@@ -32,7 +32,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-
+from datetime import datetime
 from base.timing import hr_min, str_slot
 
 # <editor-fold desc="GROUPS">
@@ -252,9 +252,29 @@ class Room(models.Model):
                                         blank=True,
                                         related_name="subrooms")
     departments = models.ManyToManyField(Department)
+    has_problem = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.name
+
+
+class RoomProblemType(models.Model):
+    name = models.CharField(max_length=20)
+    description = models.CharField(max_length=120)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.name + ': ' + self.description
+
+
+class RoomProblem(models.Model):
+    problem_type = models.ForeignKey(RoomProblemType, on_delete=models.CASCADE)
+    creation_time = datetime.now()
+    description = models.CharField(max_length=400)
+    room_concerned = models.ForeignKey(Room, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.room_concerned.name + '\n' + self.problem_type.name + '\n' + self.description
 
 
 class RoomSort(models.Model):
