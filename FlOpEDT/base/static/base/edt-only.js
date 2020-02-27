@@ -49,7 +49,7 @@ wdw_weeks.add_full_weeks([{week: week, year: year}]) ;
 
 var days_header = new WeekDayHeader(svg, "edt-fg", week_days, true, null) ;
 
-var hours_header = new HourHeader(svg, "edt-fg", hours) ;
+var hours_header = new HourHeader(svg, "edt-fg", hours);
 
 
 var labgp = {width: tv_gp_w, tot: 8, height_init: 40, width_init: 30};
@@ -109,6 +109,8 @@ svg.create_layouts(dsp_svg.cadastre);
 
 
 file_fetch.groups.callback = function() {
+
+
 
     create_groups(this.data);
 

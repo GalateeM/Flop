@@ -39,6 +39,8 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
+    path('INFO', views.room_problem, name="room_problem"),
+
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),

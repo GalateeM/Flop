@@ -218,6 +218,9 @@ def edt_light(req, year=None, week=None, **kwargs):
                       'cosmo': COSMO_MODE,
                   })
 
+def room_problem():
+   return HttpResponse("Room problem Board.")
+
 
 @login_required
 def preferences(req, **kwargs):
