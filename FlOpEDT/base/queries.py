@@ -236,6 +236,17 @@ def get_rooms(department_abbrev):
             'roomgroups':dic_rg}
 
 
+def get_single_rooms(department_abbrev):
+    """
+    :return: an list of single room (excluding room_group)
+    """
+    rooms = Room.objects.filter(departments__abbrev=department_abbrev)
+
+    list_r = [r for r in rooms]
+
+    return list_r
+
+
 def get_coursetype_constraints(department_abbrev):
     """
     From the data stored in the database, fill the course type 
