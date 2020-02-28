@@ -62,12 +62,13 @@ from base.forms import ContactForm, PerfectDayForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     CourseModification, Day, Time, RoomGroup, Room, PlanningModification, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType
+    TrainingProgramme, CourseType, RoomProblem
 import base.queries as queries
 from base.weeks import *
 from .forms import RoomProblemForm
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -1612,7 +1613,13 @@ def get_room_problem(request, **kwargs):
     if request.method == 'POST':
         form = RoomProblemForm(request.POST)
         if form.is_valid():
-            return HttpResponseRedirect('/thanks/')
+            dat = form.cleaned_data
+            pbtype = dat.get("problem_type") #RoomProblemType.objects.get(name=dat.get("problem_type"))
+            desc = dat.get("description")
+            room = dat.get("room_concerned")
+
+            RoomProblem(problem_type=pbtype, creation_time=datetime.now(), description=desc, room_concerned=room ).save()
+            return HttpResponseRedirect('/edt/')
         else:
             return render(request, 'base/roomProblem_form.html', {'form': form})
     else:

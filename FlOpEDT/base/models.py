@@ -259,17 +259,17 @@ class Room(models.Model):
 
 
 class RoomProblemType(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=30)
     description = models.CharField(max_length=120)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return self.name + ': ' + self.description
+        return self.name
 
 
 class RoomProblem(models.Model):
     problem_type = models.ForeignKey(RoomProblemType, on_delete=models.CASCADE)
-    creation_time = datetime.now()
+    creation_time = models.DateTimeField()
     description = models.CharField(max_length=400)
     room_concerned = models.ForeignKey(Room, on_delete=models.CASCADE)
 
