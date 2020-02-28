@@ -26,7 +26,7 @@ var boutonPbSalle = document.createElement("button");
 //Assign different attributes to the element.
 boutonPbSalle.innerHTML = "un problème dans une salle ?"
 boutonPbSalle.onclick = function() { // Note this is a function
-    alert("redirection vers tableau de bord des problème de salle");
+    document.location.href="room_problem"
 };
 
 var footer = document.getElementById("footer");

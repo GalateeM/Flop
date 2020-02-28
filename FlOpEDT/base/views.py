@@ -221,8 +221,9 @@ def edt_light(req, year=None, week=None, **kwargs):
                       'cosmo': COSMO_MODE,
                   })
 
-def room_problem():
-   return HttpResponse("Room problem Board.")
+def room_problem(req, **kwargs):
+    department = req.department.abbrev
+    return render(req, "base/room_problem.html", {'department': department})
 
 
 @login_required
