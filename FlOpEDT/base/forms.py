@@ -24,7 +24,9 @@
 # without disclosing the source code of your own applications.
 
 from django import forms
+from django.db import models
 from people.models import Tutor, FullStaff
+from base.models import RoomProblemType, Room, RoomProblem
 
 
 class ContactForm(forms.Form):
@@ -57,3 +59,18 @@ class PerfectDayForm(forms.Form):
         self.fields['max_hours_per_day'] = forms.IntegerField(label="Maximum", min_value=1, max_value=9,
                                                               required=False, initial=6)
 
+
+class RoomProblemForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RoomProblemForm, self).__init__(*args, **kwargs)
+        self.fields['description'].widget=forms.Textarea(attrs={'rows': 7})
+        self.fields['description'].required = True
+
+    # problem_type = forms.ModelChoiceField(queryset=RoomProblemType.objects.all(), to_field_name="name", label="Type de problème: ")
+    # description = forms.CharField(label='Description: ', max_length=400, widget=forms.Textarea(attrs={'rows': 7}))
+    # room_concerned = forms.CharField(label="Salle", max_length=5, )
+    # #room_concerned = forms.ModelChoiceField(queryset=Room.objects())
+
+    class Meta:
+        model = RoomProblem
+        fields = ['problem_type', 'description', 'room_concerned']

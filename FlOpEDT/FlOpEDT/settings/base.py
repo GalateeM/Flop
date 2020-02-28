@@ -64,8 +64,9 @@ INSTALLED_APPS = [
     'synchro',
     'ics',
     'displayweb',
-    'configuration'
+    'configuration',
 #    'importation'
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -176,3 +177,6 @@ if 'ADMINS' in os.environ:
     MANAGERS = ADMINS
 
 COSMO_MODE = False
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+

@@ -37,7 +37,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMessage, send_mail
 from django.db import transaction
 from django.db.models import Sum
-from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
+from django.http import HttpResponse, Http404, JsonResponse, HttpRequest, request
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
@@ -65,6 +65,9 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     TrainingProgramme, CourseType
 import base.queries as queries
 from base.weeks import *
+from .forms import RoomProblemForm
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
 
 logger = logging.getLogger(__name__)
 
@@ -1603,7 +1606,16 @@ def get_key_unavailable_rooms(department_abbrev, year, week):
 def get_key_all_tutors(department_abbrev):
     return f'ALL-TUT-D{department_abbrev}'
 
+
+def get_room_problem(request, **kwargs):
+    if request.method == 'POST':
+        form = RoomProblemForm(request.POST)
+        if form.is_valid():
+            return HttpResponseRedirect('/thanks/')
+        else:
+            return render(request, 'base/roomProblem_form.html', {'form': form})
+    else:
+        form = RoomProblemForm()
+        return render(request, 'base/roomProblem_form.html', {'form': form})
+
 # </editor-fold desc="HELPERS">
-
-
-

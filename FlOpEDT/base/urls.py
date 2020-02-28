@@ -39,8 +39,6 @@ urlpatterns = [
 
     # directly reachable by users
     # ----------------------------
-    path('INFO', views.room_problem, name="room_problem"),
-
     url(r'^preferences$', views.preferences, name="preferences"),
     url(r'^semaine-type$', views.stype, name="stype"),
     url(r'^aide$', views.aide, name="aide"),
@@ -48,6 +46,7 @@ urlpatterns = [
     url(r'^contact/(?P<tutor>\w{2,8})?$', views.contact, name="contact"),
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
+    url(r'^probleme$', views.get_room_problem, name="probleme"),
 
     # exchanges with the db via django
     # ---------------------------------
