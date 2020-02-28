@@ -1,6 +1,6 @@
 
-var nb_columns = 20; //import nb from nb rooms 
-var nb_lines = 5;
+var nb_columns =  15; //import nb from nb rooms
+var nb_lines = 8;
 
 var width = 1500; 
 var height = 800;

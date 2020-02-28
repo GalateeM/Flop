@@ -53,3 +53,14 @@ def generate_room_file(department_abbrev):
                            'static', 'base',
                            'rooms.json'), 'w') as fp:
         json.dump(get_rooms(department_abbrev), fp)
+
+def generate_single_room_file(department_abbrev):
+    """
+    From the data stored in the database, fill the room description file, that
+    will be used by the website
+    :return:
+    """
+    with open(os.path.join(settings.BASE_DIR, 'base',
+                           'static', 'base',
+                           'single_rooms.json'), 'w') as fp:
+        json.dump(get_single_rooms(department_abbrev), fp)
