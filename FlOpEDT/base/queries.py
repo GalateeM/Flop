@@ -242,7 +242,7 @@ def get_single_rooms(department_abbrev):
     """
     rooms = Room.objects.filter(departments__abbrev=department_abbrev)
 
-    list_r = {'r for r in rooms': r for r in room}
+    list_r = {r for r in room}
 
     return list_r
 
