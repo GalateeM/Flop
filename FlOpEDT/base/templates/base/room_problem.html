@@ -29,19 +29,21 @@
 
 {% block content %}
 {% load static %}
-<html lang="fr">
 <head>
-  <title>fonctionalité qui marche</title>
   <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="{% static 'base/style.css' %}" />
   <script src="{% static 'base/jquery.min.js' %}"></script>
   <script src="{% static 'base/d3.v4.min.js' %}"></script>
 </head>
-<body>
- <h1>État des salles</h1>
- <svg height="800" width="1500" id="grille" >
+<script>
+  var url_data_rooms = "{% url 'base:fetch_single_rooms' department %}" ;
+</script>
+ <svg height="800" width="1500" >
+   <g class="rooms-grid-layer">
+  </g>
+  <g class="rooms-layer">
+  </g>
  </svg>
   <script type='text/javascript' src="{% static 'base/etat_salles_script.js' %}"></script>
-</body>
-</html>
+
 {% endblock %}
