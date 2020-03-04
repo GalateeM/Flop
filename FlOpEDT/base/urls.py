@@ -48,6 +48,8 @@ urlpatterns = [
     url(r'^((?P<year>\d{4}))?(/(?P<week>\d{1,2}))?$', views.edt, name="edt"),
     url(r'^tv(/(?P<year>\d+))?(/(?P<week>\d+))?$', views.edt_light, name="edt_light"),
     url(r'^probleme$', views.get_room_problem, name="probleme"),
+    #Send Email to teacher when student want modify schedule
+    url(r'^email-modif$', views.send_email_proposal, name='email-proposal'),
 
     # exchanges with the db via django
     # ---------------------------------
