@@ -243,6 +243,12 @@ class RoomGroup(models.Model):
         return self.name
 
 
+class Building(models.Model):
+    name = models.CharField(max_length=20)
+    def __str__(self):
+        return self.name
+
+
 class Room(models.Model):
     name = models.CharField(max_length=20)
     subroom_of = models.ManyToManyField(RoomGroup,
@@ -250,6 +256,13 @@ class Room(models.Model):
                                         related_name="subrooms")
     departments = models.ManyToManyField(Department)
     has_problem = models.PositiveSmallIntegerField(default=0)
+    building = models.ForeignKey('Building',
+                                 blank=True,
+                                 null=True,
+                                 default=None,
+                                 related_name="rooms",
+                                 on_delete=models.SET_NULL)
+    floor = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
