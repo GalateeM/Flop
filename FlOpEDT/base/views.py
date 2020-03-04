@@ -55,7 +55,7 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource
+    TutorRessource, RoomRessource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
 from base.forms import ContactForm, PerfectDayForm
@@ -857,6 +857,14 @@ def fetch_rooms(req, **kwargs):
     """
     rooms = queries.get_rooms(req.department.abbrev)
     return JsonResponse(rooms, safe=False)
+
+def fetch_single_rooms(req, **kwargs):
+    """
+    Return single rooms for a given department
+    """
+    dataset = RoomRessource() \
+        .export(Room.objects.filter(departments=req.department))
+    return HttpResponse(dataset.csv, content_type='text/csv')
 
 
 def fetch_flat_rooms(req, **kwargs):
