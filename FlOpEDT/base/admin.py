@@ -292,15 +292,25 @@ class VersionResource(resources.ModelResource):
         model = EdtVersion;
         fields = ("year", "week", "version", "department")
 
+
 class ModuleRessource(resources.ModelResource):
-	class Meta:
-		model = Course
-		fields = ('module__abbrev', 'module__name', 'module__url')
-		
+    class Meta:
+        model = Course
+        fields = ('module__abbrev', 'module__name', 'module__url')
+
+
 class TutorRessource(resources.ModelResource):
-	class Meta:
-		model = Course
-		fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
+
+    class Meta:
+        model = Course
+        fields = ('tutor__username', 'tutor__first_name', 'tutor__last_name', 'tutor__email')
+
+
+class RoomRessource(resources.ModelResource):
+
+    class Meta:
+        model = Room
+        fields = ('name', 'building', 'floor', 'has_problem')
 
 # </editor-fold desc="RESOURCES">
 
