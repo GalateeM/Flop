@@ -26,7 +26,7 @@
 from django import forms
 from django.db import models
 from people.models import Tutor, FullStaff
-from base.models import RoomProblemType, Room, RoomProblem
+from base.models import RoomProblemType, Room, RoomProblem, Module
 
 
 class ContactForm(forms.Form):
@@ -74,3 +74,17 @@ class RoomProblemForm(forms.ModelForm):
     class Meta:
         model = RoomProblem
         fields = ['problem_type', 'description', 'room_concerned']
+
+
+class ModuleDescriptionForm(forms.ModelForm):
+
+    def __init__(self, module, dept, *args, **kwargs):
+        # first call parent's constructor
+        super(ModuleDescriptionForm, self).__init__(*args, **kwargs)
+        m = Module.objects.get(train_prog__department=dept, abbrev=module)
+        self.fields['description'].initial = m.description
+
+
+    class Meta:
+        model = Module
+        fields = ['description']

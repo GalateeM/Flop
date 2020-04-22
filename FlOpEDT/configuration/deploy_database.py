@@ -33,7 +33,7 @@ from random import choice
 
 from displayweb.models import TrainingProgrammeDisplay
 
-from base.models import Room, RoomType, RoomGroup, TrainingProgramme,\
+from base.models import RoomType, Room, TrainingProgramme,\
     Group, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
@@ -148,7 +148,7 @@ def rooms_extract(department, book):
     # Create temporary RoomType for import purposes. This type 
     # will be deleted at the end of the process
     temporay_room_random_key = ''.join(choice(string.ascii_lowercase + string.digits) for _ in range(6))
-    temporay_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
+    temporary_room_type = RoomType.objects.create(department=department, name=f"temp_{department.abbrev}_{temporay_room_random_key}")
 
     while idCat is not None :
         try:
@@ -173,11 +173,9 @@ def rooms_extract(department, book):
         try:
             room, _ = Room.objects.get_or_create(name=idRoom)
             
-            room_group, _ = RoomGroup.objects.get_or_create(name=idRoom)
-            room_group.types.add(temporay_room_type)
+            room.types.add(temporary_room_type)
             
             # Ensure that a room_group exits with the same roomid
-            room.subroom_of.add(room_group)
             room.departments.add(department)
 
 
@@ -194,22 +192,19 @@ def rooms_extract(department, book):
 
     row = ROOMGROUP_DECLARATION_START_ROW
     col = ROOMGROUP_DECLARATION_COL
-    room_group_id = sheet.cell(row=row, column=col).value
+    room_id = sheet.cell(row=row, column=col).value
 
-    while room_group_id is not None :
+    while room_id is not None :
 
         try:
-            if not Room.objects.filter(name=room_group_id).exists():
-                room_group = RoomGroup.objects.create(name=room_group_id)
-                room_group.types.add(temporay_room_type)
-            else:
-                logger.warning(f"A custom group can't have the same name thant an existing Room : {room_group_id}")
+            room_group, _ = Room.objects.get_or_create(name=room_id)
+            room_group.types.add(temporary_room_type)
 
         except IntegrityError as ie:
-            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_group_id, ie)
+            logger.warning("A constraint has not been respected creating the RoomGroup %s : \n" %room_id, ie)
 
         row += 1
-        room_group_id = sheet.cell(row=row, column=col).value
+        room_id = sheet.cell(row=row, column=col).value
 
     ######################## Filling the RoomGroups with Rooms ####################################
 
@@ -231,13 +226,13 @@ def rooms_extract(department, book):
             
             try:                
                 room = Room.objects.get(name=idRoom)
-                room_group = RoomGroup.objects.get(name=idGroup, types__in=[temporay_room_type,])
+                room_group = Room.objects.get(name=idGroup, types__in=[temporary_room_type, ])
                 room.subroom_of.add(room_group)
 
             except Room.DoesNotExist:
                 logger.warning(f"unable to find room '{idRoom}' with correct RoomType'")
             
-            except RoomGroup.DoesNotExist:
+            except Room.DoesNotExist:
                 logger.warning(f"unable to find  RoomGroup '{idGroup}' with correct RoomType'")                            
 
             col += 1
@@ -256,29 +251,29 @@ def rooms_extract(department, book):
     while idCat is not None :
 
         col = ROOM_CATEGORY_START_COL + 1
-        room_group_id = sheet.cell(row=row, column=col).value
+        room_id = sheet.cell(row=row, column=col).value
 
         room_type = RoomType.objects.get(department=department, name=idCat)
 
-        while room_group_id is not None :
+        while room_id is not None :
             try:
                 # Test if group is a common room based group or a department custom group
                 try:
-                    room_group = RoomGroup.objects.get(subrooms__id=room_group_id)
+                    room_group = Room.objects.get(subrooms__id=room_id)
                 except:
-                    room_group = RoomGroup.objects.get(name=room_group_id, types__in=[temporay_room_type,])
+                    room_group = Room.objects.get(name=room_id, types__in=[temporary_room_type, ])
 
                 room_group.types.add(room_type)
-            except RoomGroup.DoesNotExist:
-                logger.warning(f"unable to find  RoomGroup '{room_group_id}'")
+            except Room.DoesNotExist:
+                logger.warning(f"unable to find  RoomGroup '{room_id}'")
 
             col += 1
-            room_group_id = sheet.cell(row=row, column=col).value
+            room_id = sheet.cell(row=row, column=col).value
 
         row += 1
         idCat = sheet.cell(row=row, column=ROOM_CATEGORY_START_COL).value
 
-    temporay_room_type.delete()
+    temporary_room_type.delete()
     logger.info("Rooms extraction done")
 
 
@@ -604,6 +599,7 @@ def settings_extract(department, book):
         'day_finish_time': None,
         'lunch_break_start_time': None,
         'lunch_break_finish_time': None,
+        'default_preference_duration': None,
 
     }
 
@@ -621,7 +617,7 @@ def settings_extract(department, book):
     hours_row = 2
     hours_col = 2
 
-    for index, setting in enumerate(list(settings)[2:]):
+    for index, setting in enumerate(list(settings)[2:6]):
         current_row = hours_row + index
         hour_raw_value = sheet.cell(row=current_row, column=hours_col).value
         try:
@@ -631,108 +627,12 @@ def settings_extract(department, book):
         except:
             logger.error(f'an error has occured while converting hour at Paramètres[{current_row}, {hours_col}]')
 
+    try:
+        default_preference_duration = int(sheet.cell(row=7, column=2).value)
+        settings['default_preference_duration'] = default_preference_duration
+    except:
+        logger.error(f'an error has occured while defining default_preference_duration')
 
     # Set settings
     logger.info(f'TimeGeneralSettings : {settings}')
     TimeGeneralSettings.objects.get_or_create(**settings)
-
-
-def displayInfo():
-
-    print("The Professors are : ")
-
-    for p in Tutor.objects.all():
-
-        print(p.username, " : ", p.first_name, " ", p.last_name.upper())
-
-        if p.status == Tutor.SUPP_STAFF :
-            print("Qualite : ", p.qualite)
-            print("Employer : ", p.employer)
-            print("Status : SupplyStaff")
-        else:
-            print("Status : FullStaff")
-
-        print("e-mail : ", p.email, "\n")
-
-    print("------------------")
-
-    print("The Rooms are : ")
-
-    for r in Room.objects.all():
-
-        print(r.name, ", subroom of : ")
-
-        for sub in r.subroom_of.all():
-
-            print(sub)
-
-    print("---")
-
-    print("The Room groups are : ")
-
-    for rg in RoomGroup.objects.all():
-
-        print(rg.name, ", types : ")
-
-        for t in rg.types.all():
-
-            print("| ", t, " |")
-
-    print("---")
-
-    print("The Room types are : ")
-
-    for rt in RoomType.objects.all():
-
-        print(rt)
-
-    print("------------------")
-
-    print("The Training programs are : ")
-
-    for tp in TrainingProgramme.objects.all():
-
-        print(tp.abbrev, " : ", tp)
-
-    print("---")
-
-    print("The Group types are : ")
-
-    for gt in GroupType.objects.all():
-
-        print(gt)
-
-    print("---")
-
-    print("The Groups are : ")
-
-    for g in Group.objects.all():
-
-        print(g, " : ")
-        print(" - size : ", g.size)
-        print(" - type : ", g.type)
-        print(" - basic : ", g.basic)
-
-        print(" - parent groups : ")
-        for i in g.ancestor_groups():
-            print(i)
-
-    print("------------------")
-
-    print("The Modules are : ")
-
-    for m in Module.objects.all():
-
-        print(m, " : ", m.name, " - ", m.ppn)
-        print("- head : ", m.head)
-        print("- training program : ", m.train_prog)
-        print("- starting week : ", m.period.starting_week)
-        print("- ending week : ", m.period.ending_week)
-
-    print("------------------")
-
-    print("The CourseTypes are : ")
-
-    for ct in CourseType.objects.all():
-
-        print(ct)

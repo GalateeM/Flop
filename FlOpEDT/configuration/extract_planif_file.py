@@ -29,9 +29,10 @@ import sys
 from openpyxl import *
 
 from base.weeks import actual_year
-from base.models import Group, Module, Course, Room, CourseType, RoomType,\
-    TrainingProgramme, Dependency, Period, Department
-from people.models import Tutor
+from base.models import Group, Module, Course, CourseType, RoomType,\
+    TrainingProgramme, Dependency, Period, Department, CoursePossibleTutors
+from people.models import Tutor, UserDepartmentSettings
+from people.tutor import fill_default_user_preferences
 from misc.assign_colors import assign_module_color
 
 
@@ -109,18 +110,25 @@ def ReadPlanifWeek(department, book, feuille, week, year):
             grps = sheet.cell(row=row, column=group_COL).value
             COURSE_TYPE = CourseType.objects.get(name=nature, department=department)
             ROOMTYPE = RoomType.objects.get(name=salle, department=department)
+            supp_profs = []
+            possible_profs = []
             if prof is None:
                 TUTOR, created = Tutor.objects.get_or_create(username='---')
                 if created:
                     TUTOR.save()
-                supp_profs=[]
+                    fill_default_user_preferences(TUTOR)
+                    UserDepartmentSettings(user=TUTOR, department=department).save()
             else:
                 assert isinstance(prof, str) and prof is not None
-                profs = prof.split(";")
-                prof = profs[0]
-                TUTOR = Tutor.objects.get(username=prof)
-                supp_profs = profs[1:]
-            SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
+                prof = prof.replace(' ', '')
+                if '|' in prof:
+                    possible_profs = prof.split("|")
+                    TUTOR = None
+                else:
+                    profs = prof.split(";")
+                    prof = profs[0]
+                    TUTOR = Tutor.objects.get(username=prof)
+                    supp_profs = profs[1:]
 
             if Cell.comment:
                 local_comments = Cell.comment.text.replace(' ', '').replace('\n', '').replace(',', ';').split(';')
@@ -146,9 +154,18 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                 C = Course(tutor=TUTOR, type=COURSE_TYPE, module=MODULE, group=GROUP, week=week, year=year,
                            room_type=ROOMTYPE)
                 C.save()
-                for sp in SUPP_TUTORS:
-                    C.supp_tutor.add(sp)
+                if supp_profs != []:
+                    SUPP_TUTORS = Tutor.objects.filter(username__in=supp_profs)
+                    for sp in SUPP_TUTORS:
+                        C.supp_tutor.add(sp)
                     C.save()
+                if possible_profs != []:
+                    cpt = CoursePossibleTutors(course=C)
+                    cpt.save()
+                    for pp in possible_profs:
+                        t = Tutor.objects.get(username=pp)
+                        cpt.possible_tutors.add(t)
+                    cpt.save()
                 for after_type in [x for x in comments + local_comments if x[0] == 'A']:
                     try:
                         n = int(after_type[1])
@@ -179,14 +196,17 @@ def ReadPlanifWeek(department, book, feuille, week, year):
                     P = Dependency(course1=relevant_courses[0], course2=relevant_courses[1], ND=True)
                     P.save()
         except Exception as e:
-            print("Exception ligne %g semaine %s de %s : %s \n" % (row, week, feuille, module), e)
-            raise
+            raise Exception(f"Exception ligne {row}, semaine {week} de {feuille} : {module} \n")
 
 
 def extract_period(department, book, period, year):
     if period.starting_week < period.ending_week:
+        if period.ending_week < 31:
+            year += 1
         for week in range(period.starting_week, period.ending_week + 1):
             ReadPlanifWeek(department, book, period.name, week, year)
+            print(week, year)
+
     else:
         for week in range(period.starting_week, 53):
             ReadPlanifWeek(department, book, period.name, week, year)

@@ -26,14 +26,18 @@
 # without disclosing the source code of your own applications.
 
 from base.models import ScheduledCourse, RoomPreference, EdtVersion, Department, CourseStartTimeConstraint,\
-    TimeGeneralSettings, Room, RoomGroup
+    TimeGeneralSettings, Room, CourseModification
 from base.timing import str_slot
 from django.db.models import Count, Max, Q, F
-from TTapp.models import LimitedRoomChoices, slot_pause
+from TTapp.models import MinNonPreferedTrainProgsSlot, MinNonPreferedTutorsSlot, max_weight
+from TTapp.slots import slot_pause
 from base.views import get_key_course_pl, get_key_course_pp
 from django.core.cache import cache
 
 def basic_reassign_rooms(department, week, year, target_work_copy):
+    minimize_moves(department, week, year, target_work_copy)
+
+def minimize_moves(department, week, year, target_work_copy):
     """
     Reassign the rooms to minimize moves...
     """
@@ -96,7 +100,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     continue
                 # test if precedent.room is available
                 prec_is_unavailable = False
-                for r in precedent.room.subrooms.all():
+                for r in precedent.room.and_subrooms():
                     if RoomPreference.objects.filter(week=week, year=year,  day=day,
                                                      start_time=st, room=r, value=0).exists():
                         prec_is_unavailable = True
@@ -104,7 +108,7 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                     if ScheduledCourse.objects \
                         .filter(start_time=st,
                                 day=day,
-                                room__in=r.subroom_of.exclude(id=precedent.room.id),
+                                room__in={r}|set(r.subroom_of.exclude(id=precedent.room.id)),
                                 **scheduled_courses_params) \
                         .exists():
                             prec_is_unavailable = True
@@ -121,12 +125,6 @@ def basic_reassign_rooms(department, week, year, target_work_copy):
                 elif cp_using_prec.count() == 1:
                     sib = cp_using_prec[0]
                     if sib.course.room_type == CP.course.room_type and sib.course:
-                        if not LimitedRoomChoices.objects.filter(
-                                    Q(week=week) | Q(week=None),
-                                    Q(year=year) | Q(year=None),
-                                    Q(train_prog=sib.course.module.train_prog) | Q(module=sib.course.module) | Q(group=sib.course.group) |
-                                    Q(tutor=sib.course.tutor) | Q(type=sib.course.type),
-                                    possible_rooms=sib.room).exists():
                             r = CP.room
                             CP.room = precedent.room
                             sib.room = r
@@ -170,13 +168,6 @@ def get_shared_rooms():
     Returns the rooms that are shared between departments
     '''
     return Room.objects.annotate(num_depts=Count('departments')).filter(num_depts__gt=1)
-
-
-def get_shared_roomgroups():
-    '''
-    Returns all roomgroups in conflict between departments
-    '''
-    return RoomGroup.objects.filter(subrooms__in=get_shared_rooms())
 
 
 def compute_conflicts_helper(dic):
@@ -230,19 +221,19 @@ def compute_conflicts(department, week, year, copy_a):
     # rooms that are used in parallel
     tmp_conflicts = []
     dic_by_room = {}
-    dic_rooms = {}
-    conflict_roomgroup_list = get_shared_roomgroups()
+    dic_subrooms = {}
+    conflict_room_list = get_shared_rooms()
     
-    for rg in conflict_roomgroup_list:
-        dic_rooms[str(rg.id)] = [r.name for r in rg.subrooms.all()]
-    print(dic_rooms)
+    for room in conflict_room_list:
+        dic_subrooms[str(room.id)] = [r.name for r in room.and_subrooms()]
+    print(dic_subrooms)
     courses_list = ScheduledCourse.objects.select_related('course__type__duration')\
                                           .filter(Q(work_copy=copy_a) & Q(course__module__train_prog__department__abbrev=department) \
                                                   | Q(work_copy=0)&~Q(course__module__train_prog__department__abbrev=department),
                                                   course__week=week,
                                                   course__year=year,
                                                   work_copy=copy_a,
-                                                  room__in=conflict_roomgroup_list)\
+                                                  room__in=conflict_room_list)\
                                           .annotate(duration=F('course__type__duration'),
                                                     week=F('course__week'),
                                                     year=F('course__year'))\
@@ -255,10 +246,10 @@ def compute_conflicts(department, week, year, copy_a):
     # create busy slots for every room in the roomgroups
     for sc in courses_list:
         roomgroup = sc['room']
-        for room in dic_rooms[str(roomgroup)]:
-            if room in dic_by_room:
+        for subroom in dic_subrooms[str(roomgroup)]:
+            if subroom in dic_by_room:
                 new_sc = sc.copy()
-                new_sc['room'] = room
+                new_sc['room'] = subroom
                 dic_by_room[new_sc['room']].append(new_sc)
 
     conflicts['room'] = compute_conflicts_helper(dic_by_room)
@@ -342,7 +333,9 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
         cp.work_copy = copy_b
         cp.save()
 
-    if copy_a ==0 or copy_b == 0:
+    if copy_a == 0 or copy_b == 0:
+        CourseModification.objects.filter(course__year=year,
+                                          course__week=week).delete()
         version_copy.version += 1
         version_copy.save()
 
@@ -362,3 +355,18 @@ def basic_swap_version(department, week, year, copy_a, copy_b=0):
                                    year,
                                    week,
                                    copy_b))
+
+
+def add_generic_constraints_to_database(department):
+    # first objective  => minimise use of unpreferred slots for teachers
+    # ponderation MIN_UPS_I
+
+    M = MinNonPreferedTutorsSlot(weight=max_weight, department=department)
+    M.save()
+
+    # second objective  => minimise use of unpreferred slots for courses
+    # ponderation MIN_UPS_C
+
+    M = MinNonPreferedTrainProgsSlot(weight=max_weight, department=department)
+    M.save()
+

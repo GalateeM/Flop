@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -33,8 +33,6 @@ from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import render
 from django.db import transaction
 from django.conf import settings
-
-from misc.generate_static_files import generate_group_file, generate_room_file
 
 from FlOpEDT.decorators import dept_admin_required
 
@@ -109,8 +107,8 @@ def import_config_file(req, **kwargs):
                             logger.warning(f'Exception with dept')
                             logger.warning(e)
 
-                        extract_database_file(path, department_name=dept_name,
-                                              department_abbrev=dept_abbrev)
+                        extract_database_file(department_name=dept_name,
+                                              department_abbrev=dept_abbrev, bookname=path)
                         logger.debug("extract OK")
 
                         os.rename(path, os.path.join(settings.MEDIA_ROOT,

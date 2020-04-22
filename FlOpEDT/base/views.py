@@ -3,21 +3,21 @@
 # This file is part of the FlOpEDT/FlOpScheduler project.
 # Copyright (c) 2017
 # Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful, but
 # WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Affero General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU Affero General Public
 # License along with this program. If not, see
 # <http://www.gnu.org/licenses/>.
-# 
+#
 # You can be released from the requirements of the license by purchasing
 # a commercial license. Buying such a license is mandatory as soon as
 # you develop activities involving the FlOpEDT/FlOpScheduler software
@@ -46,7 +46,7 @@ from django.views.generic import RedirectView
 from FlOpEDT.decorators import dept_admin_required, tutor_required
 from FlOpEDT.settings.base import COSMO_MODE
 
-from people.models import Tutor, UserDepartmentSettings, User
+from people.models import Tutor, UserDepartmentSettings, User, NotificationsPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
@@ -54,15 +54,15 @@ from displayweb.models import BreakingNews
 from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
-    SharedRoomGroupsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource, RoomRessource
+    SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
+    TutorRessource, ModuleDescriptionResource, RoomRessource
 if COSMO_MODE:
     from base.admin import CoursPlaceResourceCosmo
-from base.forms import ContactForm, PerfectDayForm
+from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, RoomGroup, Room, \
+    CourseModification, Day, Time, Room, RoomType, RoomSort, \
     Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
-    TrainingProgramme, CourseType, RoomProblem
+    TrainingProgramme, CourseType, Module, RoomProblem
 import base.queries as queries
 from base.weeks import *
 from .forms import RoomProblemForm
@@ -102,8 +102,8 @@ def favicon(req, fav, **kwargs):
 def index(req):
     """
     Display department selection view.
-    
-    The view create a default department if not exist and 
+
+    The view create a default department if not exist and
     redirects to edt vue if only one department exist
     """
 
@@ -136,9 +136,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
         copie = 0
         gp = ''
 
-    # une_salle = RoomGroup.objects.all()[1].name
-    une_salle = 'salle?'
-
     if req.user.is_authenticated:
         name_usr = req.user.username
         try:
@@ -155,7 +152,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': copie,
                                 'gp': gp,
                                 'name_usr': name_usr,
@@ -163,10 +159,6 @@ def edt(req, year=None, week=None, splash_id=0, **kwargs):
                                 'splash_id': splash_id,
                                 'time_settings': queries.get_time_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
-                                'has_department_perm': req.user.is_authenticated \
-                                                       and req.user.has_department_perm(req.department),
-                                'is_department_admin': req.user.is_authenticated \
-                                                       and req.user.has_department_perm(req.department, admin=True),
                                 'dept': req.department.abbrev,
                                 'cosmo': COSMO_MODE,
                             })
@@ -196,15 +188,12 @@ def edt_light(req, year=None, week=None, **kwargs):
         gp_w = 30
         svg_top_m = 40
 
-    une_salle = "salle?"  # RoomGroup.objects.all()[0].name
-
     return TemplateResponse(req, 'base/show-edt-light.html',
                             {
                                 'all_weeks': week_list(),
                                 'week': week,
                                 'year': year,
                                 'promo': promo,
-                                'une_salle': une_salle,
                                 'copie': 0,
                                 'gp': '',
                                 'name_usr': '',
@@ -212,8 +201,6 @@ def edt_light(req, year=None, week=None, **kwargs):
                                 'splash_id': 0,
                                 'time_settings': queries.get_time_settings(req.department),
                                 'days': num_all_days(year, week, req.department),
-                                'has_department_perm': False,
-                                'is_department_admin': False,
                                 'dept': req.department.abbrev,
                                 'tv_svg_h': svg_h,
                                 'tv_svg_w': svg_w,
@@ -242,6 +229,7 @@ def preferences(req, **kwargs):
 @login_required
 def stype(req, *args, **kwargs):
     err = ''
+    user_notifications_pref = queries.get_notification_preference(req.user)
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
@@ -250,8 +238,8 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref': user_notifications_pref,
                                  'err': err,
-                                 'is_department_admin': req.user.has_department_perm(req.department, admin=True),
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department),
@@ -286,11 +274,77 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'user_notifications_pref': user_notifications_pref,
                                  'err': err,
                                  'current_year': current_year,
                                  'time_settings': queries.get_time_settings(req.department),
                                  'days': num_all_days(1, 1, req.department)
                                  })
+
+@tutor_required
+def room_preference(req, department, tutor=None):
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+    roomgroups = Room.objects.filter(types__in=roomtypes)
+    rt_dict = {rt.id: rt.name for rt in roomtypes}
+    rg_dict = {rg.id: rg.name for rg in roomgroups}
+    try:
+        if tutor is None:
+            tutor = req.user.username
+        tutor = Tutor.objects.get(username=tutor)
+    except:
+        pass
+
+    base_pref = {}
+    for rs in RoomSort.objects.filter(tutor=tutor):
+        if rs.for_type not in base_pref:
+            base_pref[rs.for_type] = []
+        base_pref[rs.for_type].append({'better': rs.prefer, 'worse': rs.unprefer})
+
+    pref = {rt :{rg: len(rt.members.all()) for rg in rt.members.all()} for rt in roomtypes}
+
+    for rt in base_pref:
+        rank = 1
+        initial_rg = set([rg for p in base_pref[rt] for rg in p.values()])
+        ranked_rg = set()
+            
+        while base_pref[rt]:
+            better = set([p['better'] for p in base_pref[rt]])
+            worse = set([p['worse'] for p in base_pref[rt]])
+            best = better - worse
+            if not best:
+                for rg in better & worse:
+                    pref[rt][rg] = rank
+                base_pref[rt]=[]
+            else:
+                base_pref[rt]=[p for p in base_pref[rt]\
+                               if p['better'] not in best]
+                for rg in best:
+                    ranked_rg.add(rg)
+                    pref[rt][rg] = rank
+                rank += 1
+
+        for rg in initial_rg - ranked_rg:
+            pref[rt][rg] = rank
+
+        for rg in set(rt.members.all()) - initial_rg:
+            pref[rt][rg] = 0
+
+    for rt in set(roomtypes) - set(base_pref.keys()):
+        for rg in rt.members.all():
+            pref[rt][rg] = 0
+
+    pref_js = {rt.id :{rg.id: pref[rt][rg] for rg in rt.members.all()} for rt in roomtypes}
+            
+    return render(req, 'base/room_preference.html',
+                  {'user':req.user,
+                   'roomtypes': rt_dict,
+                   'roomgroups': rg_dict,
+                   'pref_tmpl': pref,
+                   'pref_js': pref_js,
+                   'department': department})
+
+    # {'data' : })
 
 
 @login_required
@@ -303,8 +357,7 @@ def user_perfect_day_changes(req, username=None, *args, **kwargs):
         t.pref_hours_per_day = user_pref_hours
         t.max_hours_per_day = user_max_hours
         t.save()
-    return redirect('base:stype', req.department)
-
+    return redirect('base:preferences', req.department)
 
 @login_required
 def fetch_perfect_day(req, username=None, *args, **kwargs):
@@ -316,14 +369,31 @@ def fetch_perfect_day(req, username=None, *args, **kwargs):
     return JsonResponse(perfect_day, safe=False)
 
 
+@login_required
+def fetch_user_notifications_pref(req, username=None, *args, **kwargs):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        user = None
+    
+    return JsonResponse({"nb_weeks": queries.get_notification_preference(user)},
+                        safe=False)
+
+@login_required
+def user_notifications_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        n, created = NotificationsPreferences.objects.get_or_create(user=u)
+        data = req.POST
+        user_notifications_pref = int(data['user_notifications_pref'])
+        n.nb_of_notified_weeks = user_notifications_pref
+        n.save()
+    return redirect('base:preferences', req.department)
+
+
 @dept_admin_required
 def aide(req, **kwargs):
-    return TemplateResponse(req, 'base/aide.html',
-                            {'has_department_perm': req.user.is_authenticated \
-                                                    and req.user.has_department_perm(req.department),
-                             'is_department_admin': req.user.is_authenticated \
-                                                    and req.user.has_department_perm(req.department, admin=True)
-                             })
+    return TemplateResponse(req, 'base/aide.html')
 
 
 @login_required
@@ -338,8 +408,8 @@ def decale(req, **kwargs):
     liste_profs = []
 
     for p in Tutor.objects \
-                    .filter(departments=department) \
-                    .order_by('username'):
+            .filter(departments=department) \
+            .order_by('username'):
         liste_profs.append(p.username)
 
     return TemplateResponse(req, 'base/show-decale.html',
@@ -348,6 +418,13 @@ def decale(req, **kwargs):
                              'year_init': year_init,
                              'profs': liste_profs
                              })
+
+
+def all_modules_with_desc(req, **kwargs):
+    return TemplateResponse(req, 'base/modules.html',
+                            {'is_tutor': req.user.is_tutor\
+                             if req.user.is_authenticated else False})
+
 
 
 # </editor-fold desc="VIEWERS">
@@ -390,17 +467,17 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
         else:
             dataset = CoursPlaceResource()
         dataset = dataset.export(queries.get_scheduled_courses(
-                        department=department,                         
-                        week=week,
-                        year=year,
-                        num_copy=num_copy)
-            )
+            department=department,
+            week=week,
+            year=year,
+            num_copy=num_copy)
+        )
         ok = num_copy != 0 \
              or (version == queries \
-                                .get_edt_version(
-                                    department=department, 
-                                    week=week, 
-                                    year=year))
+                 .get_edt_version(
+            department=department,
+            week=week,
+            year=year))
 
     if dataset is None:
         raise Http404("What are you trying to do?")
@@ -410,7 +487,7 @@ def fetch_cours_pl(req, year, week, num_copy, **kwargs):
     response['year'] = year
     response['days'] = str(num_all_days(year, week, req.department))
     response['num_copy'] = num_copy
-    
+
     cached = cache.set(cache_key, response)
     return response
 
@@ -437,14 +514,14 @@ def fetch_cours_pp(req, week, year, num_copy, **kwargs):
         .export(Course
                 .objects
                 .filter(
-                        module__train_prog__department=department,
-                        week=week,
-                        year=year)
+        module__train_prog__department=department,
+        week=week,
+        year=year)
                 .exclude(pk__in=ScheduledCourse
                          .objects
                          .filter(
-                             course__module__train_prog__department=department,
-                             work_copy=num_copy)
+        course__module__train_prog__department=department,
+        work_copy=num_copy)
                          .values('course'))
                 .select_related('group__train_prog',
                                 'tutor',
@@ -482,7 +559,6 @@ def fetch_tutor(req, year, week, **kwargs):
                                   week=week,
                                   year=year).distinct()
     dataset = TutorRessource().export(tutor)
-
     response = HttpResponse(dataset.csv, content_type='text/csv')
     response['week'] = week
     response['year'] = year
@@ -510,16 +586,16 @@ def fetch_dispos(req, year, week, **kwargs):
     busy_inst_init = Course.objects.filter(week=week,
                                            year=year,
                                            module__train_prog__department=department) \
-                                   .select_related('module__train_prog__department')\
-                                   .distinct('tutor') \
-                                   .values_list('tutor')
-                                           
+        .select_related('module__train_prog__department') \
+        .distinct('tutor') \
+        .values_list('tutor')
+
     if COSMO_MODE:
         busy_inst_after = ScheduledCourse.objects.filter(course__week=week,
                                                          course__year=year,
-                                                         course__module__train_prog__department=department)\
-                                                 .distinct('tutor') \
-                                                 .values_list('tutor')
+                                                         course__module__train_prog__department=department) \
+            .distinct('tutor') \
+            .values_list('tutor')
     else:
         busy_inst_after = []
 
@@ -578,14 +654,14 @@ def fetch_course_default_week(req, train_prog, course_type, **kwargs):
         else:
             response['more'] = 'No such course type'
         return response
-            
+
     dataset = CoursePreferenceResource() \
         .export(CoursePreference.objects \
                 .filter(week=None,
                         course_type=ct,
                         train_prog=tp,
                         day__in=queries.get_working_days(req.department)
-                ))
+                        ))
 
     response = HttpResponse(dataset.csv,
                             content_type='text/csv')
@@ -618,9 +694,9 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     #     return cached
 
     dataset = RoomPreferenceResource() \
-        .export(RoomPreference.objects\
-                .prefetch_related('room__departments')\
-                .filter(room__departments = department, 
+        .export(RoomPreference.objects \
+                .prefetch_related('room__departments') \
+                .filter(room__departments=department,
                         week=week,
                         year=year,
                         value=0))
@@ -632,7 +708,7 @@ def fetch_unavailable_rooms(req, year, week, **kwargs):
     response['year'] = year
 
     return response
-   
+
 
 def fetch_all_tutors(req, **kwargs):
     '''
@@ -644,9 +720,9 @@ def fetch_all_tutors(req, **kwargs):
     if cached is not None:
         return cached
     tutor_list = [t.user.username \
-                  for t in UserDepartmentSettings.objects\
-                  .filter(department=req.department,
-                          user__is_tutor=True)]
+                  for t in UserDepartmentSettings.objects \
+                      .filter(department=req.department,
+                              user__is_tutor=True)]
     response = JsonResponse(tutor_list, safe=False)
     cache.set(cache_key, response)
     return response
@@ -737,7 +813,7 @@ def fetch_decale(req, **kwargs):
             tutors.append(c.tutor.username)
 
     if module != '':
-        course_queryset = Course.objects.filter(module__train_prog__department=department)        
+        course_queryset = Course.objects.filter(module__train_prog__department=department)
         course = filt_m(course_queryset, module) \
             .order_by('tutor__username') \
             .distinct('tutor__username')
@@ -761,9 +837,9 @@ def fetch_decale(req, **kwargs):
 def fetch_bknews(req, year, week, **kwargs):
     dataset = BreakingNewsResource() \
         .export(BreakingNews.objects.filter(
-                                        department=req.department,
-                                        year=year,
-                                        week=week))
+        department=req.department,
+        year=year,
+        week=week))
     response = HttpResponse(dataset.csv,
                             content_type='text/csv')
     response['week'] = week
@@ -795,17 +871,17 @@ def fetch_week_infos(req, year, week, **kwargs):
 
     proposed_pref, required_pref = \
         pref_requirements(req.department, req.user, year, week) if req.user.is_authenticated \
-        else (-1, -1)
+            else (-1, -1)
 
     try:
         regen = str(Regen.objects.get(department=req.department, week=week, year=year))
     except ObjectDoesNotExist:
         regen = 'I'
-        
+
     response = JsonResponse({'version': version,
                              'proposed_pref': proposed_pref,
                              'required_pref': required_pref,
-                             'regen':regen})
+                             'regen': regen})
     return response
 
 
@@ -818,7 +894,7 @@ def pref_requirements(department, tutor, year, week):
     nb_courses = Course.objects.filter(tutor=tutor,
                                        week=week,
                                        year=year) \
-                               .count()
+        .count()
     week_av = UserPreference \
         .objects \
         .filter(user=tutor,
@@ -855,7 +931,7 @@ def fetch_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    rooms = queries.get_rooms(req.department.abbrev)
+    rooms = queries.get_room_types_groups(req.department.abbrev)
     return JsonResponse(rooms, safe=False)
 
 def fetch_single_rooms(req, **kwargs):
@@ -871,8 +947,9 @@ def fetch_flat_rooms(req, **kwargs):
     """
     Return rooms for a given department
     """
-    return JsonResponse([room.name for room in Room.objects.filter(departments=req.department)],
-                         safe=False)    
+    return JsonResponse([room.name for room in queries.get_rooms(req.department.abbrev, basic=True)],
+                        safe=False)
+
 
 def fetch_constraints(req, **kwargs):
     """
@@ -880,7 +957,6 @@ def fetch_constraints(req, **kwargs):
     """
     constraints = queries.get_coursetype_constraints(req.department.abbrev)
     return JsonResponse(constraints, safe=False)
-
 
 def fetch_departments(req, **kwargs):
     """
@@ -896,7 +972,6 @@ def fetch_course_types(req, **kwargs):
     """
     course_types = queries.get_course_types(req.department)
     return JsonResponse(course_types, safe=False)
-
 
 def fetch_training_programmes(req, **kwargs):
     """
@@ -914,11 +989,11 @@ def fetch_tutor_courses(req, year, week, tutor, **kwargs):
     logger.info(f"Fetch {tutor} courses")
     dataset = TutorCoursesResource() \
         .export(ScheduledCourse.objects \
-                    .filter(
-                        course__week=week,
-                        course__year=year,
-                        work_copy=0,
-                        course__tutor__username=tutor))
+        .filter(
+        course__week=week,
+        course__year=year,
+        work_copy=0,
+        course__tutor__username=tutor))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
@@ -939,24 +1014,24 @@ def fetch_extra_sched(req, year, week, **kwargs):
     dataset = MultiDepartmentTutorResource() \
         .export(ScheduledCourse.objects \
                 .filter(
-                    course__week=week,
-                    course__year=year,
-                    work_copy=0,
-                    course__tutor__in=tutors,
-                )
+        course__week=week,
+        course__year=year,
+        work_copy=0,
+        course__tutor__in=tutors,
+    )
                 .exclude(course__room_type__department=req.department))
     return HttpResponse(dataset.csv, content_type='text/csv')
 
 
-def fetch_shared_roomgroups(req, year, week, **kwargs):
+def fetch_shared_rooms(req, year, week, **kwargs):
     # which room groups are shared among departments
-    shared_roomgroups = []
-    for rg in RoomGroup.objects.all(): 
+    shared_rooms = []
+    for rg in Room.objects.all():
         depts = set() 
         for rt in rg.types.all(): 
             depts.add(rt.department) 
             if len(depts) > 1: 
-                shared_roomgroups.append(rg)
+                shared_rooms.append(rg)
 
     # courses in any shared room
     courses = ScheduledCourse.objects \
@@ -964,11 +1039,18 @@ def fetch_shared_roomgroups(req, year, week, **kwargs):
                     course__week=week,
                     course__year=year,
                     work_copy=0,
-                    room__in=shared_roomgroups,
+                    room__in=shared_rooms,
                 ) \
                 .exclude(course__room_type__department=req.department)
-    dataset = SharedRoomGroupsResource().export(courses)
+    dataset = SharedRoomsResource().export(courses)
     return HttpResponse(dataset.csv, content_type='text/csv')
+
+
+def fetch_all_modules_with_desc(req, **kwargs):
+    data = Module.objects.filter(period__department=req.department)
+    res = ModuleDescriptionResource().export(data)
+    return HttpResponse(res.json, content_type='application/json')
+
 
 # </editor-fold desc="FETCHERS">
 
@@ -992,6 +1074,7 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
     tutor_old = sched_course.tutor
     if tutor_old is None:
         tutor_old = sched_course.course.tutor
+        sched_course.tutor = tutor_old
         
     course_log = CourseModification(course=course,
                                     old_week=week,
@@ -1009,14 +1092,11 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
 
     # Rooms
     try:
-        new_room = RoomGroup.objects.get(name=change['room'])
+        new_room = Room.objects.get(name=change['room']) \
+            if change['room'] != '' else None
         ret['sched'].room = new_room
-    except ObjectDoesNotExist:
-        if new_room == 'salle?' or new_room is None:
-            raise Exception('Oublié de trouver une salle ' \
-                  'pour un cours ?')
-        else:
-            raise Exception(f"Problème : salle {change['room']} inconnue")
+    except Room.DoesNotExist:
+        raise Exception(f"Problème : salle {change['room']} inconnue")
 
     # Timing
     ret['sched'].start_time = change['start']
@@ -1032,8 +1112,10 @@ def clean_change(year, week, old_version, change, work_copy=0, initiator=None, a
         raise Exception(f"Problème : prof {change['tutor']} inconnu")
 
     if apply:
-        for obj in ret.values():
-            obj.save()
+        ret['course'].save()
+        ret['sched'].save()
+        if work_copy == 0:
+            ret['log'].save()
 
     return ret
 
@@ -1069,6 +1151,7 @@ def edt_changes(req, **kwargs):
             = "Problème prof, semaine, année ou numéro de copie."
         return JsonResponse(bad_response)
 
+
     recv_changes = json.loads(req.POST.get('tab',[]))
 
     msg = ''
@@ -1095,37 +1178,40 @@ def edt_changes(req, **kwargs):
                 for change in recv_changes:
                     new_courses = clean_change(year, week, old_version, change, work_copy=work_copy,
                                                initiator=initiator, apply=True)
-                    same, changed = new_courses['log'].strs_course_changes()
-                    msg += str(new_courses['log'])
-                    impacted_inst.add(new_courses['course'].tutor)
-                    impacted_inst.add(new_courses['sched'].tutor)
-                if None in impacted_inst:
-                    impacted_inst.remove(None)
+                    if work_copy == 0:
+                        same, changed = new_courses['log'].strs_course_changes()
+                        msg += str(new_courses['log'])
+                        impacted_inst.add(new_courses['course'].tutor)
+                        impacted_inst.add(new_courses['sched'].tutor)
+                        if None in impacted_inst:
+                            impacted_inst.remove(None)
             except Exception as e:
                 bad_response['more'] = str(e)
                 return JsonResponse(bad_response)
+
             if work_copy == 0:
-                edt_version = EdtVersion.objects.get(week=week, year=year)
+                edt_version = EdtVersion.objects.get(week=week, year=year, department=department)
                 edt_version.version += 1
                 edt_version.save()
 
             cache.delete(get_key_course_pl(department.abbrev, year, week, work_copy))
             cache.delete(get_key_course_pp(department.abbrev, year, week, work_copy))
 
-        subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
-        for inst in impacted_inst:
-            subject += inst.username + ' '
+        if work_copy == 0:
+            subject = '[Modif sur tierce] ' + initiator.username + ' a déplacé '
+            for inst in impacted_inst:
+                subject += inst.username + ' '
 
-        if initiator in impacted_inst:
-            impacted_inst.remove(initiator)
-        if len(impacted_inst) > 0:
-            email = EmailMessage(
-                subject,
-                msg,
-                to=['edt.info.iut.blagnac@gmail.com']
-            )
-            # email.send()
-            logger.info(email)
+            if initiator in impacted_inst:
+                impacted_inst.remove(initiator)
+            if len(impacted_inst) > 0:
+                email = EmailMessage(
+                    subject,
+                    msg,
+                    to=['edt.info.iut.blagnac@gmail.com']
+                )
+                # email.send()
+                logger.info(email)
 
         return JsonResponse(good_response)
     else:
@@ -1185,6 +1271,81 @@ class HelperRoomPreference():
                               start_time=start_time,
                               duration=duration,
                               value=value)
+
+
+@tutor_required
+def room_preferences_changes_per_tutor(req, tutor, **kwargs):
+    bad_response = {'status': 'KO', 'more': ''}
+    good_response = {'status': 'OK', 'more': ''}
+
+    if not req.is_ajax():
+        bad_response['more'] = "Non ajax"
+        return JsonResponse(bad_response)
+
+    if req.method != "POST":
+        bad_response['more'] = "Non POST"
+        return bad_response
+
+    if tutor != req.user.username \
+       and not req.user.has_department_perm(req.department, admin=True):
+        bad_response['more'] = "Vous ne pouvez pas changez les préférences " +\
+            "de quelqu'un·e d'autre sans être responsable d'emplois du temps."
+        return bad_response
+
+    try:
+        tutor = Tutor.objects.get(username=tutor)
+    except ObjectDoesNotExist:
+        bad_response['more'] = "Qui est-ce ?"
+        return bad_response
+        
+
+    try:
+        recv_pref = json.loads(req.POST.get('roompreferences'))
+    except:
+        bad_response['more'] \
+            = "Problème format."
+        return JsonResponse(bad_response)
+
+    roomtypes = RoomType.objects.filter(department=req.department)\
+                                .prefetch_related('members')
+
+    pref_list = {roomtypes.get(id=rt_id) : \
+                 [{'rg': Room.objects.get(id=rg_id),
+                   'rank': val} for rg_id, val in rg_val_dict.items()\
+                  if val != 0] \
+                 for rt_id, rg_val_dict in recv_pref.items() }
+
+    print(pref_list)
+
+    bulk = []
+    for rt in pref_list:
+        pref_list[rt].sort(key=lambda p: p['rank'])
+        prev_rg = []
+        cur_rg = []
+        cur_rank = pref_list[rt][0]['rank']
+        for pref in pref_list[rt]:
+            if pref['rank'] != cur_rank:
+                prev_rg = cur_rg
+                cur_rg = []
+                cur_rank = pref['rank']
+            cur_rg.append(pref['rg'])
+            for rg in prev_rg:
+                bulk.append(RoomSort(
+                    tutor=tutor,
+                    for_type=rt,
+                    prefer=rg,
+                    unprefer=pref['rg']
+                    ))
+
+    RoomSort.objects.filter(for_type__department=req.department,
+                            tutor=tutor)\
+                    .select_related('for_type')\
+                    .delete()
+    
+    RoomSort.objects.bulk_create(bulk)
+    
+    return JsonResponse(good_response)
+
 
 
 def preferences_changes(req, year, week, helper_pref):
@@ -1357,8 +1518,8 @@ def decale_changes(req, **kwargs):
         bad_response['reason'] = "Non POST"
         return bad_response
 
-    new_assignment = json.loads(req.POST.get('new',{}))
-    change_list = json.loads(req.POST.get('liste',[]))
+    new_assignment = json.loads(req.POST.get('new', {}))
+    change_list = json.loads(req.POST.get('liste', []))
     new_week = new_assignment['ns']
     new_year = new_assignment['na']
 
@@ -1369,8 +1530,8 @@ def decale_changes(req, **kwargs):
 
         edt_versions = EdtVersion.objects.select_for_update().filter(
             (Q(week=old_week) & Q(year=old_year))
-             |(Q(week=new_week) & Q(year=new_year)), department=req.department)
-        
+            | (Q(week=new_week) & Q(year=new_year)), department=req.department)
+
         with transaction.atomic():
             # was the course was scheduled before?
             if c['d'] != '' and c['t'] != -1:
@@ -1387,7 +1548,7 @@ def decale_changes(req, **kwargs):
                 ev.version += 1
                 ev.save()
             else:
-                cache.delete(get_key_course_pp(req.department.abbrev, 
+                cache.delete(get_key_course_pp(req.department.abbrev,
                                                old_year,
                                                old_week,
                                                0))
@@ -1404,15 +1565,20 @@ def decale_changes(req, **kwargs):
             changing_course.week = new_week
             changing_course.year = new_year
             if new_year != 0:
-                changing_course.tutor = Tutor.objects.get(username=new_assignment['np'])
+                changing_course.tutor = Tutor.objects.get(
+                    username=new_assignment['np']
+                )
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_year,
                                            new_week,
                                            0))
+            cache.delete(get_key_preferences_tutor(req.department.abbrev,
+                                                   new_year,
+                                                   new_week))
             changing_course.save()
             ev, _ = EdtVersion.objects.update_or_create(
                 year=new_year,
-                week=new_week, 
+                week=new_week,
                 department=req.department)
             ev.version += 1
             ev.save()
@@ -1428,7 +1594,7 @@ def decale_changes(req, **kwargs):
 # ---------
 
 
-def contact(req, tutor, **kwargs):
+def contact(req, tutor=None, **kwargs):
     ack = ''
     if req.method == 'POST':
         form = ContactForm(req.POST)
@@ -1552,6 +1718,26 @@ def send_email_proposal(req, **kwargs):
 # ---------
 # HELPERS
 # ---------
+@tutor_required
+def module_description(req, module, **kwargs):
+
+    if req.method == 'POST':
+        form = ModuleDescriptionForm(req.department, module, req.POST)
+        if form.is_valid():
+            description = form.cleaned_data['description']
+            m = Module.objects.get(train_prog__department=req.department, abbrev=module)
+            m.description = description
+            m.save()
+            return all_modules_with_desc(req)
+        else:
+            form = ModuleDescriptionForm(module, req.POST)
+    else:
+        form = ModuleDescriptionForm(module)
+    return TemplateResponse(req, 'base/module_description.html',
+                            {'form': form,
+                             'req': req,
+                             'module': module
+                             })
 
 
 def clean_train_prog(req):

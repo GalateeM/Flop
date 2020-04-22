@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 # -*- coding: utf-8 -*-
 
 # This file is part of the FlOpEDT/FlOpScheduler project.
@@ -27,12 +27,11 @@
 import logging
 
 from django.db import transaction
+from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import Group, TrainingProgramme, \
-                        ScheduledCourse, EdtVersion, Department, Regen
-
-from base.models import Room, RoomType, RoomGroup, \
+from base.models import Group, RoomType, Room, \
+                        ScheduledCourse, EdtVersion, Department, Regen, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
@@ -40,23 +39,23 @@ from base.models import Room, RoomType, RoomGroup, \
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
-from people.models import Tutor
+from people.models import Tutor, NotificationsPreferences
 from TTapp.models import TTConstraint
 
 logger = logging.getLogger(__name__)
 
 
 @transaction.atomic
-def create_first_department():    
+def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
-    
+
     # Update all existing department related models
     models = [
         TrainingProgramme, EdtVersion, Regen, \
         RoomType, Period, CourseType, BreakingNews, \
         TutorCost, GroupType]
-   
+
     for model in models:
         model.objects.all().update(department=department)
 
@@ -70,7 +69,7 @@ def create_first_department():
     types = TTConstraint.__subclasses__()
 
     for type in types:
-        type.objects.all().update(department=department)    
+        type.objects.all().update(department=department)
 
     # Init TimeGeneralSettings with default values
     TimeGeneralSettings.objects.create(
@@ -94,15 +93,15 @@ def get_edt_version(department, week, year, create=False):
         except EdtVersion.MultipleObjectsReturned as e:
             logger.error(f'get_edt_version: database inconsistency, multiple objects returned for {params}')
             raise(e)
-        else:    
+        else:
             version = edt_version.version
     else:
         """
-        Raise model.DoesNotExist to simulate get behaviour 
+        Raise model.DoesNotExist to simulate get behaviour
         when no item is matching filter parameters
         """
         try:
-            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]   
+            version = EdtVersion.objects.filter(**params).values_list("version", flat=True)[0]
         except IndexError:
             raise(EdtVersion.DoesNotExist)
     return version
@@ -126,7 +125,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                                                            'course__room_type',
                                                            'course__module__display'
                         )
-    return qs    
+    return qs
 
 
 def get_groups(department_abbrev):
@@ -207,7 +206,7 @@ def get_descendant_groups(gp, children):
     return current
 
 
-def get_rooms(department_abbrev):
+def get_room_types_groups(department_abbrev):
     """
     From the data stored in the database, fill the room description file, that
     will be used by the website.
@@ -216,24 +215,36 @@ def get_rooms(department_abbrev):
     :return: an object containing one dictionary roomtype -> (list of roomgroups),
     and one dictionary roomgroup -> (list of rooms)
     """
-    dic_rt = {}
-    dept_rg = set()
+    dept = Department.objects.get(abbrev=department_abbrev)
 
-    for rt in RoomType.objects.filter(department__abbrev=department_abbrev):
-        dic_rt[str(rt)] = []
-        for rg in rt.members.all():
-            dept_rg.add(rg)
-            if str(rg) not in dic_rt[str(rt)]:
-                dic_rt[str(rt)].append(str(rg))
+    return {'roomtypes': {str(rt): list(set(
+        [room.name for room in rt.members.all()]
+    )) for rt in RoomType.objects.filter(department=dept)},
+            'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
+                           for room in Room.objects.filter(departments=dept)}
+            }
 
-    dic_rg = {}
-    for rg in dept_rg:
-        dic_rg[rg.name] = []
-        for r in rg.subrooms.all():
-            dic_rg[rg.name].append(str(r))
 
-    return {'roomtypes':dic_rt,
-            'roomgroups':dic_rg}
+def get_rooms(department_abbrev, basic=False):
+    """
+    :return: 
+    """
+    if department_abbrev is not None:
+        dept = Department.objects.get(abbrev=department_abbrev)
+    else:
+        dept = None
+    if not basic:
+        if dept is None:
+            return Room.objects.all()
+        else:
+            return Room.objects.filter(departments=dept)
+    else:
+        if dept is None:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                           .filter(nb_sub=0)
+        else:
+            return Room.objects.annotate(nb_sub=Count('subrooms'))\
+                               .filter(departments=dept, nb_sub=0)
 
 
 def get_single_rooms(department_abbrev):
@@ -249,7 +260,7 @@ def get_single_rooms(department_abbrev):
 
 def get_coursetype_constraints(department_abbrev):
     """
-    From the data stored in the database, fill the course type 
+    From the data stored in the database, fill the course type
     description file (duration and allowed start times), that will
     be used by the website
     :return: a dictionary course type -> (object containing duration
@@ -289,11 +300,13 @@ def get_departments():
     """
     return [d.abbrev for d in Department.objects.all()]
 
+
 def get_course_types(dept):
     """
     :return: list of course type names
     """
     return [d.name for d in CourseType.objects.filter(department=dept)]
+
 
 def get_training_programmes(dept):
     """
@@ -301,8 +314,23 @@ def get_training_programmes(dept):
     """
     return [d.abbrev for d in TrainingProgramme.objects.filter(department=dept)]
 
+
 def get_working_days(dept):
     """
     :return: list of abbreviated working days in dept
     """
     return TimeGeneralSettings.objects.get(department=dept).days
+
+
+def get_notification_preference(user):
+    if user is not None:
+        try:
+            return user.notifications_preference.nb_of_notified_weeks
+        except NotificationsPreferences.DoesNotExist:
+            if user.is_tutor:
+                return 4
+            elif user.is_student:
+                return 0
+            else:
+                pass
+    return 0
