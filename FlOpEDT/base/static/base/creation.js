@@ -115,86 +115,26 @@ function create_edt_grid() {
 }
 
 
-
-function add_garbage() {
-
-  if (slot_case) {
-
-    var garbage_dsg = {
-      day: garbage.day,
-      start: garbage.start,
-      duration: rev_constraints[garbage.start],
-      display: false,
-      dispo: false,
-      pop: false,
-      reason: ""
-    };
-
-    data_slot_grid.push(garbage_dsg);
-
-  }
-}
-function remove_garbage() {
-  var found = false;
-  var i = 0;
-  while (!found && i < data_slot_grid.length) {
-    if (data_slot_grid[i].day == garbage.day
-      && data_slot_grid[i].slot == garbage.slot) {
-      found = true;
-      data_slot_grid.splice(i, 1);
-    }
-    i += 1;
-  }
-}
-
-
 // create potential slots for course c
-function create_slot_grid_data(c) {
-  data_slot_grid = [];
-  if (slot_case) {
-    // does not depend on course c
-
-    week_days.forEach(function (day) {
-      for (var s in rev_constraints) {
-        var start = +s;
-        if (start < time_settings.time.day_finish_time) {
-          var gs = {
-            day: day.ref,
-            start: start,
-            duration: rev_constraints[s],
-            display: false,
-            dispo: false,
-            pop: false,
-            reason: ""
-          };
-          data_slot_grid.push(gs);
-        }
-      }
-    });
-  } else {
-    var ok_starts = constraints[c.c_type].allowed_st;
-    week_days.forEach(function (day) {
-      for (var s = 0; s < ok_starts.length; s++) {
-        data_slot_grid.push({
-          c_type: c.c_type,
-          day: day.ref,
-          group: c.group,
-          promo: c.promo,
-          start: ok_starts[s],
-          duration: c.duration
-        });
-      }
-    });
-  }
+function add_slot_grid_data(c) {
+  var ok_starts = constraints[c.c_type].allowed_st;
+  week_days.forEach(function (day) {
+    for (var s = 0; s < ok_starts.length; s++) {
+      data_slot_grid.push({
+        c_type: c.c_type,
+        day: day.ref,
+        group: c.group,
+        promo: c.promo,
+        start: ok_starts[s],
+        duration: c.duration
+      });
+    }
+  });
 }
 
 
 function create_grid_data() {
   if (fetch.constraints_ok && fetch.groups_ok) {
-    if (slot_case) {
-      create_slot_grid_data();
-    }
-
     for (let p = 0; p < set_promos.length; p++) {
       compute_promo_leaves(root_gp[p].gp);
     }
@@ -974,91 +914,85 @@ function translate_quote_from_csv(d) {
    ------ COURSES ------
   ----------------------*/
 
+function run_course_drag(d) {
+  if (ckbox["edt-mod"].cked && fetch.done) {
+
+    // get the time interval, whatever the group
+    cur_over = which_slot(
+      drag.x + parseInt(drag.sel.select("rect").attr("x")),
+      drag.y + parseInt(drag.sel.select("rect").attr("y")),
+      d);
+    //console.log(cur_over.day, cur_over.start_time);
+
+    data_slot_grid.forEach(function (s) {
+      s.display = false;
+    });
+    if (!is_garbage(cur_over)) {
+      slots_over = data_slot_grid.filter(function (c) {
+        return c.day == cur_over.day
+          && c.start == cur_over.start_time;
+      });
+      slots_over.forEach(function (s) {
+        s.display = true;
+      });
+    }
+    go_grid(true);
+
+    drag.x += d3.event.dx;
+    drag.y += d3.event.dy;
+    drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
+  }
+}
 
 function def_drag() {
-  var cur_over = null;
-  var slots_over = null;
   dragListener = d3.drag()
     .on("start", function (c) {
       cancel_cm_adv_preferences();
       cancel_cm_room_tutor_change();
       if (ckbox["edt-mod"].cked && fetch.done) {
 
-        if (!slot_case) {
-          create_slot_grid_data(c);
-        }
-
-        // no data_slot_grid when uniline
-        data_slot_grid.forEach(function (sl) {
-          fill_grid_slot(c, sl);
+        // compute available slots for this course
+        pending.prepare_modif(c);
+        data_slot_grid = [];
+        pending.linked_courses.forEach(function (d) {
+          add_slot_grid_data(d);
         });
+        data_slot_grid.forEach(function (sl) {
+          pending.linked_courses.forEach(function (d) {
+            fill_grid_slot(d, sl);
+          });
+        });
+        pending.rollback();
 
 
-        drag.x = 0;
-        drag.y = 0;
+        
+        drag.set_selection(c.id_course);
 
         // raise the course to the drag layer
-        drag.sel = d3.select(this);
-        svg.get_dom("dg").node().appendChild(drag.sel.node());
-
-      }
-    })
-    .on("drag", function (d) {
-      if (ckbox["edt-mod"].cked && fetch.done) {
-        pending.prepare_dragndrop(d);
-        cur_over = which_slot(
-          drag.x + parseInt(drag.sel.select("rect").attr("x")),
-          drag.y + parseInt(drag.sel.select("rect").attr("y")),
-          d);
-        //console.log(cur_over.day, cur_over.start_time);
-
-        data_slot_grid.forEach(function (s) {
-          s.display = false;
+        drag.sel.nodes().forEach(function (n) {
+          svg.get_dom("dg").node().appendChild(n);
         });
-        if (!is_garbage(cur_over)) {
-          slots_over = data_slot_grid.filter(function (c) {
-            return c.day == cur_over.day
-              && c.start == cur_over.start_time;
-          });
-          slots_over.forEach(function (s) {
-            s.display = true;
-          });
-        }
-        go_grid(true);
 
-        drag.x += d3.event.dx;
-        drag.y += d3.event.dy;
-        drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
+        pending.prepare_dragndrop(c);
+
+        run_course_drag(c);
       }
     })
+    .on("drag", run_course_drag)
     .on("end", function (d) {
-
       // click => end. So if real drag
-      if (drag.sel != null) {
+      if (drag.sel.length != 0) {
 
         // lower the course to the middleground layer
-        svg.get_dom("edt-mg").node().appendChild(drag.sel.node());
+        drag.sel.nodes().forEach(function(n) {
+          svg.get_dom("edt-mg").node().appendChild(n);
+        });
 
         if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
 
-
-          if (slot_case) {
-            data_slot_grid.forEach(function (s) {
-              s.display = false;
-            });
-          } else {
-            data_slot_grid = [];
-          }
-
+          data_slot_grid = [];
 
           if (!is_garbage(cur_over)) {
-
-            // console.log("not garbage");
-
-            // var gs = data_slot_grid.filter(function(s) {
-            //     return s.day == cur_over.day
-            // 	    && s.start == cur_over.start_time;
-            // });
 
             var pending_change = {
               day: cur_over.day,
@@ -1078,7 +1012,7 @@ function def_drag() {
             d.day = cur_over.day;
             d.start = cur_over.start_time;
 
-            add_bouge(pending.init_course);
+            add_bouge(pending);
             pending.clean();
           }
 
@@ -1086,7 +1020,7 @@ function def_drag() {
 
           drag.x = 0;
           drag.y = 0;
-          drag.sel = null;
+          drag.sel = [];
           cur_over = null;
 
           go_grid(true);
@@ -1120,38 +1054,8 @@ function def_drag() {
 
 
 function fill_grid_slot(c2m, grid_slot) {
-  grid_slot.dispo = true;
-  grid_slot.reason = "";
-
-  // // the user has the right to do whatever s/he wants
-  // if ((logged_usr.rights >> 2) % 2 == 1) {
-  // 	return ;
-  // }
-  var wanted_course = Object.assign({}, c2m);
-  Object.assign(wanted_course, { day: grid_slot.day, start: grid_slot.start });
-
-  var check = check_course(wanted_course);
-
-  if (check.length == 0) {
-    return;
-  } else {
-    grid_slot.dispo = false;
-    if (check.nok_type == 'stable') {
-      grid_slot.reason = "Cours fixe";
-    } else if (check.nok_type == 'train_prog_unavailable') {
-      grid_slot.reason = "CRENEAU NON DISPO POUR " + check.train_prog;
-    } else if (check.nok_type == 'tutor_busy') {
-      grid_slot.reason = "PB PROF OCCUPE";
-    } else if (check.nok_type == 'group_busy') {
-      grid_slot.reason = "PB GROUPE";
-    } else if (check.nok_type == 'tutor_unavailable') {
-      grid_slot.reason = "PB PROF PAS DISPO";
-    } else if (check.nok_type == 'tutor_availability_unknown') {
-      grid_slot.reason = "PB DISPO NON DECLAREE";
-    }
-    return;
-  }
-
+  Object.assign(c2m, {day: grid_slot.day, start: grid_slot.start});
+  grid_slot.dispo = check_course().length == 0;
 }
 
 function warning_check(check_tot) {
@@ -1161,27 +1065,41 @@ function warning_check(check_tot) {
     if (check.nok == 'stable') {
       expand = "Le cours était censé être fixe.";
     } else if (check.nok == 'train_prog_unavailable') {
-      expand = "La promo " + check.more.train_prog + " ne devait pas avoir cours à ce moment-là.";
+      expand = "La promo " + check.more.train_prog
+        + " ne devait pas avoir cours à ce moment-là.";
     } else if (check.nok == 'tutor_busy') {
-      expand = "L'enseignant·e " + check.more.tutor + " avait déjà un cours prévu.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'group_busy') {
-      expand = "Le groupe " + check.more.group + " avait déjà un cours prévu.";
+      expand = "Le groupe " + check.more.group
+        + " avait déjà un cours prévu.";
     } else if (check.nok == 'tutor_unavailable') {
-      expand = "L'enseignant·e " + check.more.tutor + " s'était déclaré·e indisponible.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " s'était déclaré·e indisponible.";
     } else if (check.nok == 'tutor_availability_unknown') {
-      expand = "L'enseignant·e " + check.more.tutor + " n'a pas déclaré ses dispos.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " n'a pas déclaré ses dispos.";
     } else if (check.nok == 'tutor_busy_other_dept') {
-      expand = "L'enseignant·e " + check.more.tutor + " est occupé dans un autre département.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " est occupé dans un autre département.";
     } else if (check.nok == 'tutor_free_week') {
-      expand = "L'enseignant·e " + check.more.tutor + " ne donne pas de cours cette week.";
+      expand = "L'enseignant·e " + check.more.tutor
+        + " ne donne pas de cours cette week.";
     } else if (check.nok == 'room_busy') {
       if (check.more.rooms.length == 1) {
         expand = "La salle " + check.more.rooms[0] + " est déjà prise.";
       } else {
-        expand = "Les salles " + check.more.rooms.join(", ") + " sont déjà prises.";
+        expand = "Les salles " + check.more.rooms.join(", ")
+          + " sont déjà prises.";
       }
     } else if (check.nok == 'room_busy_other_dept') {
-      expand = "La salle " + check.more.room + " est utilisée par un autre département.";
+      expand = "La salle " + check.more.room
+        + " est utilisée par un autre département.";
+    } else if (check.nok == 'group_lunch') {
+      expand = "Le groupe " + check.more.group
+        + " de " + set_promos[check.more.promo]
+        + " aura du mal à manger le "
+        + week_days.day_by_ref(check.more.day).date + ".";
     }
     return expand;
   });
@@ -1199,8 +1117,146 @@ function simultaneous_courses(target_course) {
   });
 }
 
+
+// return courses that involve any student of target_course during
+// during the same day
+function gp_courses(target_course) {
+  let ret = cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.promo == target_course.promo
+        && (
+          c.group == target_course.group
+          ||
+          groups[target_course.promo][target_course.group]
+            .ancetres.indexOf(c.group) > -1
+          ||
+          groups[target_course.promo][target_course.group]
+            .descendants.indexOf(c.group) > -1
+        )
+    ) ;
+  }) ;
+  ret.push(pending.wanted_course);
+  return ret ;
+}
+
+// return courses that involve the tutor of target_course during
+// during the same day
+function tutor_courses(target_course) {
+  return cours.filter(function (c) {
+    return (
+      c.day == target_course.day
+        && c.id_course != target_course.id_course
+        && c.prof == target_course.prof
+    ) ;
+  });
+}
+
+function check_group_lunch(issues) {
+
+  // is there a constraint for this group
+  let related_cst = lunch_constraint.groups.filter(function(c){
+    return (
+      c.groups.filter(function(g){
+        return (
+          g.group == pending.wanted_course.group
+            && g.promo == pending.wanted_course.promo) ;
+      }).length > 0) ;
+  }) ;
+
+  // if not, is there a general constraint
+  if (related_cst.length == 0) {
+    related_cst = lunch_constraint.groups.filter(function(c){
+      return c.groups.length == 0 ;
+    }) ;
+  }
+
+  // no lunch constraint
+  if (related_cst.length == 0) {
+    return ;
+  }
+
+  if (!have_lunch(
+    gp_courses(pending.wanted_course),
+    related_cst[0].start,
+    related_cst[0].end,
+    related_cst[0].min_length
+  )) {
+    issues.push({
+      nok: 'group_lunch',
+      more: {
+        group: pending.wanted_course.group,
+        promo: pending.wanted_course.promo,
+        day: pending.wanted_course.day}
+    });
+  }
+}
+
+// could someone with courses in course_list have lunch of length
+// lunch_length between lunch_start and lunch_end?
+function have_lunch(course_list, lunch_start, lunch_end, lunch_length) {
+  if (course_list.length == 0) {
+    return true ;
+  }
+  course_list.sort(function(a,b) {
+    return a.start - b.start ;
+  });
+
+  // get all busy intervals of the day
+  let i = 1 ; let j = 0 ;
+  let busy_times = [] ;
+  busy_times.push({
+    start: course_list[0].start,
+    duration: course_list[0].duration
+  });
+  while (i < course_list.length) {
+    if (course_list[i].start > busy_times[j].start + busy_times[j].duration) {
+      busy_times.push({
+        start: course_list[i].start,
+        duration: course_list[i].duration
+      });
+      j ++ ;
+    } else {
+      busy_times[j].duration =
+        Math.max(
+          busy_times[j].start + busy_times[j].duration,
+          course_list[i].start + course_list[i].duration
+        )
+        - busy_times[j].start ;
+    }
+    i++ ;
+  }
+
+  // do we have enough consecutive time?
+  i = 0 ;
+  // enough time before the first course or after the last course
+  if (busy_times[0].start >= lunch_start + lunch_length
+      ||
+      busy_times[busy_times.length-1].start
+      + busy_times[busy_times.length-1].duration
+      <= lunch_end - lunch_length) {
+    return true ;
+  }
+  // maybe between two courses?
+  while (
+    i+1 < busy_times.length
+      && busy_times[i].start + busy_times[i].duration
+      <= lunch_end - lunch_length) {
+    if (
+      Math.min(busy_times[i+1].start, lunch_end)
+        - Math.max(busy_times[i].start + busy_times[i].duration, lunch_start)
+        >= lunch_length) {
+      return true ;
+    }
+    i ++ ;
+  }
+  return false ;
+}
+
+
 /*
- check whether it is possible to schedule c2m on time date.start_time, day date.day. 
+ check whether pending.wanted_course is acceptable. 
  returns an object containing at least contraints_ok: true iff it is, and
  - nok_type: 'stable' -> course cannot be moved
  - nok_type: 'train_prog_unavailable', train_prog: abbrev_train_prog -> students
@@ -1212,15 +1268,14 @@ function simultaneous_courses(target_course) {
    unavailable
  - nok_type: 'sleep', tutor: tutor_username -> the tutor needs to sleep (11h break)
 */
-// c2m element of course
-// date {day, start_time}
-function check_course(wanted_course) {
+function check_course() {
+  let ret = [];
+  let possible_conflicts = [];
 
-  var ret = [];
-  var possible_conflicts = [];
-  var conflicts = [];
+  pending.update_linked();
 
-  if (is_garbage(wanted_course)) {
+  // everything allowed in the garbage
+  if (is_garbage(pending.wanted_course)) {
     return ret;
   }
 
@@ -1229,42 +1284,18 @@ function check_course(wanted_course) {
   }
 
   if (!pending.pass.core) {
-
-    // course was supposed to be fix
-    if (wanted_course.id_course == -1) {
-      ret.push({ nok: 'stable' });
-    }
-
-    // training programme was supposed to be free
-    if (is_free(wanted_course, wanted_course.promo)) {
-      ret.push({
-        nok: 'train_prog_unavailable',
-        more: { train_prog: set_promos[wanted_course.promo] }
-      });
-    }
+    check_stable_course(ret) ;
+    check_free_training_programme(ret) ;
   }
 
 
-
-
-  possible_conflicts = simultaneous_courses(wanted_course);
+  possible_conflicts = simultaneous_courses(pending.wanted_course);
 
   if (!pending.pass.core) {
 
-    // group is busy
-    conflicts = possible_conflicts.filter(function (c) {
-      return ((c.group == wanted_course.group
-        || groups[wanted_course.promo][wanted_course.group].ancetres.indexOf(c.group) > -1
-        || groups[wanted_course.promo][wanted_course.group].descendants.indexOf(c.group) > -1)
-        && c.promo == wanted_course.promo);
-    });
+    check_busy_group(ret, possible_conflicts) ;
 
-    if (conflicts.length > 0) {
-      ret.push({
-        nok: 'group_busy',
-        more: { group: wanted_course.group }
-      });
-    }
+    check_group_lunch(ret);    
 
     // we will ask later about other constraints
     if (ret.length > 0 && (pending.force.tutor || pending.force.room)) {
@@ -1274,110 +1305,183 @@ function check_course(wanted_course) {
   }
 
 
-
   // tutor availability
   if (!pending.pass.tutor) {
-    conflicts = possible_conflicts.filter(function (c) {
-      return (c.prof == wanted_course.prof);
-    });
-
-
-
-    if (conflicts.length > 0) {
-      ret.push({
-        nok: 'tutor_busy',
-        more: { tutor: wanted_course.prof }
-      });
-    }
-
-
-
+    
+    check_tutor_busy(ret, possible_conflicts) ;
+    
     // tutor availability
-    if (dispos[wanted_course.prof] !== undefined) {
-
-      // in the current department
-      var pref_tut = get_preference(dispos[wanted_course.prof][wanted_course.day],
-        wanted_course.start, wanted_course.duration);
-      if (pref_tut == 0) {
-        ret.push({
-          nok: 'tutor_unavailable',
-          more: { tutor: wanted_course.prof }
-        });
-      } else if (pref_tut == -1) {
-        ret.push({
-          nok: 'tutor_availability_unknown',
-          more: { tutor: wanted_course.prof }
-        });
-      }
-
-      // in other departments
-      var extra_unavailable = find_in_pref(extra_pref.tutors, wanted_course.prof, wanted_course);
-
-      if (extra_unavailable == 0) {
-        ret.push({
-          nok: 'tutor_busy_other_dept',
-          more: { tutor: wanted_course.prof }
-        });
-      }
-
-    } else {
-      ret.push({
-        nok: 'tutor_free_week',
-        more: { tutor: wanted_course.prof }
-      });
+    if (!check_tutor_free_week(ret)) {
+      check_tutor_preferences(ret) ;
+      check_tutor_busy_other_departments(ret) ;
     }
-
+        
     // we will ask later about room constraints
     if (ret.length > 0 && pending.force.room) {
       return ret;
     }
-
-
+        
   }
 
-  // shared rooms availability
-  // var extra_unavailable = find_in_pref(extra_pref.rooms,
-  //                                      wanted_course.room,
-  //                                      wanted_course);
 
   if (!pending.pass.room) {
-
-    var busy_rooms = [];
-    possible_conflicts.forEach(function (c) {
-      if (c.room in rooms.roomgroups) {
-        rooms.roomgroups[c.room].forEach(function (r) {
-          busy_rooms.push(r);
-        });
-      }
-    });
-
-    var conflict_rooms = [];
-    if (wanted_course.room in rooms.roomgroups) {
-      rooms.roomgroups[wanted_course.room].forEach(function (r) {
-        if (busy_rooms.includes(r)) {
-          conflict_rooms.push(r);
-        }
-      });
-    }
-
-    if (conflict_rooms.length > 0) {
-      ret.push({
-        nok: 'room_busy',
-        more: { rooms: [conflict_rooms] }
-      });
-    }
-
-    extra_unavailable = find_in_pref(extra_pref.rooms, wanted_course.room, wanted_course);
-
-    if (extra_unavailable == 0) {
-      ret.push({
-        nok: 'room_busy_other_dept',
-        more: { room: wanted_course.room }
-      });
-    }
+    check_unshared_rooms(ret, possible_conflicts) ;
+    check_shared_rooms(ret, possible_conflicts) ;
   }
 
   return ret;
+}
+
+// course cannot be moved
+function check_stable_course(issues) {
+  if (pending.wanted_course.id_course == -1) {
+    issues.push({ nok: 'stable' });
+  }
+}
+
+
+// training programme is free
+function check_free_training_programme(issues) {
+  pending.linked_courses.forEach(function(c) {
+    if (is_free(c, c.promo)) {
+      issues.push({
+        nok: 'train_prog_unavailable',
+        more: { train_prog: set_promos[c.promo] }
+      });
+    }
+  });
+}
+
+// group is busy
+function check_busy_group(issues, possible_conflicts) {
+  let conflicts = [] ;
+  pending.linked_courses.forEach(function(wanted) {
+    conflicts = possible_conflicts.filter(function (c) {
+      return (
+        (c.group == wanted.group
+         || groups[wanted.promo][wanted.group].ancetres.indexOf(c.group) > -1
+         || groups[wanted.promo][wanted.group].descendants.indexOf(c.group) > -1
+        )
+          && c.promo == wanted.promo
+      );
+    });
+
+    if (conflicts.length > 0) {
+      issues.push({
+        nok: 'group_busy',
+        more: { group: wanted.group }
+      });
+    }
+  }) ;
+}
+
+// tutor does not teach this week
+// return true iff does not teach  
+function check_tutor_free_week(issues) {
+  if (typeof dispos[pending.wanted_course.prof] === 'undefined') {
+    issues.push({
+      nok: 'tutor_free_week',
+      more: { tutor: pending.wanted_course.prof }
+    });
+    return true ;
+  }
+  return false ;
+}
+
+
+// tutor teaches already in the current department
+function check_tutor_busy(issues, possible_conflicts) {
+  let conflicts = possible_conflicts.filter(function (c) {
+    return (c.prof == pending.wanted_course.prof);
+  });
+  
+  if (conflicts.length > 0) {
+    issues.push({
+      nok: 'tutor_busy',
+      more: { tutor: pending.wanted_course.prof }
+    });
+  }
+}
+
+
+// tutor teaches already in another department
+function check_tutor_busy_other_departments(issues) {
+  let extra_unavailable = find_in_pref(
+    extra_pref.tutors,
+    pending.wanted_course.prof,
+    pending.wanted_course);
+  
+  if (extra_unavailable == 0) {
+    issues.push({
+      nok: 'tutor_busy_other_dept',
+      more: { tutor: pending.wanted_course.prof }
+    });
+  }
+}
+
+// tutor is a priori available
+function check_tutor_preferences(issues) {
+  let wanted_course = pending.wanted_course ;
+  let pref_tut = get_preference(
+    dispos[wanted_course.prof][wanted_course.day],
+    wanted_course.start, wanted_course.duration);
+  if (pref_tut == 0) {
+    issues.push({
+      nok: 'tutor_unavailable',
+      more: { tutor: wanted_course.prof }
+    });
+  } else if (pref_tut == -1) {
+    issues.push({
+      nok: 'tutor_availability_unknown',
+      more: { tutor: wanted_course.prof }
+    });
+  }
+}
+
+
+// room available in the current department
+function check_unshared_rooms(issues, possible_conflicts) {
+  let busy_rooms = [];
+  possible_conflicts.forEach(function (c) {
+    if (c.room in rooms.roomgroups) {
+      rooms.roomgroups[c.room].forEach(function (r) {
+        busy_rooms.push(r);
+      });
+    }
+  });
+
+  let conflict_rooms = [];
+  if (pending.wanted_course.room in rooms.roomgroups) {
+    rooms.roomgroups[pending.wanted_course.room].forEach(function (r) {
+      if (busy_rooms.includes(r)) {
+        conflict_rooms.push(r);
+      }
+    });
+  }
+
+  if (conflict_rooms.length > 0) {
+    issues.push({
+      nok: 'room_busy',
+      more: { rooms: [conflict_rooms] }
+    });
+  }
+}
+
+
+// room available in the current department
+function check_shared_rooms(issues, possible_conflicts) {
+  let wanted_course = pending.wanted_course ;
+  let extra_unavailable = find_in_pref(
+    extra_pref.rooms,
+    wanted_course.room,
+    wanted_course);
+
+  if (extra_unavailable == 0) {
+    issues.push({
+      nok: 'room_busy_other_dept',
+      more: { room: wanted_course.room }
+    });
+  }
 }
 
 
@@ -1387,7 +1491,8 @@ function splash_violated_constraints(check_list, step) {
   console.log(warn_check);
   //console.log(pending.wanted_course.id_course);
   if ((logged_usr.rights >> 2) % 2 == 1) {
-    var privilege_warning = "Des privilèges vous ont été accordés, et vous en profitez pour outrepasser ";
+    var privilege_warning = "Des privilèges vous ont été accordés, "
+    + "et vous en profitez pour outrepasser ";
     if (warn_check.length > 1) {
       privilege_warning += "les contraintes suivantes :";
     } else {
@@ -1477,12 +1582,12 @@ function clean_pending() {
 
 
 function check_pending_course() {
-  var warn_check = check_course(pending.wanted_course);
+  var warn_check = check_course();
   console.log(warn_check);
 
   if (warn_check.length == 0) {
 
-    add_bouge(pending.init_course);
+    add_bouge(pending);
     //pending.save_wanted() ;
     pending.clean();
 
@@ -1507,19 +1612,6 @@ function check_pending_course() {
     if (core_constraints.length > 0) {
 
       splash_violated_constraints(warn_check, 'core');
-
-      /* TO BE REMOVED
-if (slot_case) {
-var gs = data_slot_grid.filter(function(s) {
-  return s.day == wanted_course.day
-    && s.start == wanted_course.start;
-});
-console.log(gs);
-if (gs.length==1) {
-  gs[0].pop = true;
-}
-    } 
-      */
 
     } else if (tutor_constraints.length > 0) {
       if (pending.force.tutor) {
@@ -1582,6 +1674,7 @@ function indexOf_constraints(c, y) {
         y: cours_y({
           start: d,
           promo: c.promo,
+          duration: c.duration
         }),
         start: d
       };
@@ -1742,14 +1835,14 @@ function create_stype() {
     .attr("stroke", "#555555")
     .attr("stroke-width", 1)
     .attr("fill", function (d) {
-      return smi_fill(d.value / par_dispos.nmax);
+      return smi_fill(d.value);
     })
     .attr("width", dispot_w)
     .attr("height", dispot_h)
     .attr("x", dispot_x)
     .attr("y", dispot_y)
     .attr("fill", function (d) {
-      return smi_fill(d.value / par_dispos.nmax);
+      return smi_fill(d.value);
     });
 
   datdisi
@@ -1768,7 +1861,7 @@ function create_stype() {
     .attr("but", "dis")
     .on("mouseover", but_bold)
     .on("mouseout", but_back)
-    .on("click", send_dis_change)
+    .on("click", send_pref_pres_change)
     .attr("cursor", "pointer");
 
   dis_but
@@ -1890,6 +1983,130 @@ function get_dispos_type(dt) {
 // -- no slot --
 
 
+/*--------------------------
+   ------ CONSTRAINTS ------
+   -------------------------*/
+
+
+function fetch_lunch_constraints() {
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_group_lunch,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      lunch_constraint.groups = d3.csvParse(
+        msg,
+        translate_group_lunch_constraints);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+      // window.location.href = url_login;
+      //window.location.replace(url_login+"?next="+url_stype);
+    }
+  });
+}
+
+
+function translate_group_lunch_constraints(d) {
+  let ret = {
+    start: +d.start_time,
+    end: +d.end_time,
+    min_length: +d.lunch_length,
+    groups: []
+  };
+  let groups = d.groups.split("|");
+  if (groups.length > 1) {
+    for (let i = 0 ; i < groups.length ; i++) {
+      let tp_gp = groups[i].split("-");
+      ret.groups.push({
+        promo: set_promos.indexOf(tp_gp[0]),
+        group: translate_gp_name(tp_gp[1])
+      });
+    }
+  }
+  return ret ;
+}
+
+/*--------------------
+   ------ VISIO ------
+   --------------------*/
+function translate_links(links_str) {
+  // split the many links first
+  let links_tab = links_str.split('|') ;
+  let links = [] ;
+  for(let i = 0 ; i < links_tab.length ; i++) {
+    //then separate url and description
+    let link = links_tab[i].split(' ');
+    let l_id = +link.shift() ;
+    let l_url = link.shift() ;
+    let l_desc = link.join(' ');
+    links.push({
+      'id': l_id,
+      'url': l_url,
+      'desc': l_desc 
+    }) ;
+    links_by_id[String(l_id)] = {'url': l_url, 'desc': l_desc};
+  }
+  return links ;
+}
+
+function fetch_preferred_links() {
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_fetch_user_preferred_links,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      d3.csvParse(msg, translate_user_preferred_links);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
+  show_loader(true);
+  $.ajax({
+    type: "GET", //rest Type
+    dataType: 'text',
+    url: url_fetch_group_preferred_links,
+    async: true,
+    contentType: "text/csv",
+    success: function (msg) {
+      d3.csvParse(msg, translate_group_preferred_links);
+      show_loader(false);
+    },
+    error: function (xhr, error) {
+      console.log("error");
+      console.log(xhr);
+      console.log(error);
+      console.log(xhr.responseText);
+      show_loader(false);
+    }
+  });
+
+}
+
+function translate_user_preferred_links(d) {
+  preferred_links.users[d.user] = translate_links(d.links) ;
+}
+function translate_group_preferred_links(d) {
+  preferred_links.groups[d.group] = translate_links(d.links) ;
+}
+
 
 
 /*--------------------
@@ -1910,14 +2127,21 @@ function select_entry_cm() {
   room_tutor_change.cm_settings = entry_cm_settings;
   var fake_id = new Date();
   fake_id = fake_id.getMilliseconds() + "-" + pending.wanted_course.id_course;
-  room_tutor_change.proposal = [{
-    fid: fake_id,
-    content: "Prof"
-  },
-  {
-    fid: fake_id,
-    content: "Salle"
-  }];
+  room_tutor_change.proposal = [
+    {
+      fid: fake_id,
+      content: "Prof"
+    },
+    {
+      fid: fake_id,
+      content: "Salle"
+    },
+    {
+      fid: fake_id,
+      content: "Visio"
+    },
+  ];
+  update_change_cm_nlin() ;
 }
 
 
@@ -1926,17 +2150,20 @@ function select_entry_cm() {
 function def_cm_change() {
   entry_cm_settings.click = function (d) {
     context_menu.room_tutor_hold = true;
+    pending.pass.core = true;
+
     if (d.content == 'Salle') {
       // don't consider other constraints than room's
       pending.pass.tutor = true;
-      pending.pass.core = true;
       room_cm_level = 0;
       select_room_change();
-    } else {
+    } else if (d.content == 'Prof'){
       // don't consider other constraints than tutor's
       pending.pass.room = true;
-      pending.pass.core = true;
       select_tutor_module_change();
+    } else {
+      pending.pass.tutor = true ;
+      select_pref_link_types_change();
     }
     go_cm_room_tutor_change();
   };
@@ -1963,6 +2190,22 @@ function def_cm_change() {
       select_tutor_filters_change();
     } else {
       confirm_tutor_change(d);
+    }
+    go_cm_room_tutor_change();
+  };
+
+  pref_links_cm_settings.click = function (d) {
+    context_menu.room_tutor_hold = true;
+    confirm_pref_links_change(d);
+    go_cm_room_tutor_change();
+  };
+  
+  pref_link_types_cm_settings.click = function (d) {
+    context_menu.room_tutor_hold = true;
+    if (d.content == 'Groupe') {
+      select_pref_links_change('groups');
+    } else {
+      select_pref_links_change('users');
     }
     go_cm_room_tutor_change();
   };

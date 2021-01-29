@@ -70,6 +70,9 @@ function fetch_tutor_preferences() {
         fetch.pref_saved = true;
         if (ckbox["dis-mod"].cked) {
           create_dispos_user_data();
+          open_lunch() ;
+          go_edt(false);
+          create_pref_modes();
         }
 
         fetch_ended(false);
@@ -106,6 +109,41 @@ function translate_dispos_from_csv(d) {
 }
 
 
+// if there exist tutor preferences that would be cut 
+function open_lunch() {
+  let t = time_settings.time ;
+  if (Object.keys(t.bu).length > 0) {
+    return ;
+  }
+  let during_lunch = user.dispos.filter(function(d){
+    return !(d.start_time + d.duration <= t.lunch_break_start_time
+             || d.start_time >= t.lunch_break_finish_time) ;
+  });
+  if (during_lunch.length > 0) {
+    t.bu.lunch_break_finish_time = t.lunch_break_finish_time ;
+    t.lunch_break_finish_time = t.lunch_break_start_time ;
+  }
+  let min_start = t.day_start_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time < min_start) {
+      min_start = d.start_time ;
+    }
+  });
+  if (min_start < t.day_start_time) {
+    t.bu.day_start_time = t.day_start_time ;
+    t.day_start_time = min_start ;
+  }
+  let max_finish = t.day_finish_time ;
+  user.dispos.forEach(function(d){
+    if (d.start_time + d.duration > max_finish) {
+      max_finish = d.start_time + d.duration ;
+    }
+  });
+  if (max_finish > t.day_finish_time) {
+    t.bu.day_finish_time = t.day_finish_time ;
+    t.day_finish_time = max_finish ;
+  }
+}
 
 
 // fetch the moments where a tutor teaches in another departement
@@ -302,7 +340,7 @@ function create_dispos_user_data() {
     sort_preferences(dispos);
   }
 
-  week_days.forEach(function (day) {
+  week_days.day_list.forEach(function (day) {
     pref_list = dispos[user.name][day.ref];
     for (var k = 0; k < pref_list.length; k++) {
       d2p = {
@@ -315,7 +353,12 @@ function create_dispos_user_data() {
       user.dispos_bu.push(d2p);
       if (pref_list[k].value < 0) {
         if (!pref_only) {
-          pref_list[k].value = get_dispos_type(d2p).value;
+          let default_pref = get_dispos_type(d2p);
+          if (default_pref != null) {
+            pref_list[k].value = default_pref.value;
+          } else {
+            pref_list[k].value = 0 ;
+          }
         } else {
           pref_list[k].value = par_dispos.nmax;
         }
@@ -558,12 +601,20 @@ function fetch_cours() {
 
         week_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
         days_header.mix.days = week_days;
+        days_header.fetch_physical_presence() ;
+
 
         tutors.pl = [];
         modules.pl = [];
         salles.pl = [];
 
-        cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+        cours_pl = [] ;
+        d3.csvParse(
+          msg,
+          function(d) {
+            translate_cours_pl_from_csv(d, cours_pl);
+          }
+        );
 
 
         fetch.ongoing_cours_pl = false;
@@ -605,17 +656,15 @@ function fetch_cours() {
 
         // console.log(exp_week,num_copie);
 
-        cours_pp = d3.csvParse(msg, translate_cours_pp_from_csv);
+        cours_pp = [] ;
+        d3.csvParse(
+          msg,
+          function(d) {
+            translate_cours_pp_from_csv(d, cours_pp);
+          }
+        );
 
-        if (cours_pp.length > 0 && !garbage_plot) {
-          garbage_plot = true;
-          add_garbage();
-          go_grid(true);
-        } else if (cours_pp.length == 0 && garbage_plot) {
-          garbage_plot = false;
-          remove_garbage();
-          go_grid(true);
-        }
+        go_grid(true);
 
         fetch.ongoing_cours_pp = false;
         fetch_ended(false);
@@ -631,7 +680,7 @@ function fetch_cours() {
 }
 
 
-function translate_cours_pl_from_csv(d) {
+function translate_cours_pl_from_csv(d, result) {
   var ind = tutors.pl.indexOf(d.prof_name);
   if (ind == -1) {
     tutors.pl.push(d.prof_name);
@@ -642,29 +691,37 @@ function translate_cours_pl_from_csv(d) {
   if (salles.pl.indexOf(d.room) == -1) {
     salles.pl.push(d.room);
   }
-  var co = {
-    id_course: +d.id_course,
-    no_course: +d.num_course,
-    prof: d.prof_name,
-    //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
-    group: translate_gp_name(d.gpe_name),
-    promo: set_promos.indexOf(d.gpe_promo),
-    mod: d.module,
-    c_type: d.coursetype,
-    day: d.day,
-    start: +d.start_time,
-    duration: constraints[d.coursetype].duration,
-    room: d.room,
-    room_type: d.room_type,
-    color_bg: d.color_bg,
-    color_txt: d.color_txt,
-    display: true
-  };
-  return co;
+
+  // multiple groups
+  let groups = d.gpe_name.split("|");
+
+  for (let i = 0 ; i < groups.length ; i++) {
+    result.push({
+      id_course: +d.id_course,
+      no_course: +d.num_course,
+      prof: d.prof_name,
+      //        prof_full_name: d.prof_first_name + " " + d.prof_last_name,
+      group: translate_gp_name(groups[i]),
+      promo: set_promos.indexOf(d.gpe_promo),
+      mod: d.module,
+      c_type: d.coursetype,
+      day: d.day,
+      start: +d.start_time,
+      duration: constraints[d.coursetype].duration,
+      room: d.room,
+      room_type: d.room_type,
+      color_bg: d.color_bg,
+      color_txt: d.color_txt,
+      display: true,
+      id_visio: d.room==''?(d.id_visio==''?-1:+d.id_visio):-1,
+      comment: d.comment,
+      graded: (d.graded=='' || d.graded=='False' || d.graded=='false')?false:true
+    });
+  }
 }
 
 
-function translate_cours_pp_from_csv(d) {
+function translate_cours_pp_from_csv(d, result) {
   if (tutors.pp.indexOf(d.prof) == -1) {
     tutors.pp.push(d.prof);
   }
@@ -674,25 +731,29 @@ function translate_cours_pp_from_csv(d) {
   if (salles.pp.indexOf(d.room) == -1) {
     salles.pp.push(d.room);
   }
-  var co = {
-    id_course: +d.id,
-    no_course: +d.no,
-    prof: d.prof,
-    group: translate_gp_name(d.group),
-    promo: set_promos.indexOf(d.promo),
-    mod: d.module,
-    c_type: d.coursetype,
-    day: garbage.day,
-    start: garbage.start,
-    duration: constraints[d.coursetype].duration,
-    room: "",
-    room_type: d.room_type,
-    color_bg: d.color_bg,
-    color_txt: d.color_txt,
-    display: true
-  };
-  console.log(co);
-  return co;
+
+  // multiple groups
+  let groups = d.groups.split("|");
+
+  for (let i = 0 ; i < groups.length ; i++) {
+    result.push({
+      id_course: +d.id,
+      no_course: +d.no,
+      prof: d.prof,
+      group: translate_gp_name(groups[i]),
+      promo: set_promos.indexOf(d.promo),
+      mod: d.module,
+      c_type: d.coursetype,
+      day: garbage.day,
+      start: garbage.start,
+      duration: constraints[d.coursetype].duration,
+      room: "",
+      room_type: d.room_type,
+      color_bg: d.color_bg,
+      color_txt: d.color_txt,
+      display: true
+    });
+  }
 }
 
 
@@ -777,7 +838,14 @@ function side_week_rcv(side_week) {
 
 
     var side_days = new WeekDays(JSON.parse(req.getResponseHeader('days').replace(/'/g, '"')));
-    var side_cours_pl = d3.csvParse(msg, translate_cours_pl_from_csv);
+
+    side_cours_pl = [] ;
+    var side_cours_pl = d3.csvParse(
+      msg,
+      function(d) {
+        translate_cours_pl_from_csv(d, side_cours_pl) ;
+      }
+    );
 
     insert_side_week(side_week, side_days, side_cours_pl);
 
@@ -954,6 +1022,7 @@ function fetch_room_preferences() {
       }
       show_loader(false);
       fetch.ongoing_un_rooms = false;
+      fetch_ended(false);
     },
     error: function (msg) {
       console.log("error");
@@ -1045,6 +1114,8 @@ function fetch_all(first, fetch_work_copies) {
   if (!fetch.course_saved) {
     fetch.ongoing_cours_pp = true;
     fetch.ongoing_cours_pl = true;
+    fetch.ongoing_bknews = true;
+    fetch_ongoing_colors = true;
   }
   if (!fetch.pref_saved &&
     (ckbox["dis-mod"].cked
@@ -1054,8 +1125,6 @@ function fetch_all(first, fetch_work_copies) {
   if (ckbox["edt-mod"].cked) {
     fetch.ongoing_un_rooms = true;
   }
-  fetch.ongoing_bknews = true;
-  fetch_ongoing_colors = true;
 
   fetch_version();
 

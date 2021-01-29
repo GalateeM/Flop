@@ -53,7 +53,9 @@ function bknews_bot_y() {
   return bknews_top_y() + bknews_h();
 }
 function bknews_h() {
-  if (bknews.nb_rows == 0) {
+  var t = time_settings.time;
+  if (t.lunch_break_finish_time == t.lunch_break_start_time
+     && bknews.nb_rows == 0) {
     return 0;
   } else {
     return bknews.nb_rows * bknews_row_height()
@@ -148,7 +150,7 @@ function dispo_h(d) {
 }
 
 function dispo_fill(d) {
-  return smi_fill(d.value / par_dispos.nmax);
+  return smi_fill(d.value);
 }
 
 function pref_sel_choice_x(d, i) {
@@ -204,7 +206,7 @@ function dispo_more_h(d) {
 }
 
 function dispo_more_y(d) {
-  return dispo_y(d) + dispo_h(d) - dispo_more_h(d);
+  return dispo_y(d) + dispo_h(d) - 2*dispo_more_h(d);
 }
 
 function dispo_more_x(d) {
@@ -304,9 +306,13 @@ function cursor_pref() {
   ---------------------*/
 
 
+function availability_content(d) {
+  return d.off < 0 ? d.value : d.off ;
+}
+
 //ratio content
 function rc(d) {
-  return d.off < 0 ? d.value / par_dispos.nmax : d.off / par_dispos.nmax;
+  return availability_content(d) / par_dispos.nmax ;
 }
 
 
@@ -353,15 +359,20 @@ function smile_coin_y(d) {
 }
 
 function smi_fill(d) {
-  if (d <= .5) {
+  // remote teaching
+  if (d == 1) {
+    return "rgb(0,191,255)" ;
+  }
+  let val = d / par_dispos.nmax ;
+  if (val <= .5) {
     return "rgb(" +
       100 + "%," +
-      2 * d * smiley.mid_o_v + "%," +
+      2 * val * smiley.mid_o_v + "%," +
       0 + "%)";
   } else {
     return "rgb(" +
-      200 * (1 - d) + "%," +
-      ((smiley.min_v - smiley.mid_y_v) * (-1 + 2 * d) + smiley.mid_y_v) + "%," +
+      200 * (1 - val) + "%," +
+      ((smiley.min_v - smiley.mid_y_v) * (-1 + 2 * val) + smiley.mid_y_v) + "%," +
       0 + "%)";
   }
 }
@@ -370,8 +381,17 @@ function tete_str(d) {
   return d == 0 ? "white" : "black";
 }
 
-function trait_vis_strw(d) {
-  return d == 0 ? 0 : 1;
+function eye_str_width(d) {
+  return availability_content(d) < 1 ? 0 : 1;
+}
+
+function mouth_str_width(d) {
+  return availability_content(d) < 2 ? 0 : 1;
+}
+
+function brow_str_width(d) {
+  let v = availability_content(d) ;
+  return v < 2 || v > 4 ? 0 : 1;
 }
 
 function interdit_w(d) {
@@ -394,94 +414,69 @@ function smile_trans(d, i) {
   }
 }
 
+function path_hpr() {
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
+  return "M " + smiley.tete + "," + mid_hp
+    + " a " + mid_hp + " " + mid_hp
+    + " 0 1 0 " + "0,-" + 2*mid_hp ;
+}
 
+function path_hpl() {
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
+  return "M -" + smiley.tete + "," + mid_hp
+    + " a " + mid_hp + " " + mid_hp
+    + " 0 1 1 " + "0,-" + 2*mid_hp ;
+}
+
+function path_hpt() {
+  let mid_hp = smiley.tete * smiley.headphone.ear ;
+  return "M -" + smiley.headphone.top*smiley.tete + ",-" + .5*mid_hp
+    + " a " + smiley.tete + " " + smiley.tete
+    + " 0 1 1 " + 2*smiley.headphone.top*smiley.tete + ",0" ;
+}
+
+function hp_stroke_width(d) {
+  let v = availability_content(d) ;
+  return v == 1 ? 3 : 0 ;
+}
+
+function hp_fill(d) {
+  let v = availability_content(d) ;
+  return v == 1 ? "black" : "none" ;
+}
+
+function hp_mouth_w(d) {
+  let val = availability_content(d) ;
+  return val == 1 ? smiley.headphone.mouth_w * smiley.tete : 0 ;
+}
+
+function hp_mouth_sw(d) {
+  let val = availability_content(d) ;
+  return val == 1 ? 2 : 0 ;
+}
 
 /*----------------------
   -------- GRID --------
   ----------------------*/
-function gs_x(d) {
-  if (slot_case) {
-    return week_days.day_by_ref(d.day).num * (rootgp_width * labgp.width +
-      dim_dispo.plot * (dim_dispo.width + dim_dispo.right));
-  } else {
-    return cours_x(d);
-  }
-}
-
-function gs_y(d) {
-  if (slot_case) {
-    var t = time_settings.time;
-    var ret = (d.start - t.day_start_time) * nbRows * scale;
-    if (d.start >= t.lunch_break_finish_time) {
-      ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time) * nbRows * scale;
-    }
-    return ret;
-  } else {
-    return cours_y(d);
-  }
-}
-
-function gs_width(d) {
-  return slot_case ? rootgp_width * labgp.width : cours_width(d);
-}
-
-function gs_height(d) {
-  return slot_case ? d.duration * nbRows * scale : cours_height(d);
-}
 
 function gs_fill(d) {
-  if (d.display || d.pop) {
+  if (d.display) {
     return d.dispo ? "green" : "red";
   } else {
     return "none";
   }
 }
 
-function gs_opacity(d) {
-  return d.pop ? 1 : .5;
-}
-
-function gs_cursor(d) {
-  return d.pop ? "pointer" : "default";
-}
-
-function gs_txt(s) {
-  return s.pop ? s.reason : "";
-}
-
-function gs_sw(d) {
-  //    return is_free(d.day,d.slot)&&d.slot<5?0:2;
-  return 2;
-}
-
 function gs_sc(d) {
-  if (slot_case) {
-    return d.start < time_settings.time.day_finish_time ? "black" : "red";
-  } else {
-    return d.dispo ? "green" : "red";
-  }
-}
-
-function gs_sda(d) {
-  return slot_case ? "" : "1,4";
-}
-
-function gs_slc(d) {
-  return slot_case ? "square" : "round";
+  return d.dispo ? "green" : "red";
 }
 
 
 function gscg_x(datum) {
-  // hack for LP
-  var hack = 0;
-  if (datum.gp.name == "fLP1") {
-    hack = .5 * labgp.width;
-  }
   return datum.day * (rootgp_width * labgp.width +
     dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
     datum.gp.x * labgp.width +
-    .5 * labgp.width +
-    hack;
+    .5 * labgp.width ;
 }
 
 function gscg_y(datum) {
@@ -534,7 +529,8 @@ function nb_minutes_in_grid() {
   var minutes = bknews.nb_rows * bknews.time_height
     + nbRows * (t.lunch_break_start_time - t.day_start_time
       + t.day_finish_time - t.lunch_break_finish_time);
-  if (bknews.nb_rows != 0) {
+  if (t.lunch_break_finish_time != t.lunch_break_start_time
+     || bknews.nb_rows > 0) {
     minutes += 2 * bknews.time_margin;
   }
   return minutes;
@@ -704,11 +700,72 @@ function cours_x(c) {
 function cours_y(c) {
   var t = time_settings.time;
   var ret = (c.start - t.day_start_time) * nbRows * scale
-    + row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale;
+    + row_gp[root_gp[c.promo].row].y * c.duration * scale;
   if (c.start >= t.lunch_break_finish_time) {
     ret += bknews_h() - (t.lunch_break_finish_time - t.lunch_break_start_time) * nbRows * scale;
   }
   return ret;
+}
+
+function cours_reverse_y(y) {
+  let t = time_settings.time;
+  let break_start = (t.lunch_break_start_time - t.day_start_time)
+    * (nbRows * scale) ;
+  let i = 0 ;
+  let break_finish = break_start + bknews_h();
+
+  // nothing during lunch break or outside
+  if (y > break_start && y < break_finish
+      || y < 0
+      || y > grid_height()) {
+    return "" ;
+  }
+
+  // 1 row: compare with last cut
+  if (nbRows == 1) {
+    if (y <= break_start) {
+      return min_to_hm_txt(t.day_start_time
+                           + y/scale);
+    } else {
+      return min_to_hm_txt(t.lunch_break_finish_time
+                     + (y-break_finish)/scale);
+    }
+  }
+
+  // several rows: based on rev_constraints
+
+  // y coordinate for every constraint start
+  let rev_cst_y = Object.keys(rev_constraints).map(function(c) {
+    if (c <= t.lunch_break_start_time) {
+      return (c - t.day_start_time) * (nbRows * scale) ;
+    } else {
+      if (c < t.lunch_break_finish_time) {
+        console.log("Course during lunch break?");
+      } else {
+        return (t.lunch_break_start_time - t.day_start_time) * (nbRows * scale)
+          + bknews_h()
+          + (c - t.lunch_break_finish_time) * (nbRows * scale) ;
+      }
+    }
+  });
+
+  // get last constraint before y
+  while (i+1 < rev_cst_y.length
+         && rev_cst_y[i+1] < y) {
+    i = i+1 ;
+  }
+  let before_last_slot = Object.keys(rev_constraints)[i];
+
+  // get time since last constraint
+  y -= rev_cst_y[i] ;
+  while (y > 0) {
+    y -= rev_constraints[before_last_slot] * scale ;
+  }
+  
+  return min_to_hm_txt(+before_last_slot
+                       + rev_constraints[before_last_slot]
+                       + y / scale );
+
 }
 
 function cours_width(c) {
@@ -737,7 +794,7 @@ function cours_fill(c) {
   return (typeof coco === 'undefined')?"white":coco.color_bg;
 }
 function is_exam(c) {
-  return false;
+  return c.graded;
 }
 
 function cours_txt_weight(c) {
@@ -763,7 +820,15 @@ function cours_txt_bot_y(c) {
   return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
-  return c.room;
+  if (c.room != '' && c.id_visio != -1) {
+    console.log(c, 'Both on site and remote?');
+  } else {
+    if (c.id_visio > -1) {
+      return 'Visio' ;
+    } else {
+      return c.room ;
+    }
+  }
 }
 function cours_opac(c) {
   return (c.display || !sel_popup.active_filter) ? 1 : opac;
@@ -807,22 +872,35 @@ function cm_chg_bg_y() {
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-function placement_details_x(cours) {
-  if (cours_x(cours) <= grid_width() / 2) {
-    return cours_x(cours) + .5 * cours_width(cours);
-  } else {
-    return cours_x(cours) + .5 * cours_width(cours) - grid_width() / 5; //grid_width()/5 = taille largeur fenetre des details
-  }
+function detail_wdw_width() {
+  return .25 * grid_width() ;
 }
-function placement_details_y(cours) {
-
-  if (cours_y(cours) <= grid_height() / 2) {
-    return cours_y(cours) + .5 * cours_height(cours);
-  } else {
-    return cours_y(cours) + .5 * cours_height(cours) - grid_height() / 3; //grid_heigth()/3 = taille hauteur fenetre des details
-  }
+function detail_wdw_height() {
+  return .3 * grid_height() ;
 }
+function detail_wdw_x(cours) {
+  let ret = cours_x(cours) + .5 * cours_width(cours) ;
+  if (cours_x(cours) > .5 * grid_width()) {
+    ret -=  detail_wdw_width();
+  }
+  return ret ;
+}
+function detail_wdw_y(cours) {
+  let ret = cours_y(cours) + .5 * cours_height(cours) ;
+  if (cours_y(cours) > .5 * grid_height()) {
+    ret -= detail_wdw_height(); 
+  }
+  return ret ;
+}
+function detail_txt_y(cours, i_info) {
+  return detail_wdw_y(cours)
+    + (i_info + 1) * detail_wdw_height() / (nb_detailed_infos + 1) ;
+}
+function detail_txt_x(cours) {
+  return detail_wdw_x(cours) + .5 * detail_wdw_width() ;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -919,7 +997,7 @@ function cm_chg_but_fill(d) {
   if (["+", arrow.right, arrow.back].includes(d.content)) {
     ret = "steelblue";
   } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
-    ret = smi_fill(cm_chg_but_pref(d) / par_dispos.nmax);
+    ret = smi_fill(cm_chg_but_pref(d));
   }
   return ret;
 }
@@ -1264,11 +1342,21 @@ function dept_txt(d) {
 
 
 function pmg_x() {
-  var wid = pref_only ? dsp_svg.w - dsp_svg.margin.left - 10 : grid_width();
+  let wid = 0 ;
+  if (pref_only) {
+    if (pref_fetched) {
+      let last_day = {day: week_days.last_day().ref} ;
+      return dispo_x(last_day) + dispo_w(last_day) + 2 * dim_dispo.mh ;
+    } else {
+      wid = dsp_svg.w - dsp_svg.margin.left - 10 ;
+    }
+  } else {
+    wid = grid_width();
+  }
   return wid
     - 2 * pref_selection.marx
     - pref_selection.choice.w
-    - pref_selection.butw;
+    - pref_selection.butw ;
 }
 function pmg_y() {
   if (pref_only) {
@@ -1287,8 +1375,11 @@ function pref_mode_trans() {
         - pref_selection.mary))
     + ")";
 }
+function pref_mode_choice_trans_x() {
+  return pref_selection.butw + pref_selection.marx ;
+}
 function pref_mode_choice_trans() {
-  return "translate(" + (pref_selection.butw + pref_selection.marx) + ",0)";
+  return "translate(" + pref_mode_choice_trans_x() + ", 0)";
 }
 
 function pref_mode_but_txt(d) {

@@ -11,14 +11,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Modification proposal: id for modification bunch, modification
   applicability, email notification
 - Room preferences: user interface improvement, room exclusion
-- Flopeditor: staff members
 
 ### Added
+- Enable courses with multiple groups
 - New app flopeditor: save initial data through graphical interface
-  - Department
+  - Departments
   - Rooms (hierarchy, room types)
   - Training programmes
+  - Course types
   - Modules
+  - Student groups
+  - Staff members
 - Preferences for mail notification
 - New mode for employees planning
   - new constraints (week-ends, consecutive working hours/days, etc.)
@@ -27,6 +30,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - A tutor can choose her/his favorite rooms
 - Module description
 - Enabled text translation
+- TTApp/ilp_constraints : contains all code + documentation allowing to write files in logs/ 
+that explain the infaisability by the solver of a set of constraints
+- Availability slots in TTModel to optimize resources
+- Allow parametrized repartition between tutors on a given Module
 
 ### Changed
 - front-end: dispatch week/day management in js files
