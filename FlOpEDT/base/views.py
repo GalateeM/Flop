@@ -1615,6 +1615,24 @@ def decale_changes(req, **kwargs):
     return good_response
 
 
+def get_room_problem(request, **kwargs):
+    if request.method == 'POST':
+        form = RoomProblemForm(request.POST)
+        if form.is_valid():
+            dat = form.cleaned_data
+            pbtype = dat.get("problem_type") #RoomProblemType.objects.get(name=dat.get("problem_type"))
+            desc = dat.get("description")
+            room = dat.get("room_concerned")
+
+            RoomProblem(problem_type=pbtype, creation_time=datetime.now(), description=desc, room_concerned=room ).save()
+            return HttpResponseRedirect('/edt/')
+        else:
+            return render(request, 'base/roomProblem_form.html', {'form': form})
+    else:
+        form = RoomProblemForm()
+        return render(request, 'base/roomProblem_form.html', {'form': form})
+
+
 # </editor-fold desc="CHANGERS">
 
 # <editor-fold desc="EMAILS">
@@ -1919,22 +1937,5 @@ def get_key_unavailable_rooms(department_abbrev, year, week):
 
 def get_key_all_tutors(department_abbrev):
     return f'ALL-TUT-D{department_abbrev}'
-
-def get_room_problem(request, **kwargs):
-    if request.method == 'POST':
-        form = RoomProblemForm(request.POST)
-        if form.is_valid():
-            dat = form.cleaned_data
-            pbtype = dat.get("problem_type") #RoomProblemType.objects.get(name=dat.get("problem_type"))
-            desc = dat.get("description")
-            room = dat.get("room_concerned")
-
-            RoomProblem(problem_type=pbtype, creation_time=datetime.now(), description=desc, room_concerned=room ).save()
-            return HttpResponseRedirect('/edt/')
-        else:
-            return render(request, 'base/roomProblem_form.html', {'form': form})
-    else:
-        form = RoomProblemForm()
-        return render(request, 'base/roomProblem_form.html', {'form': form})
 
 # </editor-fold desc="HELPERS">
