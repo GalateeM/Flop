@@ -19,6 +19,7 @@ django-ical~=1.7.0
 ipython
 openpyxl
 django-debug-toolbar
+django-crispy-forms
 #djangorestframework
 #markdown
 #django-filter

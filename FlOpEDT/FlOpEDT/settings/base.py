@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'displayweb',
     'configuration',
     'easter_egg',
+    'crispy_forms',
     'MyFlOp',
 #    'importation'
 ]
