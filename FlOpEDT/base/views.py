@@ -57,7 +57,6 @@ from base.admin import CoursResource, DispoResource, VersionResource, \
     CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
-    TutorRessource, ModuleDescriptionResource, RoomRessource
     TutorRessource, ModuleDescriptionResource, AllDispoResource, \
     GroupPreferredLinksResource, RoomRessource
 if COSMO_MODE:
