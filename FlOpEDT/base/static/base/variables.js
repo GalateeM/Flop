@@ -132,13 +132,14 @@ file_fetch.rooms.callback = function () {
   room_names = Object.keys(rooms.roomgroups).filter(function(k){
     return rooms.roomgroups[k].length == 1 ;
   });
+  room_names.sort(function comp(a, b) { return a.localeCompare(b) ; }) ;
   swap_data(room_names, rooms_sel, "room");
 };
 
 file_fetch.constraints.callback = function () {
   constraints = this.data;
 
-  // rev_constraints only used in slot_case
+  // rev_constraints only used when training programmes on multiple lines
   let i, j, coursetypes, cur_start_time;
   coursetypes = Object.keys(constraints);
   for (i = 0; i < coursetypes.length; i++) {
@@ -172,7 +173,7 @@ file_fetch.department.callback = function () {
 var slot_case = false; //true ;
 
 // current number of rows
-var nbRows;
+var nbRows = 1;
 // last positive number of rows (when filtering by group)
 var pos_nbRows = 0;
 
@@ -243,7 +244,7 @@ var par_dispos = {
 
 // parameters for the smileys
 var smiley = {
-  tete: 10,
+  tete: 5,
   oeil_x: .35,
   oeil_y: -.35,
   oeil_max: .08,
@@ -252,6 +253,13 @@ var smiley = {
   bouche_haut_y: -.1,
   bouche_bas_y: .6,
   sourcil: .4,
+  headphone: {
+    ear: .5,
+    top: 1.02,
+    mouth_y: .2,
+    mouth_w: 1,
+    mouth_h: .4
+  },
   init_x: 0,
   init_y: -180,
   max_r: 1,
@@ -358,9 +366,8 @@ var wdw_weeks = new WeeksExcerpt(dsp_weeks.visible_weeks);
   -------- GRID --------
   ----------------------*/
 
-// one element per slot
-// non-empty iff slot_case
-// filled in create_grid_data()
+// possible slots when drag'n'drop
+// filled in add_slot_grid_data()
 var data_slot_grid = [];
 
 // keys on top or at the bottom of the grid representing the name of
@@ -663,21 +670,31 @@ var side_courses = [];
 var dragListener;
 var drag_popup;
 
+var cur_over = null;
+var slots_over = null;
+
 // helper for the d&d
 var drag = {
-  sel: null,
+  sel: [],
   x: 0,
   y: 0,
   init: 0,
   svg: null,
   svg_w: 0,
-  svg_h: 0
+  svg_h: 0,
+  set_selection: function(id_course) {
+    this.sel = d3.selectAll(".cours")
+      .filter(function(c) {return c.id_course == id_course;});
+    this.x = 0 ;
+    this.y = 0 ;
+  }
 };
 
 // course being moved
 var pending = {
   init_course: null,
   wanted_course: null,
+  linked_courses: null,
   time: null,
   pass: {
     tutor: false,
@@ -691,11 +708,25 @@ var pending = {
   clean: function () {
     this.init_course = null;
     this.wanted_course = null;
+    this.linked_courses = null;
     this.time = null;
   },
   fork_course: function (d) {
     this.wanted_course = d;
+    this.linked_courses = cours.filter(function(c){
+      return c.id_course == d.id_course ;
+    });
+    this.update_linked();
     this.init_course = Object.assign({}, d);
+  },
+  update_linked: function() {
+    let w = this.wanted_course ;
+    this.linked_courses.forEach(function(c){
+      c.day =   w.day ;
+      c.start = w.start ;
+      c.room =  w.room ;
+      c.prof =  w.prof ;
+    });
   },
   prepare_dragndrop: function (d) {
     this.fork_course(d);
@@ -712,6 +743,7 @@ var pending = {
   },
   rollback: function (t) {
     Object.assign(this.wanted_course, this.init_course);
+    this.update_linked();
     this.clean();
   }
 };
@@ -750,7 +782,9 @@ var ack = {
   predefined: {
     KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
     OK: "La modification s'est déroulée sans accroc."
-  }
+  },
+  list: [],
+  ongoing: []
 };
 
 
@@ -869,6 +903,30 @@ var tutor_cm_settings =
   ncol: 3,
   nlin: 4,
   txt_intro: { 'default': "Ordre alphabétique :" }
+};
+var pref_links_cm_settings =
+{
+  type: 'preferred_links',
+  w: 200,
+  h: 18,
+  fs: 10,
+  mx: 5,
+  my: 3,
+  ncol: 1,
+  nlin: 0,
+  txt_intro: { 'default': "Quel lien pour la visio ?" }
+};
+var pref_link_types_cm_settings =
+{
+  type: 'preferred_link_types',
+  w: 120,
+  h: 18,
+  fs: 10,
+  mx: 5,
+  my: 3,
+  ncol: 1,
+  nlin: 0,
+  txt_intro: { 'default': "Relatif à qui ?" }
 };
 // rooms
 // level=0: the proposed rooms are available and of the same type
@@ -992,3 +1050,13 @@ var tutors_info = {};
 // cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
+
+
+var lunch_constraint = {} ;
+lunch_constraint['groups'] = {};
+lunch_constraint['tutors'] = {};
+
+var preferred_links = {users: {}, groups: {}};
+var links_by_id = {};
+
+var nb_detailed_infos ;

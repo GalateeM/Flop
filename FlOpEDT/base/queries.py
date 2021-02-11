@@ -35,12 +35,12 @@ from base.models import Group, RoomType, Room, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme
+                        TrainingProgramme, Course
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
 from people.models import Tutor, NotificationsPreferences
-from TTapp.models import TTConstraint
+from TTapp.TTConstraint import TTConstraint, all_subclasses
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +49,10 @@ logger = logging.getLogger(__name__)
 def create_first_department():
 
     department = Department.objects.create(name="Default Department", abbrev="default")
+
+    T = Tutor.objects.create(username='admin', is_staff=True, is_tutor=True, is_superuser=True, rights=6)
+    T.set_password('passe')
+    T.save()
 
     # Update all existing department related models
     models = [
@@ -66,7 +70,7 @@ def create_first_department():
             model_class.departments.add(department)
 
     # Update existing Constraint
-    types = TTConstraint.__subclasses__()
+    types = all_subclasses(TTConstraint)
 
     for type in types:
         type.objects.all().update(department=department)
@@ -117,8 +121,7 @@ def get_scheduled_courses(department, week, year, num_copy):
                         day__in=get_working_days(department),
                         work_copy=num_copy).select_related('course',
                                                            'course__tutor',
-                                                           'course__group',
-                                                           'course__group__train_prog',
+                                                           'course__module__train_prog',
                                                            'course__module',
                                                            'course__type',
                                                            'room',
@@ -126,6 +129,24 @@ def get_scheduled_courses(department, week, year, num_copy):
                                                            'course__module__display'
                         )
     return qs
+
+
+def get_unscheduled_courses(department, week, year, num_copy):
+    return Course.objects.filter(
+        module__train_prog__department=department,
+        week=week,
+        year=year
+    ).exclude(pk__in=ScheduledCourse.objects.filter(
+        course__module__train_prog__department=department,
+        work_copy=num_copy
+    ).values('course')
+    ).select_related('module__train_prog',
+                     'tutor',
+                     'module',
+                     'type',
+                     'room_type',
+                     'module__display'
+    ).prefetch_related('groups')
 
 
 def get_groups(department_abbrev):
@@ -142,7 +163,7 @@ def get_groups(department_abbrev):
         gp_dict_children = {}
         gp_master = None
         for gp in Group.objects.filter(train_prog=train_prog):
-            if gp.full_name() in gp_dict_children:
+            if gp.full_name in gp_dict_children:
                 raise Exception('Group name should be unique')
             if gp.parent_groups.all().count() == 0:
                 if gp_master is not None:
@@ -152,11 +173,15 @@ def get_groups(department_abbrev):
             elif gp.parent_groups.all().count() > 1:
                 raise Exception('Not tree-like group structures are not yet '
                                 'handled')
-            gp_dict_children[gp.full_name()] = []
+            gp_dict_children[gp.full_name] = []
+
+        if gp_master is None:
+            raise Exception(f"Training program {train_prog} does not have any group"
+                            f" with no parent.")
 
         for gp in Group.objects.filter(train_prog=train_prog).order_by('name'):
             for new_gp in gp.parent_groups.all():
-                gp_dict_children[new_gp.full_name()].append(gp)
+                gp_dict_children[new_gp.full_name].append(gp)
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
@@ -196,9 +221,9 @@ def get_descendant_groups(gp, children):
     except ObjectDoesNotExist:
         pass
 
-    if len(children[gp.full_name()]) > 0:
+    if len(children[gp.full_name]) > 0:
         current['children'] = []
-        for gp_child in children[gp.full_name()]:
+        for gp_child in children[gp.full_name]:
             gp_obj = get_descendant_groups(gp_child, children)
             gp_obj['parent'] = gp.name
             current['children'].append(gp_obj)
@@ -273,6 +298,7 @@ def get_coursetype_constraints(department_abbrev):
         for ct_constraint in \
               CourseStartTimeConstraint.objects.filter(course_type=ct):
             dic[ct.name]['allowed_st'] += ct_constraint.allowed_start_times
+        dic[ct.name]['allowed_st'].sort()
         if len(dic[ct.name]['allowed_st']) == 0:
             dic[ct.name]['allowed_st'] += \
                 CourseStartTimeConstraint.objects.get(course_type=None).allowed_start_times

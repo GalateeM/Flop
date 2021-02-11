@@ -30,9 +30,7 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from base.timing import hhmm, str_slot
+from base.timing import hhmm, str_slot, Day, Time
 import base.weeks
 
 
@@ -70,6 +68,7 @@ class GroupType(models.Model):
 
 
 class Group(models.Model):
+    # should not include "-" nor "|"
     name = models.CharField(max_length=10)
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
@@ -80,6 +79,7 @@ class Group(models.Model):
                                            blank=True,
                                            related_name="children_groups")
 
+    @property
     def full_name(self):
         return self.train_prog.abbrev + "-" + self.name
 
@@ -111,6 +111,16 @@ class Group(models.Model):
 
         return descendants
 
+    def basic_groups(self):
+        s = set(g for g in self.descendants_groups() | {self} if g.basic)
+        return s
+
+    def connected_groups(self):
+        """
+        :return: the set of all Groupe that have a non empty intersection with self (self included)
+        """
+        return {self} | self.descendants_groups() | self.ancestor_groups()
+
 
 # </editor-fold desc="GROUPS">
 
@@ -119,62 +129,6 @@ class Group(models.Model):
 # ------------
 # -- TIMING --
 # ------------
-
-class Day(object):
-    MONDAY = "m"
-    TUESDAY = "tu"
-    WEDNESDAY = "w"
-    THURSDAY = "th"
-    FRIDAY = "f"
-    SATURDAY = "sa"
-    SUNDAY = "su"
-
-    CHOICES = ((MONDAY, "monday"), (TUESDAY, "tuesday"),
-               (WEDNESDAY, "wednesday"), (THURSDAY, "thursday"),
-               (FRIDAY, "friday"), (SATURDAY, "saturday"),
-               (SUNDAY, "sunday"))
-
-    def __init__(self, day, week):
-        self.day = day
-        self.week = week
-
-    def __str__(self):
-        # return self.nom[:3]
-        return self.day + '_s' + str(self.week)
-
-
-# will not be used
-# TO BE DELETED at the end
-class Time(models.Model):
-    AM = 'AM'
-    PM = 'PM'
-    HALF_DAY_CHOICES = ((AM, 'AM'), (PM, 'PM'))
-    apm = models.CharField(max_length=2,
-                           choices=HALF_DAY_CHOICES,
-                           verbose_name="Half day",
-                           default=AM)
-    no = models.PositiveSmallIntegerField(default=0)
-    # nom = models.CharField(max_length=20)
-    hours = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(25)], default=8)
-    minutes = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(59)], default=0)
-
-    def __str__(self):
-        return str(self.hours)
-
-    def full_name(self):
-        message = str(self.hours) + ":"
-        if self.minutes < 10:
-            message += "0"
-        message += str(self.minutes)
-        return message
-
-
-@receiver(pre_save, sender=Time)
-def define_apm(sender, instance, *args, **kwargs):
-    if instance.hours >= 12:
-        instance.apm = Time.PM
 
 
 class Holiday(models.Model):
@@ -355,7 +309,7 @@ class Module(models.Model):
     train_prog = models.ForeignKey(
         'TrainingProgramme', on_delete=models.CASCADE)
     period = models.ForeignKey('Period', on_delete=models.CASCADE)
-    url = models.CharField(max_length=200, null=True, blank=True, default=None)
+    url = models.URLField(null=True, blank=True, default=None)
     description = models.TextField(null=True, blank=True, default=None)
 
     def __str__(self):
@@ -371,6 +325,19 @@ class ModulePossibleTutors(models.Model):
         'people.Tutor', blank=True, related_name='possible_modules')
 
 
+class ModuleTutorRepartition(models.Model):
+    module = models.ForeignKey('Module', on_delete=models.CASCADE)
+    course_type = models.ForeignKey('CourseType', on_delete=models.CASCADE)
+    tutor = models.ForeignKey('people.Tutor', on_delete=models.CASCADE)
+    week = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(53)],
+        null=True,
+        blank=True)
+    year = models.PositiveSmallIntegerField(null=True,
+                                            blank=True)
+    courses_nb = models.PositiveSmallIntegerField(default=1)
+
+
 class CourseType(models.Model):
     name = models.CharField(max_length=50)
     department = models.ForeignKey(
@@ -379,6 +346,7 @@ class CourseType(models.Model):
     group_types = models.ManyToManyField(GroupType,
                                          blank=True,
                                          related_name="compatible_course_types")
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
 
     def __str__(self):
         return self.name
@@ -397,9 +365,9 @@ class Course(models.Model):
     supp_tutor = models.ManyToManyField('people.Tutor',
                                         related_name='courses_as_supp',
                                         blank=True)
-    group = models.ForeignKey('Group', on_delete=models.CASCADE)
+    groups = models.ManyToManyField('Group', related_name='courses')
     module = models.ForeignKey(
-        'Module', related_name='module', on_delete=models.CASCADE)
+        'Module', related_name='courses', on_delete=models.CASCADE)
     modulesupp = models.ForeignKey('Module', related_name='modulesupp',
                                    null=True, blank=True, on_delete=models.CASCADE)
     week = models.PositiveSmallIntegerField(
@@ -411,19 +379,33 @@ class Course(models.Model):
 
     def __str__(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}" \
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}" \
                + (" (%s)" % self.id if self.show_id else "")
 
     def full_name(self):
         username_mod = self.tutor.username if self.tutor is not None else '-no_tut-'
-        return f"{self.type}-{self.module}-{username_mod}-{self.group}"
+        return f"{self.type}-{self.module}-{username_mod}-{'|'.join([g.name for g in self.groups.all()])}"
 
     def equals(self, other):
         return self.__class__ == other.__class__ \
                and self.type == other.type \
                and self.tutor == other.tutor \
-               and self.group == other.group \
+               and self.groups == other.groups \
                and self.module == other.module
+
+    @property
+    def is_graded(self):
+        if CourseAdditional.objects.filter(course=self).exists():
+            return self.additional.graded
+        else:
+            return self.type.graded
+
+
+class CourseAdditional(models.Model):
+    course = models.OneToOneField('Course', on_delete=models.CASCADE, related_name='additional')
+    graded = models.BooleanField(verbose_name='noté ?', default=False)
+    visio_preference_value = models.SmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(8)],
+                                                      default=1)
 
 
 class CoursePossibleTutors(models.Model):
@@ -439,7 +421,7 @@ class ScheduledCourse(models.Model):
     # in minutes from 12AM
     start_time = models.PositiveSmallIntegerField()
     room = models.ForeignKey(
-        'Room', blank=True, null=True, on_delete=models.CASCADE)
+        'Room', blank=True, null=True, on_delete=models.SET_NULL)
     no = models.PositiveSmallIntegerField(null=True, blank=True)
     noprec = models.BooleanField(
         verbose_name='vrai si on ne veut pas garder la salle', default=True)
@@ -455,9 +437,59 @@ class ScheduledCourse(models.Model):
     def __str__(self):
         return f"{self.course}{self.no}:{self.day}-t{self.start_time}-{self.room}"
 
+    @property
     def end_time(self):
         return self.start_time + self.course.type.duration
 
+
+class ScheduledCourseAdditional(models.Model):
+    scheduled_course = models.OneToOneField(
+        'ScheduledCourse',
+        on_delete=models.CASCADE,
+        related_name='additional')
+    link = models.ForeignKey(
+        'EnrichedLink',
+        blank=True, null=True, default=None,
+        related_name='additional',
+        on_delete=models.SET_NULL)
+    comment = models.CharField(
+        max_length=100,
+        null=True, default=None, blank=True)
+
+    def __str__(self):
+        return '{' + str(self.scheduled_course) + '}' \
+            + '[' + str(self.link.description) + ']' \
+            + '(' + str(self.comment) + ')'
+
+
+class EnrichedLink(models.Model):
+    url = models.URLField()
+    description = models.CharField(max_length=100,
+                                   null=True, default=None, blank=True)
+
+    @property
+    def concatenated(self):
+        return ' '.join(
+            [str(self.id),
+             self.url,
+             self.description if self.description is not None else '']
+        )
+
+    def __str__(self):
+        return (self.description if self.description is not None else '') \
+            + ' -> ' + self.url 
+
+
+class GroupPreferredLinks(models.Model):
+    group = models.OneToOneField('Group',
+                                 on_delete=models.CASCADE,
+                                 related_name='preferred_links')
+    links = models.ManyToManyField('EnrichedLink',
+                                   related_name='group_set')
+
+    def __str__(self):
+        return self.group.full_name + ' : ' + \
+            ' ; '.join([str(l) for l in self.links.all()])
 
 # </editor-fold desc="COURSES">
 
