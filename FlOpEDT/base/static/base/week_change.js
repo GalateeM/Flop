@@ -756,7 +756,7 @@ function translate_cours_pl_from_json(d, result) {
 
     if (new_course.prof != '?' &&
         tutors.pl.indexOf(new_course.prof) === -1) {
-      tutors.pl.push(d.course.tutor);
+      tutors.pl.push(new_course.prof);
     }
     result.push(new_course);
   }
@@ -893,14 +893,20 @@ function side_week_rcv(side_week) {
 // fetches courses of the weeks before and after the current week
 function fetch_side_weeks() {
 
-  var needed_weeks = which_side_weeks();
+  // shunt it for now
+  var needed_weeks = [] ; // which_side_weeks();
 
   for (var i = 0; i < needed_weeks.data.length; i++) {
     console.log(url_cours_pl + needed_weeks.data[i].url() + "/" + 0);
     $.ajax({
       type: "GET", //rest Type
       dataType: 'text',
-      url: url_cours_pl + needed_weeks.data[i].url() + "/" + 0,
+      url: build_url(
+        url_cours_pl,
+        context_dept,
+        needed_weeks.data[i].as_context(),
+        {'work_copy': num_copie}
+      ),
       async: true,
       contentType: "text/csv",
       success: side_week_rcv(needed_weeks.data[i]),
@@ -1146,6 +1152,13 @@ function translate_extra_pref_room_from_csv(d) {
    --------------------*/
 
 function fetch_all(first, fetch_work_copies) {
+
+  if (is_side_panel_open && fetch_work_copies) {
+    fetch_work_copy_numbers(true, first);
+    return ;
+  }
+
+
   fetch_status.done = false;
 
   if (!fetch_status.course_saved) {
@@ -1185,9 +1198,6 @@ function fetch_all(first, fetch_work_copies) {
   }
   fetch_bknews(first);
 
-  if (is_side_panel_open && fetch_work_copies) {
-    fetch_work_copy_numbers();
-  }
 }
 
 
