@@ -22,18 +22,38 @@
 <!-- without disclosing the source code of your own applications.          -->
 
 {% extends "base.html" %}
-{% load i18n %}
-
-{% load static %}
-
 {% csrf_token %}
-
+{% load i18n %}
 
 {% block title %} {% trans "Schedule Generation" %} {% endblock %}
 {% block content %}
+{% load static %}
 
-
-  
-  <script type='text/javascript' src="{% static "solve_board/solve_perso.js" %}"></script>
-  
+{% block jquery %}
+<link rel="stylesheet" href="{% static 'solve_board/easySelectStyle.css'%}">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+<script src="{% static 'solve_board/easySelect.js'  %}"></script>
 {% endblock %}
+
+    <table>
+    <tr>
+    <td><input type="range" name="foo">
+    <output for="foo" onforminput="value = foo.valueAsNumber;"></output></td>
+    <td><input type="button" onclick="hide_opt()" value="+"></td>
+    <td><div id="MenuOpt" style ="display: block"><select id="ChoixPOpt" data-max="" multiple="multiple" style="" class="s-hidden"></select> </div></td>
+    </tr>
+    </table>
+
+<center>
+<h1>Lignes de contraintes :</h1>
+
+    <div id ="Zone de contrainte">
+
+
+    </div>
+</center>
+<script type='text/javascript' src="{% static 'solve_board/solve_perso.js' %}"></script>
+
+{% endblock %}
+
+
