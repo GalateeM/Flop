@@ -1,0 +1,273 @@
+/* This file is part of the FlOpEDT/FlOpScheduler project.                  */
+/* Copyright (c) 2017                                                       */
+/* Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.              */
+/*                                                                          */
+/* This program is free software: you can redistribute it and/or modify     */
+/* it under the terms of the GNU Affero General Public License as           */
+/* published by the Free Software Foundation, either version 3 of the       */
+/* License, or (at your option) any later version.                          */
+/*                                                                          */
+/* This program is distributed in the hope that it will be useful, but      */
+/* WITHOUT ANY WARRANTY; without even the implied warranty of               */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU         */
+/* Affero General Public License for more details.                          */
+/*                                                                          */
+/* You should have received a copy of the GNU Affero General Public         */
+/* License along with this program. If not, see                             */
+/* <http://www.gnu.org/licenses/>.                                          */
+/*                                                                          */
+/* You can be released from the requirements of the license by purchasing   */
+/* a commercial license. Buying such a license is mandatory as soon as      */
+/* you develop activities involving the FlOpEDT/FlOpScheduler software      */
+/* without disclosing the source code of your own applications.             */
+
+  #conteneurGeneral
+  {
+    display: flex;
+    width: 81%;
+    flex-wrap: wrap;
+    margin-top: 3%;
+    margin-left: 15%;
+
+    position: -webkit-sticky;
+    position: sticky;
+    top: 10px;
+
+    background-color: grey;
+  }
+
+  .elementGeneral
+  {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .elementGeneral:nth-child(1)
+  {
+    width: 18.5%;
+    text-align: right;
+
+    padding-right: 5%;
+    border-right: 1px black solid;
+  }
+
+  .elementGeneral:nth-child(2)
+  {
+    width: 48%;
+    text-align: center;
+
+    border-right: 1px black solid;
+  }
+
+  .elementGeneral:nth-child(3)
+  {
+    width: 5%;
+    text-align: center;
+
+    border-right: 1px black solid;
+  }
+
+  .elementGeneral:nth-child(4)
+  {
+    width: 18.3%;
+
+    padding-left: 5%;
+  }
+
+  #conteneurCategorie
+  {
+    display: flex;
+    flex-wrap: wrap;
+    width: 81%;
+
+    margin-left: 15%;
+  }
+
+  .elementCategorie:nth-child(1)
+  {
+    text-align: right;
+    padding-right: 1%;
+    padding-top: 1%;
+    width: 2%;
+    border-bottom: 2px grey solid;
+  }
+
+  .elementCategorie:nth-child(2)
+  {
+    width: 97%;
+    border-bottom: 2px grey solid;
+  }
+
+  .elementCategorie:nth-child(3)
+  {
+    text-align: right;
+    padding-right: 1%;
+    padding-top: 1%;
+    width: 4%;
+    border-bottom: 2px grey solid;
+  }
+
+  .elementCategorie:nth-child(4)
+  {
+    width: 95%;
+    border-bottom: 2px grey solid;
+  }
+
+
+
+
+  #conteneurLigne
+  {
+    display: flex;
+    flex-wrap: wrap;
+
+    margin-left: 15%;
+    width: 81%;
+    border-bottom: 1px grey solid;
+  }
+
+  #conteneurLigne:hover
+  {
+    background-color: grey;
+  }
+
+  .elementLigne:nth-child(1)
+  {
+    width: 6%;
+
+    padding-top: 1.5%;
+    padding-right: 1%;
+    text-align: right;
+  }
+
+  .elementLigne:nth-child(2)
+  {
+    width: 14.5%;
+    overflow: auto;
+
+    padding-top: 0.6%;
+    padding-left: 1%;
+    padding-right: 1%;
+  }
+
+  .elementLigne:nth-child(3)
+  {
+    width: 46%;
+    overflow: auto;
+
+    padding-left: 1%;
+    padding-right: 1%;
+    padding-bottom: 0.5%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .caseParam
+  {
+    padding-left: 1%;
+    padding-right: 1%;
+    width: 16%;
+    text-align: center;
+  }
+
+  #caseBoutonAjoutParam
+  {
+    padding-left: 1%;
+    padding-right: 1%;
+    margin-top: 5%;
+    margin-bottom: 6%;
+  }
+
+  #boutonAjoutParametre
+  {
+    background-color: lime;
+  }
+
+  .elementLigne:nth-child(4)
+  {
+    width: 5.2%;
+    text-align: center;
+
+    padding-top: 1.5%;
+  }
+
+  .elementLigne:nth-child(5)
+  {
+    width: 14%;
+    padding-top: 1.5%;
+    padding-left: 1%;
+  }
+
+  .elementLigne:nth-child(6)
+  {
+    width: 8%;
+    text-align: center;
+    padding-top: 1.5%;
+  }
+
+  #labelPoids
+  {
+    padding-left: 3%;
+  }
+
+  #conteneurOptions
+  {
+    position: fixed;
+    background-color: grey;
+    width: 13.5%;
+  }
+
+
+
+  #tableauOptions
+  {
+    display: flex;
+    flex-wrap: wrap;
+    border: 2px black solid;
+  }
+
+  .elementTableauOptions:nth-child(1)
+  {
+    text-align: center;
+    border-bottom: 1px black solid;
+  }
+
+  .elementTableauOptions:nth-child(2)
+  {
+    text-align: center;
+    border-bottom: 1px black solid;
+    padding-top: 5%;
+    padding-bottom: 5%;
+  }
+
+  .elementTableauOptions:nth-child(3)
+  {
+    text-align: center;
+    border-bottom: 1px black solid;
+    padding-top: 5%;
+    padding-bottom: 5%;
+  }
+
+  .elementTableauOptions:nth-child(4)
+  {
+    text-align: center;
+    border-bottom: 1px black solid;
+    padding-top: 3%;
+    padding-bottom: 5%;
+  }
+
+  #boutonSupprimer
+  {
+    background-color: red;
+  }
+
+  #boutonValiderPoidsOption
+  {
+    background-color: lime;
+  }
+
+  #remplissage
+  {
+    margin-left: 15%;
+    margin-right: 5%;
+  }
