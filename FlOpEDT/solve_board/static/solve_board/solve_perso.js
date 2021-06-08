@@ -35,12 +35,13 @@ let parameters = {
     }
 }
 
-let lines = [
+let constraints = [
         {
         id: 8, // id de la TTC
         name: "Covoiturage", // nom du type de TTC
         weight: 1, // poids de la TTC
         is_active: true, // contrainte active ?
+        category : 2, // Id de la catégorie
         comment: "", // commentaire sur la TTC
         last_modification: null, // date de création
         weeks : [{nb: 14 , year: 2021},{nb: 33 , year: 2021}], // week a la forme : {nb: int , year: int}
@@ -157,13 +158,11 @@ let lines = [
 
 //Variables
 
-let nom;
-let tbl = document.createElement("table");
+
 
 let consZone = document.getElementById("Zone de contrainte");
+let tbl = document.createElement("table");
 let tblBody = document.createElement("tbody");
-let list_info =["Type de contrainte","Paramètres","Activation","Poids"];
- // creating all cells
 let parametres;
 
 //Boucle parcourant chaque contrainte 1 par 1
@@ -173,9 +172,12 @@ for (let l = 0; l < lines.length; l++) {
 
     // creation d'une colonne
     let row = document.createElement("tr");
+        row.setAttribute('class','ligne_contrainte')
 
     // Bouton sélection
+
     let select = document.createElement("td");
+        select.setAttribute('class','selec_contrainte')
     let selec = document.createElement('input');
     selec.setAttribute('type', 'checkbox');
     selec.setAttribute('id', 'selection');
@@ -189,14 +191,14 @@ for (let l = 0; l < lines.length; l++) {
 
     //Nom de la contrainte
     let div_nom = document.createElement("td");
+        div_nom.setAttribute('class','nom_contrainte');
     nom = document.createTextNode(lines[l].name);
     div_nom.appendChild(nom);
     row.appendChild(div_nom);
 
 // Parametres de la contraintes
-
-
 let para = document.createElement("td");
+    para.setAttribute('class','para_contrainte')
 let ol = document.createElement("ol");
 let p = document.createElement("p");
     //Les différents parametres existants de la ligne de contrainte
@@ -236,6 +238,7 @@ let p = document.createElement("p");
 
     //Bouton permettant l'affichage du menu déroulant
     let ajout_Param = document.createElement("td");
+        ajout_Param.setAttribute('class','ajout_param');
     let btn = document.createElement('input');
     btn.setAttribute('type', 'image');
     btn.setAttribute('id', 'image_Add');
@@ -260,6 +263,7 @@ let p = document.createElement("p");
 
     //Activation d'une ligne
     let activ = document.createElement("td");
+        activ.setAttribute('class','activ_contrainte');
     let activate = document.createElement('input');
     activate.setAttribute('type', 'checkbox');
     activate.setAttribute('id', 'activation');
@@ -269,6 +273,7 @@ let p = document.createElement("p");
 
 // Selection du poids
 let range_td = document.createElement("td");
+    range_td.setAttribute('class','poid_contrainte');
 
 let slide_div = document.createElement('div');
     slide_div.setAttribute('class','range-slider')
@@ -293,6 +298,7 @@ let spans = document.createElement("span");
 
 // Duplication
 let duplic = document.createElement("td");
+    duplic.setAttribute('class','duplic_contrainte');
     let btn_duplicate = document.createElement('input');
     btn_duplicate.setAttribute('type', 'image');
     btn_duplicate.setAttribute('id', 'image_duplic');
@@ -307,9 +313,9 @@ let duplic = document.createElement("td");
 
 }
 
+
 tbl.appendChild(tblBody);
 consZone.appendChild(tbl);
-tbl.setAttribute("border", "1");
 
 
 
@@ -453,25 +459,6 @@ document.getElementById("MenuOpt").style.display = "none";
     }
 //*************************************************************************
 
-var rangeSlider = function(){
-  var slider = $('.range-slider'),
-      range = $('.range-slider__range'),
-      value = $('.range-slider__value');
-
-  slider.each(function(){
-
-    value.each(function(){
-      var value = "Poids : "+$(this).prev().attr('value');
-      $(this).html(value);
-    });
-
-    range.on('input', function(){
-      $(this).next(value).html("Poids : "+this.value);
-    });
-  });
-};
-
-rangeSlider();
 
 
 

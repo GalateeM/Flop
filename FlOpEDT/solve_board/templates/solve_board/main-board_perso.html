@@ -31,21 +31,49 @@
 
 {% block jquery %}
 <link rel="stylesheet" href="{% static 'solve_board/easySelectStyle.css'%}">
+    <link rel="stylesheet" href="{% static 'solve_board/solve_perso.css' %}"/>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
 <script src="{% static 'solve_board/easySelect.js'  %}"></script>
 {% endblock %}
 
-    <table>
-    <tr>
-    <td><input type="range" name="foo">
-    <output for="foo" onforminput="value = foo.valueAsNumber;"></output></td>
-    <td><input type="button" onclick="hide_opt()" value="+"></td>
-    <td><div id="MenuOpt" style ="display: block"><select id="ChoixPOpt" data-max="" multiple="multiple" style="" class="s-hidden"></select> </div></td>
-    </tr>
-    </table>
+<div id="conteneurOptions">
+        <div id="tableauOptions">
+          <div class="elementTableauOptions"><p>Actions</p></div>
+          <div class="elementTableauOptions"><button id="boutonActiver" type="button">Activer/Désactiver</button></div>
+          <div class="elementTableauOptions"><button id="boutonSupprimer" type="button">Supprimer</button></div>
+          <div class="elementTableauOptions">
+            <p id="textePoidsOptions">Gérer le poids</p>
+            </br>
+            <input type="range" id="poidsOptions" min="0" max="8">
+            </br>
+            <p for="poids" id="nombresPoidsOptions">1--2--3--4--5--6--7--8--O</p>
+            <button id="boutonValiderPoidsOption" type="button">Valider</button>
+          </div>
+        </div>
+      </div>
+
+<div id="conteneurGeneral">
+        <div class="elementGeneral"><p>Type de contrainte</p></div>
+        <div class="elementGeneral"><p>Paramètres</p></div>
+        <div class="elementGeneral"><p>Activation</p></div>
+        <div class="elementGeneral"><p>Poids</p></div>
+      </div>
+
+
+    <div id="conteneurCategorie">
+        <div class="elementCategorie"><input id="checkboxSelectionCategorieToutes" type="checkbox" ></div>
+        <div class="elementCategorie"><p>Toutes les contraintes</p></div>
+
+        <div class="elementCategorie"><input id="checkboxSelectionSousCategorie" type="checkbox" ></div>
+        <div class="elementCategorie"><p>Image + Nom de la catégorie</p></div>
+      </div>
+
+
+
+
 
 <center>
-<h1>Lignes de contraintes :</h1>
 
     <div id ="Zone de contrainte">
 
