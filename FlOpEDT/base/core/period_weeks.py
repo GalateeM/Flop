@@ -91,7 +91,7 @@ class PeriodWeeks():
         """        
         return Course.objects \
                 .filter(
-                    year=year,
+                    week__year=year,
                     week__in=list(range(start, end + 1)),
                     module__train_prog__department=department) \
                 .distinct() \

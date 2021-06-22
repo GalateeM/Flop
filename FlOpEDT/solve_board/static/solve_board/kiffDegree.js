@@ -1,22 +1,4 @@
-
-for(let item of allPreferencesItems[name]){
-    // Faites les trucs qui créent votre ligne
-    // et mettez ces deux lignes à l'endroit qui vous intéresse
-    let newBarKiff=document.getElementById(`kiffDegree${name}${item.id}`)
-    newBarKiff.innerHTML=addCircles(`${name}Kiff_${item.name}`,`${name}KiffBar_${item.name}`);
-    }
-for(let elmt of allcircles){
-     //The element cirlcle clicked take the attribut check=true
-     elmt.addEventListener("click",otherCircleInCheckFalse);
-     elmt.addEventListener("click", circleInCheckTrue);
-
-     //animation that put a black border on the circle
-     elmt.addEventListener("click",animNull);
-     elmt.addEventListener("click", animBorderBlack);
-    }
-
-
-   let circles=[{id:1, color:"#009000", coordx:10,value:8},
+ let circles=[{id:1, color:"#009000", coordx:10,value:8},
 {id:2, color:"#40A400" , coordx:30,value:7},
 {id:3, color:"#80B800" , coordx:50,value:6},
 {id:4, color:"#BFCC00" , coordx:70,value:5},
@@ -48,7 +30,6 @@ function addCircles(idCircle,idBar){
 	newCircles=newCircles+"</g>";
 	return newCircles
 }
-
 
 
 
