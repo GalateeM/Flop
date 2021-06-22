@@ -31,14 +31,12 @@
 
 {% block jquery %}
 <link rel="stylesheet" href="{% static 'solve_board/easySelectStyle.css'%}">
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <script src="{% static 'solve_board/easySelect.js'  %}"></script>
     <script> url_ttconstraints = "{% url 'api:ttapp:constraint-list'%}"</script>
-    <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script></script>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"
-    integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+     <script> url_Tutor = "{% url 'api:ttapp:constraint-list'%}"</script>
+    <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+
 {% endblock %}
 
 

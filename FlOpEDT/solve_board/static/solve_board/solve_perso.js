@@ -21,7 +21,20 @@
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
 
+
+let constraints;
+
+function myCallback(result) {
+    // Code that depends on 'result'
+}
+
+
+
+
+
+
 function fetch_constraint(){
+
     $.ajax({
         type:"GET",
         dataType: 'text',
@@ -36,10 +49,79 @@ function fetch_constraint(){
             show_loader(false);
         }
     })
+    return constraints;
 };
 
 
+fetch_constraint();
 
+
+let parameters = {
+    "people":{
+        Tutor:[
+  {
+    "id": 1,
+    "name": "PSE"
+  },
+  {
+    "id": 2,
+    "name": "PRG"
+  },
+  {
+    "id": 3,
+    "name": "AV"
+  },
+  {
+    "id": 4,
+    "name": "BBCB"
+  },
+  {
+    "id": 5,
+    "name": "BC"
+  },
+  {
+    "id": 6,
+    "name": "BCPV"
+  },
+  {
+    "id": 7,
+    "name": "BDB"
+  },
+  {
+    "id": 8,
+    "name": "BEFT"
+  },
+  {
+    "id": 9,
+    "name": "BFLT"
+  },
+  {
+    "id": 10,
+    "name": "BK"
+  },
+  {
+    "id": 11,
+    "name": "BM"
+  },
+  {
+    "id": 12,
+    "name": "BMB"
+  },
+  {
+    "id": 13,
+    "name": "BMBJ"
+  }
+]
+    },
+    base:{
+        Module:[
+            {"id":1,"abbrev":"AMN"},
+            {"id":2,"abbrev":'AMN2'},
+            {"id":3,"abbrev":'AMN3'},
+            {"id":4,"abbrev":'AMN4'}
+        ]
+    }
+}
 
 let categories = [
     {id:1,
@@ -53,106 +135,6 @@ let categories = [
     constraints_list:[],
     hidden:true}
 ]
-
-
-let constraints = [
-        {
-        id: 8, // id de la TTC
-        name: "Covoiturage", // nom du type de TTC
-        weight: 1, // poids de la TTC
-        is_active: true, // contrainte active ?
-        comment: "", // commentaire sur la TTC
-        last_modification: null, // date de création
-        weeks : [{nb: 14 , year: 2021},{nb: 33 , year: 2021}], // week a la forme : {nb: int , year: int}
-        parameters : [
-            {
-            name: "Prof", // nom du paramètre dans la TTC
-            type: 'people.Tutor', // nom du type des objets dans ce paramètre
-            required: true, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : true,
-            id_list: [5,6,7], // ids des objets pour le paramètre dans la TTC
-            acceptable: [1,2,3,4,5,6,7,8,9,10,11] // ids des objets acceptables comme valeur du paramètre
-            },
-            {
-            name: "bonjour", // nom du paramètre dans la TTC
-            type: 'people.Tutor', // nom du type des objets dans ce paramètre
-            required: false, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : true,
-            id_list: [], // ids des objets pour le paramètre dans la TTC
-            acceptable: [1,2,3,4,5,6,7,8,9,10,11,12] // ids des objets acceptables comme valeur du paramètre
-            },
-            {
-            name: "Module", // nom du paramètre dans la TTC
-            type: 'base.Module', // nom du type des objets dans ce paramètre
-            required: true, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : true,
-            id_list: [1,2,3], // ids des objets pour le paramètre dans la TTC
-            acceptable: [1,2,3,4] // ids des objets acceptables comme valeur du paramètre
-            }
-        ]
-    },
-    {
-        id: 9, // id de la TTC
-        name: "Random", // nom du type de TTC
-        weight: 2, // poids de la TTC
-        is_active: false, // contrainte active ?
-        comment: "", // commentaire sur la TTC
-        last_modification: null, // date de création
-        weeks : [{nb: 14 , year: 2021},{nb: 33 , year: 2021}], // week a la forme : {nb: int , year: int}
-        parameters : [
-            {
-            name: "Lettre", // nom du paramètre dans la TTC
-            type: "people.Tutor", // nom du type des objets dans ce paramètre
-            required: true, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : false,
-            id_list: ["A"], // ids des objets pour le paramètre dans la TTC
-            acceptable: ["A","B"] // ids des objets acceptables comme valeur du paramètre
-            },
-            {
-            name: "Nombres", // nom du paramètre dans la TTC
-            type: 'people.Tutor', // nom du type des objets dans ce paramètre
-            required: false, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : true,
-            id_list: [], // ids des objets pour le paramètre dans la TTC
-            acceptable: [1,5,6,8,9] // ids des objets acceptables comme valeur du paramètre
-            }
-        ]
-    },
-    {
-        id: 10, // id de la TTC
-        name: "Bonsoir", // nom du type de TTC
-        weight: 8, // poids de la TTC
-        is_active: true, // contrainte active ?
-        comment: "", // commentaire sur la TTC
-        last_modification: null, // date de création
-        weeks : [{nb: 14 , year: 2021},{nb: 33 , year: 2021}], // week a la forme : {nb: int , year: int}
-        parameters : [
-            {
-            name: "Lettre", // nom du paramètre dans la TTC
-            type: "people.Tutor", // nom du type des objets dans ce paramètre
-            required: true, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : false,
-            id_list: ["A"], // ids des objets pour le paramètre dans la TTC
-            acceptable: ["A","B"] // ids des objets acceptables comme valeur du paramètre
-            },
-            {
-            name: "Nombres", // nom du paramètre dans la TTC
-            type: 'people.Tutor', // nom du type des objets dans ce paramètre
-            required: false, // paramètre obligatoire ?
-            all_except: true, // tous sauf ?
-            multiple : true,
-            id_list: [1], // ids des objets pour le paramètre dans la TTC
-            acceptable: [1,7,6,8,9] // ids des objets acceptables comme valeur du paramètre
-            }
-        ]
-    }];
-
 
 
 
@@ -171,6 +153,7 @@ let val;
 let nom;
 
 let case_param_required = document.getElementsByTagName("body")[0];
+
 for (let l = 0; l < constraints.length; l++) {
 
     // creation d'une colonne
