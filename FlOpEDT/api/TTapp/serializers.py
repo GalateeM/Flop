@@ -21,6 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from django.contrib.postgres.fields.array import ArrayField
 from base.models import Week
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
@@ -118,8 +119,11 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
     def get_parameters(self, obj):
         paramlist = []
+
         fields = self.Meta.fields
+
         department = obj.department
+        train_progs = getattr(obj, "train_progs").values("id")
 
         for field in obj._meta.get_fields():
             if(field.name not in fields):
@@ -127,22 +131,42 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                 id_list = []
                 acceptable = []
                 acceptablelist = list()
+                allexcept = False
+                multiple = False
 
                 if(not field.many_to_one and not field.many_to_many):
                     typename = type(field).__name__
                 else :
-                    typename = str(field.related_model)[8:-2] 
+                    #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
                     mod = field.related_model
-                    
-                    if(field.name == "tutors" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id","departments").filter(departments=department.id)
 
-                    elif(field.name == "train_progs" and str(department) != "None"):
-                        acceptablelist = mod.objects.values("id","department").filter(department=department.id)
+                    typename = str(mod)[8:-2]
+                    acceptablelist = mod.objects.values("id")
 
-                    else:
-                        acceptablelist = mod.objects.values("id")
+                    #Filtre les ID dans acceptable list en fonction du department
+                    if (str(department) != "None"):
+                        
+                        if(field.name == "tutors"):
+                            acceptablelist = acceptablelist.filter(departments=department.id)
 
+                        elif(field.name == "train_progs"):
+                            acceptablelist = acceptablelist.filter(department=department.id)
+                        
+                        elif(field.name == "modules"):
+                            acceptablelist = acceptablelist.filter(train_prog__department=department.id)
+
+                        elif(field.name == "groups"):
+                            acceptablelist = acceptablelist.filter(train_prog__department=department.id)
+
+                    #Filtre les ID dans acceptable list en fonction des train_progs
+                    if (len(train_progs) != 0):
+                        if(field.name == "modules"):
+                            acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
+
+                        elif(field.name == "groups"):
+                            acceptablelist = acceptablelist.filter(train_prog__in=train_progs)
+
+                    #Tout les ID possibles si pas de train_progs ou de department
                     for id in acceptablelist:
                         acceptable.append(id["id"])
 
@@ -153,13 +177,25 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                             id_list.append(attr.id)
 
                     if(field.many_to_many):
+                        multiple = True
                         listattr = attr.values("id")
                         for id in listattr:
                             id_list.append(id["id"])
 
+                if(type(field)==ArrayField):
+                    multiple = True 
+                    typename = type(field.base_field).__name__  
+
+                if( len(id_list)>(len(acceptable)*(3/4)) ):
+                    #Permet de récupérer les ID qui ne sont pas selectionné
+                    id_list = list(set(acceptable) - set(id_list)) + list(set(id_list) - set(acceptable))
+                    allexcept = True    
+
                 parameters["name"] = field.name
                 parameters["type"] = typename
                 parameters["required"] = not field.blank
+                parameters["multiple"] = multiple
+                parameters["all_except"] = allexcept
                 parameters["id_list"] = id_list
                 parameters["acceptable"] = acceptable
 
@@ -167,13 +203,7 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
         return(paramlist)
 
-class TTMinTutorsHalfDaysSerializer(TTConstraintSerializer):
+class ConstraintSerializer(TTConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
-
-class LimitedRoomChoicesSerializer(TTConstraintSerializer):
-    class Meta:
-        model = ttr.LimitedRoomChoices
-        fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
-
