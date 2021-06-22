@@ -21,8 +21,21 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from api.shared.params import dept_param, week_param, year_param
+from django.db.models import query
+from django.db.models.fields.related import ForeignKey, ManyToManyField
+from django.utils.decorators import method_decorator
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.utils.serializer_helpers import ReturnDict
 import TTapp.models as ttm
+import TTapp.TTConstraint as ttc
+import TTapp.TTConstraints.tutors_constraints as ttt
+import TTapp.TTConstraints.rooms_constraints as ttr
+import TTapp.TTConstraints.visio_constraints as ttv
+
+from itertools import chain
 from rest_framework import viewsets
+from rest_framework.response import Response
 import django_filters.rest_framework as filters
 from api.TTapp import serializers
 from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
@@ -30,14 +43,14 @@ from api.permissions import IsTutorOrReadOnly, IsAdminOrReadOnly
 # ---------------
 # ---- TTAPP ----
 # ---------------
-
+""" 
 
 class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the TTCustomConstraints.
 
     Can be filtered as wanted with every field of a CustomContraint object.
-    """
+    
     queryset = ttm.CustomConstraint.objects.all()
     serializer_class = serializers.TTCustomConstraintsSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -46,11 +59,11 @@ class TTCustomConstraintsViewSet(viewsets.ModelViewSet):
 
 
 class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the LimitCourseTypeTimePerPeriods.
 
     Can be filtered as wanted with every field of a LimitCourseTypeTimePerPeriods object.
-    """
+    
     queryset = ttm.LimitCourseTypeTimePerPeriod.objects.all()
     serializer_class = serializers.TTLimitCourseTypeTimePerPeriodsSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -59,11 +72,11 @@ class TTLimitCourseTypeTimePerPeriodsViewSet(viewsets.ModelViewSet):
 
 
 class TTReasonableDaysViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the ReasonableDays.
 
     Can be filtered as wanted with every field of a ReasonableDay object.
-    """
+    
     queryset = ttm.ReasonableDays.objects.all()
     serializer_class = serializers.TTReasonableDayssSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -72,9 +85,9 @@ class TTReasonableDaysViewSet(viewsets.ModelViewSet):
 
 
 class TTStabilizeFilter(filters.FilterSet):
-    """
+    
     Custom filter for ArrayField fixed_days
-    """
+    
     fixed_days = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -83,12 +96,12 @@ class TTStabilizeFilter(filters.FilterSet):
 
 
 class TTStabilizeViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the Stabilize objects from TTapp.
 
     Can be filtered as wanted with "fixed_days"
     of a Stabilize object by calling the function TTStabilizeFilter
-    """
+    
     queryset = ttm.Stabilize.objects.all()
     serializer_class = serializers.TTStabilizeSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -97,11 +110,11 @@ class TTStabilizeViewSet(viewsets.ModelViewSet):
 
 
 class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the MinHalfDays.
 
     Can be filtered as wanted with every field of a MinHalfDay object.
-    """
+    
     queryset = ttm.MinHalfDays.objects.all()
     serializer_class = serializers.TTMinHalfDaysSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -110,11 +123,11 @@ class TTMinHalfDaysViewSet(viewsets.ModelViewSet):
 
 
 class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the MinNonPreferedSlots.
 
     Can be filtered as wanted with every field of a MinNonPreferedSlots object.
-    """
+    
     queryset = ttm.MinNonPreferedSlot.objects.all()
     serializer_class = serializers.TTMinNonPreferedSlotsSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -123,11 +136,11 @@ class TTMinNonPreferedSlotsViewSet(viewsets.ModelViewSet):
 
 
 class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the AvoidBothTimes.
 
     Can be filtered as wanted with every field of a AvoidBothTime object.
-    """
+    
     queryset = ttm.AvoidBothTimes.objects.all()
     serializer_class = serializers.TTAvoidBothTimesSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -136,11 +149,11 @@ class TTAvoidBothTimesViewSet(viewsets.ModelViewSet):
 
 
 class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the SimultaneousCourses.
 
     Can be filtered as wanted with every field of a SimultaneousCourse object.
-    """
+    
     queryset = ttm.SimultaneousCourses.objects.all()
     serializer_class = serializers.TTSimultaneousCoursesSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -149,9 +162,9 @@ class TTSimultaneousCoursesViewSet(viewsets.ModelViewSet):
 
 
 class TTLimitedFilter(filters.FilterSet):
-    """
+    
     Custom filter for ArrayField possible_start_times
-    """
+    
     possible_start_times = filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
@@ -160,12 +173,12 @@ class TTLimitedFilter(filters.FilterSet):
 
 
 class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the LimitedStartTimeChoices.
 
     Can be filtered as wanted with "possible_start_times"
     of a LimitedStartChoices object by calling the function TTLimitedFilter
-    """
+    
     queryset = ttm.LimitedStartTimeChoices.objects.all()
     serializer_class = serializers.TTLimitedStartTimeChoicesSerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -174,13 +187,52 @@ class TTLimitedStartTimeChoicesViewSet(viewsets.ModelViewSet):
 
 
 class TTLimitedRoomChoicesViewSet(viewsets.ModelViewSet):
-    """
+    
     ViewSet to see all the LimitedRoomChoices.
 
     Can be filtered as wanted with every field of a LimitedRoomChoice object.
-    """
+    
     queryset = ttm.LimitedRoomChoices.objects.all()
     serializer_class = serializers.TTLimitedRoomChoicesSerializer
     permission_classes = [IsAdminOrReadOnly]
 
     filterset_fields = '__all__'
+ """
+
+@method_decorator(name='list',
+                  decorator=swagger_auto_schema(
+                      operation_description="Active constraint",
+                      manual_parameters=[week_param(), year_param(), dept_param()])
+                  )
+class TTConstraintViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    filterset_fields = '__all__' 
+
+    def list(self, request):
+        # Getting all the filters
+        week = self.request.query_params.get('week', None)
+        year = self.request.query_params.get('year', None)
+        dept = self.request.query_params.get('dept', None)
+        data = list()
+        constraintlist = ttc.TTConstraint.__subclasses__()
+
+        for constraint in constraintlist :
+
+            if (constraint._meta.abstract == False):
+                queryset = constraint.objects.all().select_related('department')
+
+                if week is not None:
+                    queryset = queryset.filter(weeks__nb = week)
+
+                if year is not None:
+                    queryset = queryset.filter(weeks__year=year)
+                
+                if dept is not None:
+                    queryset = queryset.filter(department__abbrev=dept)
+
+                for object in queryset:
+                    serializer = serializers.TTMinTutorsHalfDaysSerializer(object)
+                    data.append(serializer.data)
+
+        return Response(data)
+ 
