@@ -20,72 +20,26 @@
 // a commercial license. Buying such a license is mandatory as soon as
 // you develop activities involving the FlOpEDT/FlOpScheduler software
 // without disclosing the source code of your own applications.
-let parameters = {
-    people:{
-        Tutor:[
-  {
-    "id": 1,
-    "name": "PSE"
-  },
-  {
-    "id": 2,
-    "name": "PRG"
-  },
-  {
-    "id": 3,
-    "name": "AV"
-  },
-  {
-    "id": 4,
-    "name": "BBCB"
-  },
-  {
-    "id": 5,
-    "name": "BC"
-  },
-  {
-    "id": 6,
-    "name": "BCPV"
-  },
-  {
-    "id": 7,
-    "name": "BDB"
-  },
-  {
-    "id": 8,
-    "name": "BEFT"
-  },
-  {
-    "id": 9,
-    "name": "BFLT"
-  },
-  {
-    "id": 10,
-    "name": "BK"
-  },
-  {
-    "id": 11,
-    "name": "BM"
-  },
-  {
-    "id": 12,
-    "name": "BMB"
-  },
-  {
-    "id": 13,
-    "name": "BMBJ"
-  }
-]
-    },
-    base:{
-        Module:[
-            {"id":1,"abbrev":"AMN"},
-            {"id":2,"abbrev":'AMN2'},
-            {"id":3,"abbrev":'AMN3'},
-            {"id":4,"abbrev":'AMN4'}
-        ]
-    }
-}
+
+function fetch_constraint(){
+    $.ajax({
+        type:"GET",
+        dataType: 'text',
+        url: build_url(url_ttconstraints),
+        async: true,
+        contentType: "application/json",
+        success: function(msg){
+            constraints = JSON.parse(msg);
+        },
+        error: function (msg){
+            console.log("error");
+            show_loader(false);
+        }
+    })
+};
+
+
+
 
 let categories = [
     {id:1,
