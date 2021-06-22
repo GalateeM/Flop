@@ -31,13 +31,15 @@
 
 {% block jquery %}
 <link rel="stylesheet" href="{% static 'solve_board/easySelectStyle.css'%}">
-    <link rel="stylesheet" href="{% static 'solve_board/solve_perso.css' %}"/>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous"></script>
 <script src="{% static 'solve_board/easySelect.js'  %}"></script>
 {% endblock %}
 
+
+
 <div id="conteneurOptions">
+<div id="caseBoutonEnregistrerGeneral"><button id="boutonEnregistrerGeneral" type="button">Enregistrer</button></div>
         <div id="tableauOptions">
           <div class="elementTableauOptions"><p>Actions</p></div>
           <div class="elementTableauOptions"><button id="boutonActiver" type="button">Activer/Désactiver</button></div>
@@ -58,7 +60,29 @@
         <div class="elementGeneral"><p>Paramètres</p></div>
         <div class="elementGeneral"><p>Activation</p></div>
         <div class="elementGeneral"><p>Poids</p></div>
+        <div class="elementGeneral"><p> </p></div>
       </div>
+
+     <div id="conteneurAjoutLigne">
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutType" type="button">Type de contrainte</button>
+        </div>
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutParam" type="button">+</button>
+        </div>
+        <div class="elementAjoutLigne">
+          <input id="checkboxAjoutActivation" type="checkbox" >
+        </div>
+        <div class="elementAjoutLigne">
+          <input type="range" id="poidsAjout" min="0" max="8">
+          </br>
+          <p for="poids" id="textePoidsAjout">1--2--3--4--5--6--7--8--O</p>
+        </div>
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutEnregistrement" type="button">Enregistrer</button>
+        </div>
+      </div>
+
 
 
     <div id="conteneurCategorie">
@@ -68,9 +92,6 @@
         <div class="elementCategorie"><input id="checkboxSelectionSousCategorie" type="checkbox" ></div>
         <div class="elementCategorie"><p>Image + Nom de la catégorie</p></div>
       </div>
-
-
-
 
 
 <center>

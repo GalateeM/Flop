@@ -143,7 +143,7 @@
             function eachItemoutput() {
                 
                 if (settings.showEachItem == true) {
-                    $styledSelect.text(arrText.join(", ")).removeClass('active').css('color', settings.selectColor); 
+                    $styledSelect.text(arrText.join(", ")).removeClass('active').css('color', settings.selectColor);
                     
                 } else {
                     var $checked_items = checkItem.filter(":checked").length;

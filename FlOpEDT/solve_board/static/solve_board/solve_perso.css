@@ -170,6 +170,14 @@
     text-align: center;
   }
 
+  .caseParam
+  {
+    padding-left: 1%;
+    padding-right: 1%;
+    width: 16%;
+    text-align: center;
+  }
+
   #caseBoutonAjoutParam
   {
     padding-left: 1%;
