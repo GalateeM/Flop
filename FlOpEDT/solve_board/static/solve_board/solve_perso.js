@@ -22,106 +22,52 @@
 // without disclosing the source code of your own applications.
 
 
-let constraints;
-
-function myCallback(result) {
-    // Code that depends on 'result'
-}
-
-
-
-
-
-
+let constraint;
 function fetch_constraint(){
 
     $.ajax({
         type:"GET",
         dataType: 'text',
         url: build_url(url_ttconstraints),
-        async: true,
+        async: false,
         contentType: "application/json",
         success: function(msg){
-            constraints = JSON.parse(msg);
+            constraint = JSON.parse(msg);
         },
         error: function (msg){
             console.log("error");
             show_loader(false);
         }
     })
-    return constraints;
+    return constraint;
 };
 
+let constraints=fetch_constraint() ;
 
-fetch_constraint();
 
 
-let parameters = {
-    "people":{
-        Tutor:[
-  {
-    "id": 1,
-    "name": "PSE"
-  },
-  {
-    "id": 2,
-    "name": "PRG"
-  },
-  {
-    "id": 3,
-    "name": "AV"
-  },
-  {
-    "id": 4,
-    "name": "BBCB"
-  },
-  {
-    "id": 5,
-    "name": "BC"
-  },
-  {
-    "id": 6,
-    "name": "BCPV"
-  },
-  {
-    "id": 7,
-    "name": "BDB"
-  },
-  {
-    "id": 8,
-    "name": "BEFT"
-  },
-  {
-    "id": 9,
-    "name": "BFLT"
-  },
-  {
-    "id": 10,
-    "name": "BK"
-  },
-  {
-    "id": 11,
-    "name": "BM"
-  },
-  {
-    "id": 12,
-    "name": "BMB"
-  },
-  {
-    "id": 13,
-    "name": "BMBJ"
-  }
-]
-    },
-    base:{
-        Module:[
-            {"id":1,"abbrev":"AMN"},
-            {"id":2,"abbrev":'AMN2'},
-            {"id":3,"abbrev":'AMN3'},
-            {"id":4,"abbrev":'AMN4'}
-        ]
-    }
-}
+let parameter;
+function fetch_parameters(){
+
+    $.ajax({
+        type:"GET",
+        dataType: 'text',
+        url: build_url(url_parameters),
+        async: false,
+        contentType: "application/json",
+        success: function(msg){
+            parameter = JSON.parse(msg);
+        },
+        error: function (msg){
+            console.log("error");
+            show_loader(false);
+        }
+    })
+    return parameter;
+};
+let parameters =fetch_parameters();
+
+
 
 let categories = [
     {id:1,
@@ -136,8 +82,10 @@ let categories = [
     hidden:true}
 ]
 
-
-
+let id_list =[];
+for (let i = 0; i < constraints.length; i++) {
+    id_list.push(constraints[i].parameters)
+}
 
 
 
@@ -154,8 +102,9 @@ let nom;
 
 let case_param_required = document.getElementsByTagName("body")[0];
 
-for (let l = 0; l < constraints.length; l++) {
 
+
+for (let l = 0; l < constraints.length; l++) {
     // creation d'une colonne
     let row = document.createElement("tr");
     row.setAttribute('class', 'ligne_contrainte')
@@ -187,6 +136,7 @@ for (let l = 0; l < constraints.length; l++) {
 
     //Les différents parametres existants de la ligne de contrainte
     for (let k = 0; k < constraints[l].parameters.length; k++) {
+
         let p_param = document.createElement("p");
         p_param.setAttribute('id','param'+constraints[l].parameters[k].name);
         let strong = document.createElement("strong");
@@ -216,6 +166,7 @@ for (let l = 0; l < constraints.length; l++) {
         let type = constraints[l].parameters[k].type;
         let type_concat = stringGetter(type);
 
+         constraints[l].parameters[k].id_list= 1;
 
             for(let m = 0; m < constraints[l].parameters[k].id_list.length; m++ ) {
                 let tab_username = [];
@@ -262,7 +213,7 @@ for (let l = 0; l < constraints.length; l++) {
         btn_Suppr.setAttribute('type', 'image');
         btn_Suppr.setAttribute('id', 'image_Delete');
         btn_Suppr.setAttribute('src', '/static/base/img/suppression.png');
-        btn_Suppr.addEventListener('click', () => suppr(constraints[l].parameters[k].id_list));
+        btn_Suppr.addEventListener('click', () => suppr(constraints[l].parameters[k]));
         btn_Suppr.setAttribute('width', '15px');
         btn_Suppr.setAttribute('height', '15px');
 
@@ -371,6 +322,24 @@ for (let l = 0; l < constraints.length; l++) {
     let range_td = document.createElement("td");
     range_td.setAttribute('class', 'poid_contrainte');
 
+/*
+for(let item of allPreferencesItems[name]){
+    // Faites les trucs qui créent votre ligne
+    // et mettez ces deux lignes à l'endroit qui vous intéresse
+    let newBarKiff=document.getElementById(`kiffDegree${name}${item.id}`)
+    newBarKiff.innerHTML=addCircles(`${name}Kiff_${item.name}`,`${name}KiffBar_${item.name}`);
+    }
+for(let elmt of allcircles){
+     //The element cirlcle clicked take the attribut check=true
+     elmt.addEventListener("click",otherCircleInCheckFalse);
+     elmt.addEventListener("click", circleInCheckTrue);
+
+     //animation that put a black border on the circle
+     elmt.addEventListener("click",animNull);
+     elmt.addEventListener("click", animBorderBlack);
+    }
+    */
+
 
     let slide_btn = document.createElement('input');
     slide_btn.setAttribute('type', 'range');
@@ -418,6 +387,7 @@ function stringGetter (getter) {
         .split('.')
         .reduce((o,i)=>o[i], parameters);
       }
+
 
       // Tentative de sauvegarde du fichier js modifié
       /*function suppr(param){

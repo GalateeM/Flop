@@ -285,9 +285,7 @@ li.no_results {
   height: 25px; /* Specified height */
   background: #a9a9a9; /* Grey background */
   outline: none; /* Remove outline */
-  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
   -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-  transition: opacity .2s;
 }
 
 /* Mouse-over effects */
@@ -315,16 +313,16 @@ li.no_results {
   #conteneurGeneral
   {
     display: flex;
-    width: 81%;
+    width: 1460px;
     flex-wrap: wrap;
-    margin-top: 3%;
-    margin-left: 15%;
+
+    margin-left: 270px;
+    margin-right: 90px;
 
     position: -webkit-sticky;
     position: sticky;
-    top: 10px;
-
-    background-color: grey;
+    top: 0px;
+    background: grey;
   }
 
   .elementGeneral
@@ -335,7 +333,7 @@ li.no_results {
 
   .elementGeneral:nth-child(1)
   {
-    width: 18.5%;
+    width:242px;
     text-align: right;
 
     padding-right: 5%;
@@ -344,7 +342,7 @@ li.no_results {
 
   .elementGeneral:nth-child(2)
   {
-    width: 48%;
+    width: 744px;
     text-align: center;
 
     border-right: 1px black solid;
@@ -352,7 +350,7 @@ li.no_results {
 
   .elementGeneral:nth-child(3)
   {
-    width: 5%;
+    width: 76px;
     text-align: center;
 
     border-right: 1px black solid;
@@ -360,14 +358,14 @@ li.no_results {
 
   .elementGeneral:nth-child(4)
   {
-    width: 9%;
+    width: 130px;
     padding-left: 5%;
       border-right: 1px black solid;
   }
 
   .elementGeneral:nth-child(5)
   {
-    width: 5%;
+    width: 50px;
       padding-left: 2%;
     text-align: center;
   }
@@ -435,7 +433,7 @@ tr:hover
 }
 .selec_contrainte {
     height: 5px;
-    width: 2%;
+    width: 25px;
     padding-top: 1.5%;
     padding-right: 1%;
     text-align: right;
@@ -446,7 +444,6 @@ tr:hover
 
 .nom_contrainte {
     width: 285px;
-    overflow: auto;
     padding-top: 0.6%;
     padding-left: 1%;
     padding-right: 1%;
@@ -503,8 +500,8 @@ tr:hover
 
 .ajout_param{
     background-color: green;
-    padding-left: 1%;
-    padding-right: 1%;
+    padding-left: 8px;
+    padding-right: 8px;
     margin-top: 5%;
     margin-bottom: 6%;
 }
@@ -639,11 +636,7 @@ tr:hover
     width: 80.5%;
     flex-wrap: wrap;
     margin-left: 15%;
-
-    position: -webkit-sticky;
-    position: sticky;
     top: 51px;
-
     border: 5px lime solid;
     background-color:  #c3c3c3;
   }
