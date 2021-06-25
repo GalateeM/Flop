@@ -422,7 +422,7 @@ table {
 
 tr:hover
   {
-    background-color: yellow;
+    background-color: cornflowerblue;
   }
 
 
@@ -431,6 +431,8 @@ tr:hover
     flex-wrap: wrap;
     border-bottom: 1px grey solid;
 }
+
+
 .selec_contrainte {
     height: 5px;
     width: 25px;
@@ -449,6 +451,7 @@ tr:hover
     padding-right: 1%;
     background-color: DeepSkyBlue;
 }
+
 
 .para_contrainte {
 
@@ -500,10 +503,9 @@ tr:hover
 
 .ajout_param{
     background-color: green;
-    padding-left: 8px;
-    padding-right: 8px;
     margin-top: 5%;
     margin-bottom: 6%;
+    width: 45px;
 }
 
 #btn_possibl{
