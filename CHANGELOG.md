@@ -41,6 +41,7 @@ that explain the infaisability by the solver of a set of constraints
 - Modification proposal: id for modification bunch, modification
   applicability, email notification
 - Room preferences: user interface improvement, room exclusion
+- Interface allowing user to manage differents constraints
 
 ## [0.3.0] - 2019-11-07
 ### Added
