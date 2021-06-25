@@ -28,12 +28,12 @@
 
 /**
  *
- * La structure de stockage des contraintes est ci-dessous,
- * Elle est composé de différents attributs que vous pouvez
- * comprendre grâce aux commentaires.Chaque contrainte à un
- * certain nombre de paramètres stockés dans une liste.
- * constraints est une liste de contrainte. Chaque contrainte
- * est un objet.
+ * The storage structure is below,
+ * It is made up of different attributes that you can
+ * understand thanks to the comments.Each constraint has a
+ * number of parameters stored in a list.
+ * constraints is a constraint list. Each constraint
+ * is an object.
  *
 */
 
@@ -73,12 +73,12 @@ let constraints = [
 
 /**
  *
- * La structure de stockage des parameters est ci-dessous,
- * celle-ci permet de récuperer la valeur associé à un id
- * se trouvant dans l'id_list des paramètres d'une contrainte.
- * Elle est composé d'un objet parameters stockant un autre objet
- * qui lui même stocke une liste. Par exemple dans le premier cas
- * ci-dessous people et Tutor représente le type du paramètre.
+ * The storage structure of the parameters is below,
+ * this allows you to retrieve the value associated with an id
+ * found in the id_list of the parameters of a constraint.
+ * It is composed of a parameters object storing another object
+ * which itself stores a list. For example in the first case
+ * below people and Tutor represents the type of the parameter.
  *
 */
 
@@ -108,10 +108,10 @@ let constraints = [
 
 /**
  *
- * La structure ci-dessous est une liste de categories,
- * celle-ci sert à définir à quel catégorie appartient
- * chaque contrainte. Une catégorie peut en contenir
- * une autre.
+ * The structure below is a list of categories,
+ * this is used to define to which category belongs
+ * each constraint. A category can contain some
+ * another.
  *
 */
 
@@ -132,7 +132,8 @@ let categories = [
 
 
 
-// Fonction permettant de récuperer toute les contraintes de la BD à partir de l'API
+
+// Function allowing to retrieve all the constraints from the API
 let constraints;
 function fetch_constraint(){
 
@@ -156,7 +157,8 @@ function fetch_constraint(){
 fetch_constraint() ;
 
 
-// Fonction permettant de récuperer tout les parameters de la BD à partir de l'API
+
+// Function allowing to retrieve all the parameters  from the API
 let parameters;
 function fetch_parameters(){
 
@@ -187,32 +189,35 @@ fetch_parameters();
 
 
 
-//Variables
-// La zone où l'on va venir créer notre squelette HTML pour l'affichage des contraintes
-     let consZone = document.getElementById("Zone de contrainte");
+// Variables
+// The zone where we are going to create our HTML skeleton for the display of the constraints
+        let consZone = document.getElementById("Zone de contrainte");
         consZone.setAttribute('id','consZone');
-        function refresh_param() {
-// Table où l'on va ajouter les lignes pour les contraintes et les colonnes pour ces attributs
-     let tbl = document.createElement("table");
-        tbl.setAttribute('id','table');
 
-     let tblBody = document.createElement("tbody");
+// Function regenerating the lines of constraints
+function refresh_param() {
+
+// Table where we will add the rows for the constraints and the columns for these attributes
+        let tbl = document.createElement("table");
+        tbl.setAttribute('id','table');
+        let tblBody = document.createElement("tbody");
         tblBody.setAttribute('id','tableBody');
 
 
-//Boucle parcourant chaque contrainte 1 par 1
+    // Loop traversing each constraint 1 by 1
      for (let l = 0; l < constraints.length; l++) {
 
-         // creation d'une ligne
+         // Create a row
          let row = document.createElement("tr");
          row.setAttribute('class', 'ligne_contrainte');
          row.setAttribute('id', 'ligne_contrainte');
 
 
-         // Bouton sélection
+         // Selection button
          let select = document.createElement("td");
          select.setAttribute('class', 'selec_contrainte');
-         // Création d'un bouton checkbox pour sélectionner la contrainte
+
+         // Create a checkbox button to select the constraint
          let selec = document.createElement('input');
          selec.setAttribute('type', 'checkbox');
          selec.setAttribute('id', 'selection');
@@ -221,7 +226,7 @@ fetch_parameters();
          row.appendChild(select);
 
 
-         //Nom de la contrainte
+         // Name of the constraint
          let div_nom = document.createElement("td");
          div_nom.setAttribute('class', 'nom_contrainte');
          nom = document.createTextNode(constraints[l].name);
@@ -229,13 +234,15 @@ fetch_parameters();
          row.appendChild(div_nom);
 
 
-         //Parametres de la contraintes
-         // balise permettant la création d'une colonne correspondant aux paramètres
+
+         // Parameters of the constraint
+         // tag allowing the creation of a column corresponding to the parameters
          let para = document.createElement("td");
          para.setAttribute('class', 'para_contrainte');
 
 
-         //Les différents parametres existants de la ligne de contrainte
+
+         // The various existing parameters of the constraint line
          for (let k = 0; k < constraints[l].parameters.length; k++) {
 
              if (constraints[l].parameters[k].type === "base.Department") {
@@ -244,12 +251,12 @@ fetch_parameters();
 
              let p_param = document.createElement("p");
              p_param.setAttribute('id', 'param' + constraints[l].parameters[k].name);
-             // Nom du paramètre en gras s'il est obligatoire
+             // Parameter name in bold if it is required
              let strong = document.createElement("strong");
-             // Nom du paramètre en italique s'il n'est pas obligatoire
+             // Parameter name in italics if it is not required
              let em = document.createElement("em");
 
-             //Bouton permettant l'ajout de possibilités à un paramètre
+             // Button used to add possibilities to a parameter
              let btn_Possib = document.createElement('input');
              btn_Possib.setAttribute('type', 'image');
              btn_Possib.setAttribute('id', 'image_Add');
@@ -258,7 +265,7 @@ fetch_parameters();
              btn_Possib.setAttribute('height', '15px');
 
 
-             //Bouton permettant l'affichage de la zone des possibilités s'il y en a plus que 2
+             // Button allowing the display of the possibilities zone if there are more than 2
              let btn_possibl = document.createElement('input');
              btn_possibl.setAttribute('id', 'btn_possibl');
              btn_possibl.setAttribute('type', 'button');
@@ -266,13 +273,14 @@ fetch_parameters();
              btn_possibl.setAttribute('height', '15px');
              btn_possibl.setAttribute('onclick', 'hide(\'zone_Possib' + constraints[l].parameters[k].id_list + k + '\')');
              btn_possibl.setAttribute('class', 'btn_possibl');
-             // Zone d'affichage de toutes les possibilités d'un paramètre
+
+             // Display area of all the possibilities of a parameter
              let zone_Possib = document.createElement("div");
              zone_Possib.setAttribute('class', 'zone_Possib');
              zone_Possib.setAttribute('id', 'zone_Possib' + constraints[l].parameters[k].id_list + k);
              //type du paramètre actuel sous form de string
              let type = constraints[l].parameters[k].type;
-             //Concaténation du type + parameters et suppression des guillemets
+             // Concatenate the type + parameters and remove the quotes
              let type_concat = stringGetter(type);
 
              for (let m = 0; m < constraints[l].parameters[k].id_list.length; m++) {
@@ -288,13 +296,13 @@ fetch_parameters();
                  });
                  for (let h = 0; h < tab_username.length; h++) {
                      let possib = document.createTextNode(tab_username[h] + " ");
-                     // s'il y a qu'un seule valeur dans l'id_list
+                     // if there is only one value in the id_list
                      if (constraints[l].parameters[k].id_list.length === 1) {
                          btn_possibl.value = tab_username[h];
                          btn_possibl.disabled = true;
                      } else {
                          type_concat.find(function (n) {
-                             //s'il y a plus d'1 valeurs dans l'id_list
+                             // if there is more than 1 values in the id_list
                              if (n.id === constraints[l].parameters[k].id_list[0]) {
                                  let list_values = Object.values(n);
                                  btn_possibl.value = list_values[1] + "...";
@@ -306,7 +314,7 @@ fetch_parameters();
                  }
              }
 
-             //Bouton de suppression d'un paramètre
+             // Button for deleting a parameter
              let btn_Suppr = document.createElement('input');
              btn_Suppr.setAttribute('type', 'image');
              btn_Suppr.setAttribute('id', 'image_Delete');
@@ -315,7 +323,8 @@ fetch_parameters();
              btn_Suppr.setAttribute('width', '15px');
              btn_Suppr.setAttribute('height', '15px');
 
-             //S'il n'y a pas de possibilités trouvable dans parameters, alors on affiche none
+
+             // If there are no possibilities found in parameters, then we display none
              let btn_None = document.createElement('input');
              btn_None.setAttribute('id', 'None');
              btn_None.setAttribute('type', 'button');
@@ -324,9 +333,11 @@ fetch_parameters();
              btn_None.setAttribute('height', '15px');
 
 
-             //Le nom du paramètre actuel
+
+             // The name of the current parameter
              let parametres_nom = document.createTextNode("  " + constraints[l].parameters[k].name + "  ");
-             //Condition permettant de verifier si un paramètre est obligatoire et s'il n'est pas vide
+
+             // Condition used to check if a parameter is required and if it is not empty
              if (constraints[l].parameters[k].required === true && constraints[l].parameters[k].id_list.length !== 0) {
                  let case_param_required = document.createElement("div");
                  case_param_required.setAttribute('class', 'case_param_required');
@@ -334,7 +345,8 @@ fetch_parameters();
                  p_param.appendChild(strong);
                  case_param_required.appendChild(p_param);
                  case_param_required.appendChild(btn_Possib);
-                 // Condition si le btn est vide alors afficher none sinon afficher le bouton correctement
+
+                 // Condition if the btn is empty then display none otherwise display the button correctly
                  if (btn_possibl.value === "") {
                      case_param_required.appendChild(btn_None);
                      btn_None.disabled = true;
@@ -344,7 +356,8 @@ fetch_parameters();
                  case_param_required.appendChild(btn_Suppr);
                  case_param_required.appendChild(zone_Possib);
                  para.appendChild(case_param_required);
-                 //Condition permettant d'afficher les paramètre non obligatoire
+
+             // Condition used to display the non-required parameters
              } else if (constraints[l].parameters[k].id_list.length !== 0) {
                  let case_param_second = document.createElement("div");
                  case_param_second.setAttribute('class', 'case_param_second');
@@ -352,7 +365,8 @@ fetch_parameters();
                  p_param.appendChild(em);
                  case_param_second.appendChild(p_param);
                  case_param_second.appendChild(btn_Possib);
-                 // Condition si le btn est vide alors afficher none sinon afficher le bouton correctement
+
+                // Condition if the btn is empty then display none otherwise display the button correctly
                  if (btn_possibl.value === "") {
                      case_param_second.appendChild(btn_None);
                      btn_None.disabled = true;
@@ -369,10 +383,11 @@ fetch_parameters();
          row.appendChild(para);
 
 
-         //Colonne d'ajout du bouton
+         // Adding a column for button insertion
          let ajout_Param = document.createElement("td");
          ajout_Param.setAttribute('class', 'ajout_param');
-         //Bouton permettant l'affichage du menu déroulant
+
+        // Button used to display the drop-down menu
          let btn = document.createElement('input');
          btn.setAttribute('type', 'image');
          btn.setAttribute('id', 'image_Add');
@@ -381,7 +396,8 @@ fetch_parameters();
          btn.setAttribute('height', '20px');
          btn.setAttribute('onclick', 'hide(\'Menu' + l + '\')');
          ajout_Param.appendChild(btn);
-         //Validation des paramètres selectionnés à ajouter
+
+         // Validate the selected parameters to add
          let btn_valid_param = document.createElement('input');
          btn_valid_param.setAttribute('type', 'button');
          btn_valid_param.setAttribute('id', 'valider' + l);
@@ -391,7 +407,7 @@ fetch_parameters();
          row.appendChild(ajout_Param);
 
 
-         //Ajout de la zone permettant l'affichage du menu déroulant
+         // Add the zone allowing the display of the drop-down menu
          let Menu = document.createElement("div");
          Menu.setAttribute('id', 'Menu' + l);
          Menu.setAttribute('class', 'Menu');
@@ -405,7 +421,7 @@ fetch_parameters();
          ajout_Param.appendChild(Menu);
          row.appendChild(ajout_Param);
 
-         //Activation d'une ligne
+         // Activate a row
          let activ = document.createElement("td");
          activ.setAttribute('class', 'activ_contrainte');
          let activate = document.createElement('input');
@@ -416,17 +432,19 @@ fetch_parameters();
          activ.appendChild(activate);
          row.appendChild(activ);
 
-         // Si une contrainte est active, alors le bouton sera coché
+
+        // If a constraint is active, then the button will be checked
          if (constraints[l].is_active === true) {
              activate.checked = true;
          }
 
-         // Selection du poids d'une contrainte
+
+        // Select the weight of a constraint
          let range_td = document.createElement("td");
          range_td.setAttribute('class', 'poid_contrainte');
 
 
-         // Bouton permettant la gestion du poids d'une contrainte
+         // Button used to manage the weight of a constraint
          let slide_btn = document.createElement('input');
          slide_btn.setAttribute('type', 'range');
          slide_btn.setAttribute('min', '1');
@@ -439,7 +457,7 @@ fetch_parameters();
          range_td.appendChild(slide_btn);
          row.appendChild(range_td);
 
-         // Duplication d'une ligne de contrainte
+         // Duplicate a constraint line
          let duplic = document.createElement("td");
          duplic.setAttribute('class', 'duplic_contrainte');
          let btn_duplicate = document.createElement('input');
@@ -448,7 +466,7 @@ fetch_parameters();
          btn_duplicate.setAttribute('src', '/static/base/img/copier-coller-1.png');
          btn_duplicate.setAttribute('width', '25px');
          btn_duplicate.setAttribute('height', '25px');
-         // Validation d'une ligne et envoi à l'API
+         // Validating a row and sending to the API
          let btn_Validate = document.createElement('input');
          btn_Validate.setAttribute('type', 'image');
          btn_Validate.setAttribute('id', 'image_Validate');
@@ -461,17 +479,17 @@ fetch_parameters();
 
          row.appendChild(duplic);
 
-         //ajout de la ligne à la table
+         // Adding the row to the table
          tblBody.appendChild(row);
      }
-// Ajout de la table générer dans la zone HTML
-     tbl.appendChild(tblBody);
-
+// Adding the generate table in the HTML area
+    tbl.appendChild(tblBody);
      consZone.appendChild(tbl);
  }
 refresh_param();
-        create_menu();
-//Fonction transformant un string en un chemin utilisable pour parcourir une liste et/ou un objet JS
+create_menu();
+
+//Function transforming a string into a path that can be used to browse a list and / or a JS object
 function stringGetter (getter) {
         return getter
         .split('.')
@@ -480,39 +498,37 @@ function stringGetter (getter) {
 
 
 /**
- * Suppression d'un paramètre
+ * Deleting a Parameter
  * @param param
  *
  */
 function suppr(param){
     param.length=0;
     document.getElementById('tableBody').remove();
-    //Regéneration des lignes de contraintes
+    // Regeneration of the constraint lines
     refresh_param();
-    // Création des nouvaux menus déroulant
+    // Create new drop-down menus
     create_menu();
 }
 
 
 /**
- * Activation/désactivation d'un paramètre
+ * Activation / deactivation of a parameter
  * @param param
  *
  */
 function activate(checkbox,param){
       if (checkbox.checked) {
                 param.is_active = true;
-                console.log(param.is_active);
             }
             else {
                 param.is_active = false;
-                console.log(param.is_active);
             }
 
 }
 
 /**
- * Gestion du poids d'une contrainte
+ * Managing the weight of a constraint
  * @param slider, param
  *
  *
@@ -522,7 +538,7 @@ function update_weight(slider,param){
 }
 
 /**
- * Envoi de la contrainte modifié à l'API
+ * Sending the modified constraint to the API
  * @param constr,param
  *
  *
@@ -534,7 +550,7 @@ function update_send(constr,param){
 
 
 /**
- * Cacher/afficher un élement
+ * Show/hide an élement
  *
  */
      function hide(id) {
@@ -547,12 +563,12 @@ function update_send(constr,param){
     }
 
 
-// Fonction permettant la génération du menu déroulant des options
+// Function allowing the generation of the drop-down menu of options
 function create_menu() {
     for (let cpt = 0; cpt < constraints.length; cpt++) {
         var ldd = document.getElementById("ChoixP" + cpt);
 
-        //Création du menu option que l'on rempli.
+        //Creation of the option menu that is filled.
         for (let j = 0; j < constraints[cpt].parameters.length; j++) {
             if (constraints[cpt].parameters[j].id_list.length == 0) {
                 var opt = document.createElement('option');
@@ -561,7 +577,7 @@ function create_menu() {
             }
         }
 
-        // Javascript du menu déroulant permettant la sélection
+        // javascript from the drop-down menu allowing selection
         $("#ChoixP" + cpt).easySelect({
             buttons: true,
             search: true,
@@ -575,12 +591,11 @@ function create_menu() {
         })
 
 
-// Listener permettant de retourner les elements selectionner dans le easyselect
+// Listener allowing to return the selected elements in the easyselect
         $('#valider' + cpt).click(function () {
             $('#ChoixP' + cpt + ' option:selected').each(function () {
                 str = $(this).text() + " ";
                 val = $(this).val();
-                console.log(str, val);
             })
         });
 
