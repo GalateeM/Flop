@@ -158,7 +158,6 @@ fetch_constraint() ;
 
 
 
-
 // Function allowing to retrieve all the parameters  from the API
 let parameters;
 function fetch_parameters(){
@@ -183,28 +182,7 @@ function fetch_parameters(){
 fetch_parameters();
 
 
-// Function allowing to delete all the constraints from the API
-let constraints;
-function fetch_constraint(){
 
-    $.ajax({
-        type:"GET",
-        dataType: 'text',
-        url: build_url(url_ttconstraints),
-        async: false,
-        contentType: "application/json",
-        success: function(msg){
-            constraints = JSON.parse(msg);
-        },
-        error: function (msg){
-            console.log("error");
-            show_loader(false);
-        }
-    })
-    return constraints;
-};
-
-fetch_constraint() ;
 
 
 
@@ -500,7 +478,7 @@ function refresh_param() {
          btn_delete.setAttribute('type', 'image');
          btn_delete.setAttribute('id', 'image_Validate');
          btn_delete.setAttribute('src', '/static/base/img/LasuppressiondesIRP.png');
-         btn_delete.setAttribute('onclick', 'suppr_contstraint('+l+','+constraints[l].name+')');
+         btn_delete.setAttribute('onclick', 'suppr_contstraint('+l+')');
          btn_delete.setAttribute('width', '25px');
          btn_delete.setAttribute('height', '25px');
          duplic.appendChild(btn_delete);
