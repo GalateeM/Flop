@@ -22,6 +22,7 @@
 # without disclosing the source code of your own applications.
 
 from django.contrib.postgres.fields.array import ArrayField
+from rest_framework.fields import empty
 from base.models import Week
 import TTapp.models as ttm
 import TTapp.TTConstraint as ttc
@@ -136,11 +137,26 @@ class TTConstraintSerializer(serializers.ModelSerializer):
 
                 if(not field.many_to_one and not field.many_to_many):
                     typename = type(field).__name__
+
+                    #Récupère les validators dans acceptable
+                    validators = field.validators
+                    if(validators is not empty):
+                        for i in validators:
+                            acceptable.append(i.limit_value)
+                    
+                    if(type(field)==ArrayField):
+                        multiple = True 
+                        typename = type(field.base_field).__name__  
+                        #Récupère les choices de l'arrayfield dans acceptable
+                        acceptable = field.base_field.choices
+
                 else :
                     #Récupère le modele en relation avec un ManyToManyField ou un ForeignKey
                     mod = field.related_model
+
                     typenamesplit = str(mod)[8:-2].split(".")
                     typename = typenamesplit[0] + "." + typenamesplit[2]
+
                     acceptablelist = mod.objects.values("id")
 
                     #Filtre les ID dans acceptable list en fonction du department
@@ -182,10 +198,6 @@ class TTConstraintSerializer(serializers.ModelSerializer):
                         for id in listattr:
                             id_list.append(id["id"])
 
-                if(type(field)==ArrayField):
-                    multiple = True 
-                    typename = type(field.base_field).__name__  
-
                 if( len(id_list)>(len(acceptable)*(3/4)) ):
                     #Permet de récupérer les ID qui ne sont pas selectionné
                     id_list = list(set(acceptable) - set(id_list)) + list(set(id_list) - set(acceptable))
@@ -207,3 +219,8 @@ class ConstraintSerializer(TTConstraintSerializer):
     class Meta:
         model = ttt.MinTutorsHalfDays
         fields = ['id', 'name', 'weight', 'is_active', 'comment', "modified_at", 'weeks', 'parameters']
+
+class NoVisioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ttv.NoVisio
+        fields = '__all__'
