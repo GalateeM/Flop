@@ -158,6 +158,7 @@ fetch_constraint() ;
 
 
 
+
 // Function allowing to retrieve all the parameters  from the API
 let parameters;
 function fetch_parameters(){
@@ -182,7 +183,28 @@ function fetch_parameters(){
 fetch_parameters();
 
 
+// Function allowing to delete all the constraints from the API
+let constraints;
+function fetch_constraint(){
 
+    $.ajax({
+        type:"GET",
+        dataType: 'text',
+        url: build_url(url_ttconstraints),
+        async: false,
+        contentType: "application/json",
+        success: function(msg){
+            constraints = JSON.parse(msg);
+        },
+        error: function (msg){
+            console.log("error");
+            show_loader(false);
+        }
+    })
+    return constraints;
+};
+
+fetch_constraint() ;
 
 
 
@@ -285,10 +307,7 @@ function refresh_param() {
 
              for (let m = 0; m < constraints[l].parameters[k].id_list.length; m++) {
                  let tab_username = [];
-
                  type_concat.find(function (n) {
-
-
                      if (n.id === constraints[l].parameters[k].id_list[m]) {
                          let list_values = Object.values(n);
                          tab_username.push(list_values[1]);
@@ -476,7 +495,15 @@ function refresh_param() {
          btn_Validate.setAttribute('height', '25px');
          duplic.appendChild(btn_duplicate);
          duplic.appendChild(btn_Validate);
-
+         //Deleting a constraint
+         let btn_delete = document.createElement('input');
+         btn_delete.setAttribute('type', 'image');
+         btn_delete.setAttribute('id', 'image_Validate');
+         btn_delete.setAttribute('src', '/static/base/img/LasuppressiondesIRP.png');
+         btn_delete.setAttribute('onclick', 'suppr_contstraint('+l+','+constraints[l].name+')');
+         btn_delete.setAttribute('width', '25px');
+         btn_delete.setAttribute('height', '25px');
+         duplic.appendChild(btn_delete);
          row.appendChild(duplic);
 
          // Adding the row to the table
@@ -511,6 +538,30 @@ function suppr(param){
     create_menu();
 }
 
+/**
+ * Deleting a Constraints
+ * @param param
+ *
+ */
+function suppr_contstraint(index,constraint_name){
+
+
+
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette contrainte ?")) {
+        // Delete the constraints
+        if (index !== -1) constraints.splice(index, 1);
+        alert("La contrainte à été supprimée avec succés.");
+    } else {
+        // Do nothing!
+        alert("La contrainte n'a pas été supprimée.");
+    }
+
+    document.getElementById('tableBody').remove();
+    // Regeneration of the constraint lines
+    refresh_param();
+    // Create new drop-down menus
+    create_menu();
+}
 
 /**
  * Activation / deactivation of a parameter
