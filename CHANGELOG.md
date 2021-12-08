@@ -52,6 +52,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - cleaned the API and optimized requests for the mobile application
 
 
+### TBD
+- right permissions in TTapp/views
+- Modification proposal: id for modification bunch, modification
+  applicability, email notification
+- Room preferences: user interface improvement, room exclusion
+- Interface allowing user to manage differents constraints
 
 ## [0.3.0] - 2019-11-07
 ### Added

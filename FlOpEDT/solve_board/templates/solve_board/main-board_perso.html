@@ -1,0 +1,112 @@
+<!-- This file is part of the FlOpEDT/FlOpScheduler project.               -->
+<!-- Copyright (c) 2017                                                    -->
+<!-- Authors: Iulian Ober, Paul Renaud-Goud, Pablo Seban, et al.           -->
+<!--                                                                       -->
+<!-- This program is free software: you can redistribute it and/or modify  -->
+<!-- it under the terms of the GNU Affero General Public License as        -->
+<!-- published by the Free Software Foundation, either version 3 of the    -->
+<!-- License, or (at your option) any later version.                       -->
+<!--                                                                       -->
+<!-- This program is distributed in the hope that it will be useful, but   -->
+<!-- WITHOUT ANY WARRANTY; without even the implied warranty of            -->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU      -->
+<!-- Affero General Public License for more details.                       -->
+<!--                                                                       -->
+<!-- You should have received a copy of the GNU Affero General Public      -->
+<!-- License along with this program. If not, see                          -->
+<!-- <http://www.gnu.org/licenses/>.                                       -->
+<!--                                                                       -->
+<!-- You can be released from the requirements of the license by purchasing -->
+<!-- a commercial license. Buying such a license is mandatory as soon as   -->
+<!-- you develop activities involving the FlOpEDT/FlOpScheduler software   -->
+<!-- without disclosing the source code of your own applications.          -->
+
+{% extends "base.html" %}
+{% csrf_token %}
+{% load i18n %}
+
+{% block title %} {% trans "Schedule Generation" %} {% endblock %}
+{% block content %}
+{% load static %}
+
+{% block jquery %}
+<link rel="stylesheet" href="{% static 'solve_board/easySelectStyle.css'%}">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="{% static 'solve_board/easySelect.js'  %}"></script>
+    <script> url_ttconstraints = "{% url 'api:ttapp:constraint-list'%}"</script>
+     <script> url_parameters = "{% url 'api:fetch:parameter-list'%}"</script>
+    <script type='text/javascript' src="{% static 'base/helpers.js' %}"></script>
+
+{% endblock %}
+
+
+
+<div id="conteneurOptions">
+<div id="caseBoutonEnregistrerGeneral"><button id="boutonEnregistrerGeneral" type="button">Enregistrer</button></div>
+        <div id="tableauOptions">
+          <div class="elementTableauOptions"><p>Actions</p></div>
+          <div class="elementTableauOptions"><button id="boutonActiver" type="button">Activer/Désactiver</button></div>
+          <div class="elementTableauOptions"><button id="boutonSupprimer" type="button">Supprimer</button></div>
+          <div class="elementTableauOptions">
+            <p id="textePoidsOptions">Gérer le poids</p>
+            </br>
+            <input type="range" id="poidsOptions" min="0" max="8">
+            </br>
+            <p for="poids" id="nombresPoidsOptions">1--2--3--4--5--6--7--8--O</p>
+            <button id="boutonValiderPoidsOption" type="button">Valider</button>
+          </div>
+        </div>
+      </div>
+
+<div id="conteneurGeneral">
+        <div class="elementGeneral"><p>Type de contrainte</p></div>
+        <div class="elementGeneral"><p>Paramètres</p></div>
+        <div class="elementGeneral"><p>Activation</p></div>
+        <div class="elementGeneral"><p>Poids</p></div>
+        <div class="elementGeneral"><p> </p></div>
+      </div>
+
+     <div id="conteneurAjoutLigne">
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutType" type="button">Type de contrainte</button>
+        </div>
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutParam" type="button">+</button>
+        </div>
+        <div class="elementAjoutLigne">
+          <input id="checkboxAjoutActivation" type="checkbox" >
+        </div>
+        <div class="elementAjoutLigne">
+          <input type="range" id="poidsAjout" min="0" max="8">
+          </br>
+          <p for="poids" id="textePoidsAjout">1--2--3--4--5--6--7--8--O</p>
+        </div>
+        <div class="elementAjoutLigne">
+          <button id="boutonAjoutEnregistrement" type="button">Enregistrer</button>
+        </div>
+      </div>
+
+
+
+    <div id="conteneurCategorie">
+        <div class="elementCategorie"><input id="checkboxSelectionCategorieToutes" type="checkbox" ></div>
+        <div class="elementCategorie"><p>Toutes les contraintes</p></div>
+
+        <div class="elementCategorie"><input id="checkboxSelectionSousCategorie" type="checkbox" ></div>
+        <div class="elementCategorie"><p>Image + Nom de la catégorie</p></div>
+      </div>
+
+
+<center>
+
+    <div id ="Zone de contrainte">
+
+
+    </div>
+</center>
+
+<script type='text/javascript' src="{% static 'solve_board/solve_perso.js' %}"></script>
+
+{% endblock %}
+
+
