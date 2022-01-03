@@ -118,7 +118,7 @@ class MinGroupsHalfDays(TTConstraint):
 class MinNonPreferedTrainProgsSlot(TTConstraint):
     """
     Minimize the use of unprefered Slots for groups.
-    If weight is None, make impossible the use of forbidden slots.
+    Make impossible the use of forbidden slots.
     """
     def enrich_model(self, ttmodel, week, ponderation=None):
         if ponderation is None:
@@ -149,8 +149,9 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                         cost = self.local_weight() * ponderation * slot_vars_sum \
                             * ttmodel.unp_slot_cost_course[c.type,
                                                            train_prog][sl]
-                        cost *= day_time_ponderation
+                        cost *= (day_time_ponderation + 1)
                         ttmodel.add_to_group_cost(g, cost, week=week)
+
             if self.weight is None:
                 for course_type in ttmodel.wdb.course_types:
                     for sl in ttmodel.wdb.availability_slots:
@@ -163,8 +164,7 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
                                                                     simultaneous_to=sl)),
                                 '==',
                                 0,
-                                Constraint(constraint_type=ConstraintType.BOUND_HOURS_PER_DAY,
-                                           train_progs=train_prog,
+                                Constraint(constraint_type=ConstraintType.TRAIN_PROG_FORBIDDEN_SLOT,
                                            slots=sl)
                             )
 
