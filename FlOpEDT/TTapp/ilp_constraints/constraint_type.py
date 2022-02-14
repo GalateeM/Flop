@@ -134,6 +134,7 @@ class ConstraintType(Enum):
     TRAIN_PROG_FORBIDDEN_SLOT = "TRAIN_PROG_FORBIDDEN_SLOT"
     Undesired_slots_limit = "Undesired_slots_limit"
     LimitSimultaneousCoursesNumber = "LimitSimultaneousCoursesNumber"
+    MinimizeBusyDays = "MinimizeBusyDays"
 
     # From minhalfdays
     MIN_HALF_DAYS_LIMIT = "Min Half Days limit"
@@ -194,4 +195,5 @@ class ConstraintType(Enum):
     AU_PLUS_DEUX_GARDES = "AU_PLUS_DEUX_GARDES"
     EGALITE_GARDES = "EGALITE_GARDES"
     AU_MOINS_DEUX_GARDES = "AU_MOINS_DEUX_GARDES"
-
+    JOUR_GARDE = "JOUR_GARDE"
+    PAS_QUE_CES_POSTES = "PAS_QUE_CES_POSTES"
