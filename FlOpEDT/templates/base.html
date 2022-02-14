@@ -41,6 +41,8 @@
 <meta charset="UTF-8">
 <meta name="msapplication-TileColor" content="#048c04">
 <meta name="theme-color" content="#000000">
+
+<script src="{% url 'javascript-catalog' %}"></script>
 {% block jquery %}
 <script src="{% static 'base/jquery.min.js' %}"></script>
 {% endblock %}
@@ -61,7 +63,7 @@
     </a>
     <div id="full_logo">
       <a style="text-decoration: none; font-family: inherit; color: inherit" href="{% url 'index' %}">
-          <span id="acro_logo"><span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span></span>
+          <span id="acro_logo">{% trans "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>" %}</span>
       </a>
       {% autoescape off %}
       <span id="head_logo"></span>
@@ -87,10 +89,11 @@
       <li><a href="{% url "base:contact" department %}">{% trans 'Messages' %}</a></li>
       <li><a href="{% url "base:modules" department %}">{% trans 'Modules' %}</a></li>
       {% if request.is_department_admin %}
-      <li><a href="{% url "solve_board:main_board" department %}">{% trans 'Generate' %}</a></li>
-      <li><a href="{% url "base:statistics" department %}">{% trans 'Statistics' %}</a></li>
-      <li><a href="{% url "configuration:configuration" %}">{% trans 'Import'%}</a></li>
-      <li><a href="{% url "admin:index" %}">{% trans 'Admin'%}</a></li>
+          <li><a href="{% url "solve_board:main_board" department %}">{% trans 'Generate' %}</a></li>
+          <li><a href="{% url "flopeditor:flopeditor-department-default" department %}">{% trans 'flop!EDITOR' %}</a></li>
+          {# <li><a href="{% url "base:statistics" department %}">{% trans 'Statistics' %}</a></li>#}
+          <li><a href="{% url "configuration:configuration" %}">{% trans 'Import'%}</a></li>
+          <li><a href="{% url "admin:index" %}">{% trans 'Admin'%}</a></li>
       {% endif %}
       {% endif %}
       <li style="float:right">
@@ -103,7 +106,7 @@
 	<a href="{% url "people:logout" %}">{% trans "Sign out" %}</a>
 	{% endif %}
 	{% else %}
-	<a href="{% url "people:login" %}?next={{request.path}}">{% trans 'Sign in' %}</a>
+	<a href="{% url "people:login" %}?next={{request.path}}" id='sign_in'>{% trans 'Sign in' %}</a>
 	{% endif %}
       </li>
       <li style="float:right">{% if user.is_authenticated %}

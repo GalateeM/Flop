@@ -32,17 +32,16 @@ from django.db.models.fields import related as related_fields
 from django.contrib import admin
 import django.contrib.auth as auth
 
-from FlOpEDT.settings.base import COSMO_MODE
+from django.utils.translation import gettext_lazy as _
 
 from people.models import Tutor, User
-from base.models import Day, Room, Module, Course, Group, \
-    UserPreference, Time, ScheduledCourse, EdtVersion, CourseModification, \
-    TrainingProgramme,  \
-    Regen, Holiday, TrainingHalfDay, \
+from base.models import CourseStartTimeConstraint, Day, StructuralGroup, TransversalGroup, \
+    Room, Module, Course, \
+    UserPreference, ScheduledCourse, EdtVersion, CourseModification, \
+    TrainingProgramme, Regen, Holiday, TrainingHalfDay, \
     CoursePreference, Dependency, Department, CourseType, \
-    ScheduledCourseAdditional, CourseAdditional, EnrichedLink
-
-from base.models import RoomPreference, RoomSort, RoomType, EnrichedLink, GroupPreferredLinks
+    ScheduledCourseAdditional, CourseAdditional, RoomPreference, RoomSort, RoomType, EnrichedLink, GroupPreferredLinks, \
+    Mode
 from displayweb.models import ModuleDisplay
 from displayweb.models import TutorDisplay
 from import_export import resources, fields
@@ -67,7 +66,6 @@ logger = logging.getLogger('admin')
 # -- PREFERENCES --
 # -----------------
 
-
 class CoursPlaceResource(resources.ModelResource):
     id = fields.Field(column_name='id_course',
                       attribute='course',
@@ -87,7 +85,7 @@ class CoursPlaceResource(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name',
+                          widget=ManyToManyWidget(StructuralGroup, field='name',
                                                   separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
@@ -161,7 +159,7 @@ class CoursPlaceResourceCosmo(resources.ModelResource):
     #                               widget=ForeignKeyWidget(Tutor, 'last_name'))
     groups = fields.Field(column_name='gpe_name',
                           attribute='course__groups',
-                          widget=ManyToManyWidget(Group, field='name',
+                          widget=ManyToManyWidget(StructuralGroup, field='name',
                                                   separator='|'))
     promo = fields.Field(column_name='gpe_promo',
                          attribute='course__module__train_prog',
@@ -262,7 +260,7 @@ class CoursResource(resources.ModelResource):
                             attribute='course__type__duration')
     groups = fields.Field(column_name='groups',
                          attribute='groups',
-                         widget=ManyToManyWidget(Group, field='name',
+                         widget=ManyToManyWidget(StructuralGroup, field='name',
                                                  separator='|'))
     color_bg = fields.Field(column_name='color_bg',
                             attribute='module__display',
@@ -530,33 +528,42 @@ class DepartmentModelAdminMixin():
         return queryset
 
 
-class DepartmentModelAdmin(DepartmentModelAdminMixin, admin.ModelAdmin):
+class MyModelAdmin(admin.ModelAdmin):
+    save_as = True
+
+
+class DepartmentModelAdmin(DepartmentModelAdminMixin, MyModelAdmin):
     pass
 
 
-class HolidayAdmin(admin.ModelAdmin):
-    list_display = ('day', 'week', 'year')
-    ordering = ('-year', '-week', 'day')
+class HolidayAdmin(MyModelAdmin):
+    list_display = ('day', 'week', )
+    ordering = ( '-week', 'day')
     list_filter = (
         ('day', DropdownFilterSimple),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
 class TrainingHalfDayAdmin(DepartmentModelAdmin):
-    list_display = ('train_prog', 'day', 'week', 'year', 'apm')
-    ordering = ('-year', '-week', 'train_prog', 'day')
+    list_display = ('train_prog', 'day', 'week', 'apm')
+    ordering = ('-week', 'train_prog', 'day')
 
 
-class GroupAdmin(DepartmentModelAdmin):
-    list_display = ('name', 'type', 'size', 'train_prog')
-    filter_horizontal = ('parent_groups',)
-    ordering = ('size',)
-    list_filter = (('train_prog', DropdownFilterRel),
-                   )
+class StructuralGroupAdmin(DepartmentModelAdmin):
+    # list_display = ('name', 'type', 'size', 'train_prog')
+    # filter_horizontal = ('parent_groups',)
+    # ordering = ('size',)
+    # list_filter = (('train_prog', DropdownFilterRel),
+    #                )
+    pass
 
-
+class TransversalGroupAdmin(DepartmentModelAdmin):
+#     list_display = ('name', 'size', 'train_prog')
+#     ordering = ('size',)
+#     list_filter = (('train_prog', DropdownFilterRel),
+#                    )
+    pass
 # class RoomInline(admin.TabularInline):
 #     model = RoomGroup.subroom_of.through
 #     show_change_link = False
@@ -568,13 +575,12 @@ class RoomAdmin(DepartmentModelAdmin):
 
 
 class RoomPreferenceAdmin(DepartmentModelAdmin):
-    list_display = ('room', 'week', 'year', 'day', 'start_time',
+    list_display = ('room', 'week', 'day', 'start_time',
                     'duration', 'value')
-    ordering = ('-year', '-week', 'day', 'start_time')
+    ordering = ('-week', 'day', 'start_time')
     list_filter = (
         ('room', DropdownFilterRel),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
     )
 
 
@@ -598,117 +604,102 @@ class ModuleAdmin(DepartmentModelAdmin):
 
 
 class CourseAdmin(DepartmentModelAdmin):
-    list_display = ('module', 'type', 'tutor', 'week', 'year')
-    ordering = ('year', 'week', 'module', 'type', 'no', 'groups', 'tutor')
+    list_display = ('module', 'type', 'tutor', 'week')
+    ordering = ('week', 'module', 'type', 'no', 'groups', 'tutor')
     list_filter = (
         ('tutor', DropdownFilterRel),
-        ('year', DropdownFilterAll),
-        ('week', DropdownFilterAll),
+        ('week__nb', DropdownFilterAll),
         ('type', DropdownFilterRel),
-        ('groups', DropdownFilterRel),
+        #('groups', DropdownFilterRel),
     )
 
 
 class CoursPlaceAdmin(DepartmentModelAdmin):
 
-    def week_course(o):
+    def course_week(o):
         return str(o.course.week)
 
-    week_course.short_description = 'week'
-    week_course.admin_order_field = 'course__week'
+    course_week.short_description = _('Week')
+    course_week.admin_order_field = 'course__week'
 
-    def course_year(o):
-        return str(o.course.year)
-
-    course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__year'
-
-    list_display = (week_course, course_year, 'course', 'day', 'start_time',
+    list_display = (course_week, 'course', 'day', 'start_time',
                     'room')
-    ordering = ('day', 'start_time', 'course', 'room')
+    ordering = ('-course__week', 'day', 'start_time', 'course', 'room')
     list_filter = (
         ('course__tutor', DropdownFilterRel),
-        ('course__year', DropdownFilterAll),
-        ('course__week', DropdownFilterAll),)
+        ('course__week__nb', DropdownFilterAll),
+        ('course__week__year', DropdownFilterAll),
+    )
 
 
 class CoursePreferenceAdmin(DepartmentModelAdmin):
     list_display = ('course_type', 'train_prog', 'day', 'start_time',
-                    'duration', 'value', 'week', 'year')
-    ordering = ('-year', '-week')
-    list_filter = (('week', DropdownFilterAll),
-                   ('year', DropdownFilterAll),
+                    'duration', 'value', 'week')
+    ordering = ('-week',)
+    list_filter = (('week__nb', DropdownFilterAll),
                    ('train_prog', DropdownFilterRel),
                    )
 
 
 class DependencyAdmin(DepartmentModelAdmin):
     def course1_week(o):
-        return str(o.course.week)
-
-    course1_week.short_description = 'Week'
+        return str(o.course1.week)
+    
+    course1_week.short_description = _('Week')
     course1_week.admin_order_field = 'course1__week'
 
-    def course1_an(o):
-        return str(o.course.an)
-
-    course1_an.short_description = 'Année'
-    course1_an.admin_order_field = 'course1__year'
-
-    list_display = ('course1', 'course2', 'successive', 'ND')
-    list_filter = (('course1__year', DropdownFilterAll),
-                   ('course1__week', DropdownFilterAll),
-                   )
+    ordering = ('-course1__week',)
+    list_display = (course1_week, 'course2', 'successive', 'ND', )
+    list_filter = (('course1__week__nb', DropdownFilterAll),
+                   ('course1__week__year', DropdownFilterAll))
 
 
 class CourseModificationAdmin(DepartmentModelAdmin):
-    def week_course(o):
+    def course_week(o):
         return str(o.course.week)
 
-    week_course.short_description = 'Week'
-    week_course.admin_order_field = 'course__week'
+    course_week.short_description = _('Week')
+    course_week.admin_order_field = 'course__week'
 
-    def course_year(o):
-        return str(o.course.year)
-
-    course_year.short_description = 'Année'
-    course_year.admin_order_field = 'course__year'
-
-    list_display = ('course', week_course, course_year,
+    list_display = ('course', course_week,
                     'tutor_old',
                     'version_old', 'room_old', 'day_old',
                     'start_time_old', 'updated_at', 'initiator'
                     )
     list_filter = (('initiator', DropdownFilterRel),
-                   ('course__year', DropdownFilterAll),
-                   ('course__week', DropdownFilterAll),)
-    ordering = ('-updated_at', 'old_year', 'old_week')
+                   ('course__week__nb', DropdownFilterAll),
+                   ('course__week__year', DropdownFilterAll),)
+    ordering = ('-updated_at', '-old_week')
 
 
 class DispoAdmin(DepartmentModelAdmin):
     list_display = ('user', 'day', 'start_time', 'duration', 'value',
-                    'week', 'year')
-    ordering = ('user', 'year', 'week', 'day', 'start_time', 'value')
+                    'week',)
+    ordering = ('user', '-week', 'day', 'start_time', 'value')
     list_filter = (('start_time', DropdownFilterAll),
-                   ('week', DropdownFilterAll),
+                   ('week__nb', DropdownFilterAll),
+                   ('week__year', DropdownFilterAll),
                    ('user', DropdownFilterRel),
                    )
 
 
 class RegenAdmin(DepartmentModelAdmin):
-    list_display = ('year', 'week', 'full', 'fday', 'fmonth', 'fyear',
-                    'stabilize', 'sday', 'smonth', 'syear',)
-    ordering = ('-year', '-week')
+    list_display = ('week',
+                    'full', 'fdate',
+                    'stabilize', 'sdate',)
+    ordering = ('-week', )
 
 
-class EnrichedLinkAdmin(admin.ModelAdmin):
+class EnrichedLinkAdmin(MyModelAdmin):
     list_display = ('url', 'description',)
     ordering = ('description',)
 
 
-class GroupPreferredLinksAdmin(admin.ModelAdmin):
+class GroupPreferredLinksAdmin(MyModelAdmin):
     pass
 
+class CourseStartTimeConstraintAdmin(MyModelAdmin):
+    pass
 # </editor-fold desc="ADMIN_MENU">
 
 
@@ -717,7 +708,8 @@ admin.site.unregister(auth.models.Group)
 
 admin.site.register(Holiday, HolidayAdmin)
 admin.site.register(TrainingHalfDay, TrainingHalfDayAdmin)
-admin.site.register(Group, GroupAdmin)
+admin.site.register(StructuralGroup, StructuralGroupAdmin)
+admin.site.register(TransversalGroup, TransversalGroupAdmin)
 admin.site.register(Room, RoomAdmin)
 admin.site.register(RoomPreference, RoomPreferenceAdmin)
 admin.site.register(RoomSort, RoomSortAdmin)
@@ -731,3 +723,5 @@ admin.site.register(UserPreference, DispoAdmin)
 admin.site.register(Regen, RegenAdmin)
 admin.site.register(EnrichedLink, EnrichedLinkAdmin)
 admin.site.register(GroupPreferredLinks, GroupPreferredLinksAdmin)
+admin.site.register(CourseStartTimeConstraint, CourseStartTimeConstraintAdmin)
+admin.site.register(Mode, DepartmentModelAdmin)

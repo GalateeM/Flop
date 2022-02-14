@@ -34,7 +34,7 @@ from random import choice
 from displayweb.models import TrainingProgrammeDisplay
 
 from base.models import RoomType, Room, TrainingProgramme,\
-    Group, Module, GroupType, Period, Time, Day, CourseType, \
+    StructuralGroup, TransversalGroup, Module, GroupType, Period, Time, Day, CourseType, \
     Department, CourseStartTimeConstraint, TimeGeneralSettings, UserPreference, CoursePreference
 
 from people.models import FullStaff, SupplyStaff, Tutor, UserDepartmentSettings
@@ -52,7 +52,8 @@ media_dir = 'media/configuration'
 logger = logging.getLogger('base')
 
 @transaction.atomic
-def extract_database_file(department_name=None, department_abbrev=None, bookname=None):
+def extract_database_file(department_name=None, department_abbrev=None, bookname=None, book=None,
+                          fill_default_preferences=True):
 
     # Test department existence
     department, created = Department.objects.get_or_create(name=department_name, abbrev=department_abbrev)
@@ -66,10 +67,12 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
     if not created:
         logger.info(f"Department with abbrev {department_abbrev} and name {department_name} already exists. "
                     f"It will be updated")
-    if bookname is None:
-        bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
+    if book is None:
+        if bookname is None:
+            bookname = f"{media_dir}/database_file_{department_abbrev}.xlsx"
 
-    book = database_description_load_xlsx_file(bookname)
+        book = database_description_load_xlsx_file(bookname)
+
     if book is None:
         raise Exception("Database file could not be loaded.")
 
@@ -78,13 +81,13 @@ def extract_database_file(department_name=None, department_abbrev=None, bookname
         raise Exception('\n'.join(check))
 
     settings_extract(department, book['settings'])
-    people_extract(department, book['people'])
+    people_extract(department, book['people'], fill_default_preferences)
     rooms_extract(department, book['room_groups'], book['room_categories'], book['rooms'])
-    groups_extract(department, book['promotions'], book['group_types'], book['groups'])
+    groups_extract(department, book['promotions'], book['group_types'], book['groups'], book['transversal_groups'])
     modules_extract(department, book['modules'])
     courses_extract(department, book['courses'])
 
-def people_extract(department, people):
+def people_extract(department, people, fill_default_preferences):
 
     logger.info("People extraction : start")
     for id_, person in people.items():
@@ -111,7 +114,8 @@ def people_extract(department, people):
                 tutor.save()
 
                 UserDepartmentSettings.objects.create(department=department, user=tutor)
-                fill_default_user_preferences(tutor, dept=department)
+                if fill_default_preferences:
+                    fill_default_user_preferences(tutor, dept=department)
 
             except IntegrityError as ie :
                 logger.warning("A constraint has not been respected while creating the Professor : \n", ie)
@@ -191,7 +195,7 @@ def rooms_extract(department, room_groups, room_categories, rooms):
     logger.info('Room extraction : finish')
 
 
-def groups_extract(department, promotions, group_types, groups):
+def groups_extract(department, promotions, group_types, groups, transversal_groups):
 
     logger.info('Groups extraction : start')
     for id_, name in promotions.items():
@@ -225,8 +229,8 @@ def groups_extract(department, promotions, group_types, groups):
     # first loop on groups just to create them - it's too early to set the parents
     for (promotion_id, id_), group in groups.items():
 
-        verif = Group.objects.filter(name=id_, train_prog__abbrev=promotion_id,
-                                     train_prog__department=department)
+        verif = StructuralGroup.objects.filter(name=id_, train_prog__abbrev=promotion_id,
+                                               train_prog__department=department)
 
         if not verif.exists():
 
@@ -235,7 +239,7 @@ def groups_extract(department, promotions, group_types, groups):
                 promotion = TrainingProgramme.objects.get(abbrev=promotion_id,
                                                           department=department)
                 groupType = GroupType.objects.get(name=group['group_type'], department=department)
-                group = Group(name=id_, size=0, train_prog=promotion, type=groupType)
+                group = StructuralGroup(name=id_, size=0, train_prog=promotion, type=groupType)
                 group.save()
 
             except IntegrityError as ie:
@@ -248,22 +252,60 @@ def groups_extract(department, promotions, group_types, groups):
 
         for parent in group['parent']:
 
-            parent_group = Group.objects.get(name=parent, train_prog__abbrev=promotion_id, train_prog__department=department)
-            group = Group.objects.get(name=id_, train_prog__abbrev=promotion_id, train_prog__department=department)
+            parent_group = StructuralGroup.objects.get(name=parent, train_prog__abbrev=promotion_id, train_prog__department=department)
+            group = StructuralGroup.objects.get(name=id_, train_prog__abbrev=promotion_id, train_prog__department=department)
             group.parent_groups.add(parent_group)
             group.save()
 
-    for g in Group.objects.all():
+    for g in StructuralGroup.objects.all():
 
         isbasic = True
 
-        for g1 in Group.objects.all():
+        for g1 in StructuralGroup.objects.all():
             if g in g1.parent_groups.all():
                 isbasic = False
                 break
 
         g.basic = isbasic
         g.save()
+
+    # first loop on transversal groups just to create them - it's too early to set relatives
+    for (promotion_id, id_), transversal_group in transversal_groups.items():
+
+        verif = TransversalGroup.objects.filter(name=id_, train_prog__abbrev=promotion_id,
+                                                train_prog__department=department)
+
+        if not verif.exists():
+
+            try:
+
+                promotion = TrainingProgramme.objects.get(abbrev=promotion_id,
+                                                          department=department)
+                trans_group = TransversalGroup(name=id_, size=0, train_prog=promotion)
+                trans_group.save()
+
+            except IntegrityError as ie:
+                logger.warning(f"A constraint has not been respected creating the transversal group '{id_}' : {ie}")
+                pass # FIXME: continue?
+
+    # second loop, set the relatives
+
+    for (promotion_id, id_), transversal_group in transversal_groups.items():
+        t_g = TransversalGroup.objects.get(name=id_, train_prog__abbrev=promotion_id,
+                                           train_prog__department=department)
+
+        for group in transversal_group['transversal_to']:
+            conflicting_group = StructuralGroup.objects.get(name=group, train_prog__abbrev=promotion_id,
+                                                            train_prog__department=department)
+            t_g.conflicting_groups.add(conflicting_group)
+            t_g.save()
+
+        for group in transversal_group['parallel_to']:
+
+            parallel_group = TransversalGroup.objects.get(name=group, train_prog__abbrev=promotion_id,
+                                                          train_prog__department=department)
+            t_g.parallel_groups.add(parallel_group)
+            t_g.save()
 
     logger.info('Groups extraction : finish')
 
@@ -359,5 +401,6 @@ def settings_extract(department, settings):
     params = copy(settings)
     del params['periods']
     logger.info(f'TimeGeneralSettings : {params}')
-    TimeGeneralSettings.objects.get_or_create(department=department, **params)
+    TimeGeneralSettings.objects.filter(department=department).delete() # FIXME: get and modify
+    TimeGeneralSettings.objects.create(department=department, **params)
     logger.info('Settings extraction : finish')

@@ -58,6 +58,16 @@
           ----------           
            \     */
 
+
+
+/*--------------------------
+  ------- API CONTEXT ------
+  --------------------------*/
+
+const context_dept = {dept: department} ;
+
+
+
 /*--------------------------
   ------- TIME ------
   --------------------------*/
@@ -66,7 +76,7 @@
 var week_days = new WeekDays(days);
 
 // for y-axis
-var hours = new Hours(time_settings.time);
+var hours = new Hours(department_settings.time);
 
 
 /*-------------------------
@@ -109,20 +119,21 @@ function cancel_cm_room_tutor_change() {
 var file_fetch =
 {
   groups: { done: false, data: null, callback: null },
+  transversal_groups: { done: false, data: null, callback: null }, 
   constraints: { done: false, data: null, callback: null },
-  rooms: { done: false, data: null, callback: null },
-  department: { done: false, data: null, callback: null },
+  rooms: { done: false, data: null, callback: null }
 };
 
 function main(name, data) {
   file_fetch[name].data = data;
   file_fetch[name].done = true;
-  if (file_fetch.groups.done && file_fetch.constraints.done
-    && file_fetch.rooms.done && file_fetch.department.done) {
-    file_fetch.constraints.callback();
-    file_fetch.rooms.callback();
-    file_fetch.department.callback();
-    file_fetch.groups.callback();
+  // callback all when all received
+  if (!Object.keys(file_fetch).some(function(att){
+    return !file_fetch[att].done ;
+  })) {
+    Object.keys(file_fetch).forEach(function(att){
+      file_fetch[att].callback() ;
+    });
   }
 }
 
@@ -154,14 +165,10 @@ file_fetch.constraints.callback = function () {
   rev_constraints[garbage.start.toString()] = garbage.duration;
 
 
-  fetch.constraints_ok = true;
+  fetch_status.constraints_ok = true;
   create_grid_data();
 };
 
-file_fetch.department.callback = function () {
-  departments.data = this.data;
-  //create_dept_redirection();
-};
 
 
 
@@ -171,6 +178,9 @@ file_fetch.department.callback = function () {
 
 // do we have slots
 var slot_case = false; //true ;
+
+// horizontal lines where a course may start
+var plot_constraint_lines = false ;
 
 // current number of rows
 var nbRows = 1;
@@ -187,7 +197,7 @@ var opac = .4;
 
 
 // status of fetching (cours_pl : cours placés, cours_pp : cours pas placés)
-var fetch = {
+var fetch_status = {
   ongoing_cours_pl: false,
   ongoing_dispos: false,
   ongoing_cours_pp: false,
@@ -383,7 +393,7 @@ var data_grid_scale_row = [];
 
 // Garbage parameters
 var garbage = {
-  start: time_settings.time.day_finish_time,
+  start: department_settings.time.day_finish_time,
   duration: 90,
   day: week_days.day_by_num(week_days.nb_days() - 2).ref
 };
@@ -413,7 +423,7 @@ var quote = "";
   ------- GROUPS -------
   ----------------------*/
 
-// 2D data about groups [id_promo][group_subname] -> Group
+// 2D data about groups [id_promo]["structural"][group_subname] -> Group
 var groups = [];
 
 
@@ -465,7 +475,7 @@ var ckbox = [];
 ckbox["edt-mod"] = {
   menu: "edt-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };
@@ -473,7 +483,7 @@ ckbox["edt-mod"] = {
 ckbox["dis-mod"] = {
   menu: "dis-mod",
   cked: false,
-  txt: "Modifier",
+  txt: gettext("Modify"),
   disp: true,
   en: true
 };
@@ -574,35 +584,35 @@ var sel_popup = {
   but: [],
   active_filter: false
 };
-if (cosmo) {
+if (department_settings.mode.cosmo) {
   sel_popup.available = [{
     type: "group",
-    buttxt: "Filtre"
+    buttxt: gettext('Filters')
   },
   {
     type: "tutor",
-    buttxt: "Salarié·e·s"
+    buttxt: gettext('Employees')
   },
   {
     type: "module",
-    buttxt: "Postes"
+    buttxt: gettext('Posts')
   }];
 } else {
   sel_popup.available = [{
     type: "group",
-    buttxt: "Groupes"
+    buttxt: gettext('Groups')
   },
   {
     type: "tutor",
-    buttxt: "Profs"
+    buttxt: gettext('Teachers')
   },
   {
     type: "module",
-    buttxt: "Modules"
+    buttxt: gettext('Modules')
   },
   {
     type: "room",
-    buttxt: "Salles"
+    buttxt: gettext('Rooms')
   }];
 }
 sel_popup.available.forEach(function (f) {
@@ -718,6 +728,7 @@ var pending = {
     });
     this.update_linked();
     this.init_course = Object.assign({}, d);
+    this.init_course.tutors = this.wanted_course.tutors.slice() ;
   },
   update_linked: function() {
     let w = this.wanted_course ;
@@ -725,7 +736,7 @@ var pending = {
       c.day =   w.day ;
       c.start = w.start ;
       c.room =  w.room ;
-      c.prof =  w.prof ;
+      c.tutors =  w.tutors ;
     });
   },
   prepare_dragndrop: function (d) {
@@ -780,8 +791,8 @@ var ack = {
   pref: "",
   status: "OK",
   predefined: {
-    KO: "C'est un échec cuisant. Trouvez un·e responsable d'emploi du temps et faites-lui part de vos problèmes.",
-    OK: "La modification s'est déroulée sans accroc."
+    KO: gettext('KO'),
+    OK: gettext('OK')
   },
   list: [],
   ongoing: []
@@ -803,10 +814,10 @@ var did = {
   tly: -180,
   shift_s: 20
 };
-did.scale = did.h / (time_settings.time.day_finish_time
-  - time_settings.time.lunch_break_finish_time
-  + time_settings.time.lunch_break_start_time
-  - time_settings.time.day_start_time);
+did.scale = did.h / (department_settings.time.day_finish_time
+  - department_settings.time.lunch_break_finish_time
+  + department_settings.time.lunch_break_start_time
+  - department_settings.time.day_start_time);
 var stbut = {
   w: 104,
   h: 60
@@ -815,15 +826,6 @@ var stbut = {
 /*--------------------
    ------ ALL -------
   --------------------*/
-
-var departments = {
-  data: [],
-  marh: 10,
-  topx: sel_popup.selx + sel_popup.selw + 50,
-  topy: sel_popup.sely - sel_popup.selh - sel_popup.selmy,
-  w: 35,
-  h: sel_popup.selh
-};
 
 // version number of the schedule
 var version;
@@ -863,7 +865,7 @@ var entry_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 2,
-  txt_intro: { 'default': "Quoi changer ?" }
+  txt_intro: { 'default': gettext('What to change ?') }
 };
 // list of tutors in the module of the selected course
 var tutor_module_cm_settings =
@@ -876,7 +878,7 @@ var tutor_module_cm_settings =
   my: 3,
   ncol: 3,
   nlin: 0,
-  txt_intro: { 'default': "Profs du module ?" }
+  txt_intro: { 'default': gettext('Module teacher ?') }
 };
 // all tutors in batches
 var tutor_filters_cm_settings =
@@ -889,7 +891,7 @@ var tutor_filters_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Ordre alphabétique :" }
+  txt_intro: { 'default': gettext('Alphabetical order') }
 };
 // some tutors
 var tutor_cm_settings =
@@ -902,7 +904,7 @@ var tutor_cm_settings =
   my: 3,
   ncol: 3,
   nlin: 4,
-  txt_intro: { 'default': "Ordre alphabétique :" }
+  txt_intro: { 'default': gettext('Alphabetical order') }
 };
 var pref_links_cm_settings =
 {
@@ -914,7 +916,7 @@ var pref_links_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Quel lien pour la visio ?" }
+  txt_intro: { 'default': gettext('Virtual classroom link ?') }
 };
 var pref_link_types_cm_settings =
 {
@@ -926,7 +928,7 @@ var pref_link_types_cm_settings =
   my: 3,
   ncol: 1,
   nlin: 0,
-  txt_intro: { 'default': "Relatif à qui ?" }
+  txt_intro: { 'default': gettext('Relating to who ?') }
 };
 // rooms
 // level=0: the proposed rooms are available and of the same type
@@ -937,25 +939,25 @@ var room_cm_settings =
   [{
     type: 'room_available',
     txt_intro: {
-      '0': "Aucune salle disponible",
-      '1': "Salle disponible",
-      'default': "Salles disponibles"
+      '0': gettext('No room available'),
+      '1': gettext('Room available'),
+      'default': gettext('Rooms available')
     }
   },
   {
     type: 'room_available_same_type',
     txt_intro: {
-      '0': "Aucune salle disponible (tout type)",
-      '1': "Salle disponible (tout type)",
-      'default': "Salles disponibles (tout type)"
+       '0': gettext('No room available (any type)'),
+      '1': gettext('Room available (any type)'),
+      'default': gettext('Rooms available (any type)')
     }
   },
   {
     type: 'room',
     txt_intro: {
-      '0': "Aucune salle",
-      '1': "Salle",
-      'default': "Toutes les salles"
+      '0': gettext('No room'),
+      '1': gettext('Room'),
+      'default': gettext('Every rooms')
     }
   }];
 for (var l = 0; l < room_cm_settings.length; l++) {
@@ -978,7 +980,7 @@ var salarie_cm_settings = {
   my: 3,
   ncol: 3,
   nlin: 0,
-  txt_intro: {'default':"Qui s'y colle ?"}
+  txt_intro: {'default':gettext('Who should do it ?')}
 };
 
 // level=0: salaries qui ont le même poste dans la semaine
@@ -1047,7 +1049,8 @@ var tutors_info = {};
 
 
 // rectangle colors
-// cosmo mode: tutor_username -> {color_bg: color, color_txt: color}
+// cosmo mode 1: tutor_username -> {color_bg: color, color_txt: color}
+// cosmo mode 2: module_abbrev -> {color_bg: color, color_txt: color}
 // tutor mode: module_abbrev -> {color_bg: color, color_txt: color}
 var colors = {} ;
 

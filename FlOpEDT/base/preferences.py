@@ -23,7 +23,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import CourseStartTimeConstraint, Course, UserPreference
+from base.models import CourseStartTimeConstraint, Course, UserPreference, Week
 from TTapp import TTConstraint
 
 def split_preferences(tutor, departments=None):
@@ -68,19 +68,29 @@ def split_preferences(tutor, departments=None):
         split_pm = [min_pm] + pm + [max_day]
         intervals = [split_am, split_pm]
 
-    weeks = UserPreference\
+    considered_user_pref = UserPreference\
         .objects\
         .filter(user=tutor)\
-        .distinct('week', 'year').values('week', 'year')
+        .distinct('week')
+
+    weeks = [user_pref.week for user_pref in considered_user_pref]
 
     # create typical week if non existing
-    if len([wy for wy in weeks
-            if wy['week'] is None and wy['year'] is None]) == 0:
+    if None not in weeks:
+        # if database has been flushed, create all necessary weeks
+        if not Week.objects.exists():
+            for y in range(10, 51):
+                year = 2000 + y
+                if y in {20, 26, 32, 37, 48}:
+                    final_week = 53
+                else:
+                    final_week = 52
+                for w_nb in range(1, final_week + 1):
+                    Week.objects.get_or_create(nb=w_nb, year=year)
         # QuerySet does not support append
-        weeks = list(weeks)
-        weeks.append({'week': None, 'year': None})
+        weeks.append(None)
     
-    for week_dict in weeks:
+    for week in weeks:
         for d in days:
 
             # store old preferences in a more friendly way
@@ -88,7 +98,7 @@ def split_preferences(tutor, departments=None):
             pref_time = []
             pref_val = []
             pref_slots = UserPreference.objects\
-                                       .filter(user=tutor, day=d, **week_dict)\
+                                       .filter(user=tutor, day=d, week=week)\
                                        .order_by('start_time')
 
             for slot in pref_slots:
@@ -147,5 +157,5 @@ def split_preferences(tutor, departments=None):
                         start_time=inter[i],
                         duration=inter[i+1]-inter[i],
                         value=val,
-                        **week_dict
+                        week=week
                     )

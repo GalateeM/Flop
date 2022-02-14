@@ -36,13 +36,15 @@ from django.conf import settings
 
 from FlOpEDT.decorators import dept_admin_required
 
-from base.models import Department, Course
+from base.models import Department, Course, Period, Week
 
 from configuration.make_planif_file import make_planif_file
 from configuration.extract_planif_file import extract_planif
 from configuration.deploy_database import extract_database_file
 from configuration.file_manipulation import upload_file, check_ext_file
 from configuration.forms import ImportPlanif, ImportConfig
+from base.weeks import current_year
+from django.db.models import Q
 
 
 logger = logging.getLogger(__name__)
@@ -61,6 +63,9 @@ def configuration(req, **kwargs):
 
     arg_req['departements'] = [{'name': depart.name, 'abbrev': depart.abbrev}
                                for depart in Department.objects.all() if not depart.abbrev == 'default']
+    arg_req['periods'] = [{'name': period.name, 'department': period.department.abbrev}
+                          for period in Period.objects.all()]
+    arg_req['current_year'] = current_year
     return render(req, 'configuration/configuration.html', arg_req)
 
 
@@ -183,8 +188,7 @@ def get_planif_file(req, **kwargs):
 def import_planif_file(req, **kwargs):
     """
     Import a planification's file filled. Before data processing, it must to
-    check if the first step of te configuration is done. After, it must to
-    flush data related with the planification. Extract the data of the xlsx file.
+    check if the first step of te configuration is done. Extract the data of the xlsx file.
 
     :param req:
     :return:
@@ -202,12 +206,38 @@ def import_planif_file(req, **kwargs):
                     except Exception as e:
                         response = {'status': 'error', 'data': str(e)}
                         return HttpResponse(json.dumps(response), content_type='application/json')
-                    print(req.POST)
                     stabilize_courses = "stabilize" in req.POST
-                    Course.objects.filter(type__department=dept).delete()
-                    logger.info("Flush planif database OK")
+                    choose_weeks = "choose_weeks" in req.POST
+                    choose_periods = "choose_periods" in req.POST
+                    if choose_weeks:
+                        week_nb = req.POST["week_nb"]
+                        year = req.POST["year"]
+                        if not week_nb and not year:
+                            from_week = None
+                        else:
+                            week_nb = int(week_nb)
+                            year = int(year)
+                            from_week = Week.objects.get(nb=week_nb, year=year)
+                        week_nb_end = req.POST["week_nb_end"]
+                        year_end = req.POST["year_end"]
+                        if not week_nb_end and not year_end:
+                            until_week = None
+                        else:
+                            week_nb_end = int(week_nb_end)
+                            year_end = int(year_end)
+                            until_week = Week.objects.get(nb=week_nb_end, year=year_end)
+                    else:
+                        from_week = None
+                        until_week = None
 
-                    extract_planif(dept, bookname=path, stabilize_courses=stabilize_courses)
+                    if choose_periods:
+                        periods = Period.objects.filter(department=dept, name__in=req.POST.getlist('periods'))
+                        print(periods)
+                    else:
+                        periods = None
+
+                    extract_planif(dept, bookname=path, from_week=from_week, until_week=until_week, periods=periods,
+                                   stabilize_courses=stabilize_courses)
                     logger.info("Extract file OK")
                     rep = "OK !"
 

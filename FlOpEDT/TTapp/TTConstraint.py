@@ -23,9 +23,15 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
+from base.models import TimeGeneralSettings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from django.utils.translation import gettext_lazy as _
+
 from django.db import models
+
+from FlOpEDT.decorators import timer
+
 max_weight = 8
 
 
@@ -41,8 +47,7 @@ class TTConstraint(models.Model):
     Attributes:
         department : the department concerned by the constraint. Has to be filled.
         train_progs : the training programs concerned by the constraint. All of self.department if None
-        week : the week for which the constraint should be applied. All if None.
-        year : the year for which the constraint should be applied. All if None.
+        weeks : the weeks for which the constraint should be applied. All if None.
         weight : from 1 to max_weight if the constraint is optional, depending on its importance
                  None if the constraint is necessary
         is_active : usefull to de-activate a Constraint just before the generation
@@ -50,24 +55,23 @@ class TTConstraint(models.Model):
     department = models.ForeignKey('base.Department', null=True, on_delete=models.CASCADE)
     train_progs = models.ManyToManyField('base.TrainingProgramme',
                                          blank=True)
-    week = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(52)],
-        null=True,
-        default=None,
-        blank=True)
-    year = models.PositiveSmallIntegerField(null=True, default=None, blank=True)
+    weeks = models.ManyToManyField('base.Week', blank=True)
     weight = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(max_weight)],
         null=True, default=None, blank=True)
     comment = models.CharField(max_length=100, null=True, default=None, blank=True)
-    is_active = models.BooleanField(verbose_name='Contrainte active?', default=True)
+    is_active = models.BooleanField(verbose_name=_('Is active?'), default=True)
+    modified_at = models.DateField(auto_now=True)
 
     def local_weight(self):
+        if self.weight is None:
+            return 10
         return float(self.weight) / max_weight
 
     class Meta:
         abstract = True
 
+    @timer
     def enrich_model(self, ttmodel, week, ponderation=1):
         raise NotImplementedError
 
@@ -90,8 +94,8 @@ class TTConstraint(models.Model):
         else:
             train_prog_value = 'All'
 
-        if self.week:
-            week_value = f"{self.week} ({self.year})"
+        if self.weeks.exists():
+            week_value = ','.join([f"{w.nb} ({w.year})" for w in self.weeks.all()])
         else:
             week_value = 'All'
 
@@ -105,7 +109,7 @@ class TTConstraint(models.Model):
             'comment': self.comment,
             'details': {
                 'train_progs': train_prog_value,
-                'week': week_value,
+                'weeks': week_value,
                 'weight': self.weight,
                 }
             }
@@ -165,3 +169,9 @@ class TTConstraint(models.Model):
             if hasattr(self, attr) and attr not in kwargs:
                 kwargs[attr] = getattr(self, attr)
         return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
+
+    def time_settings(self, department = None):
+        if department:
+            return TimeGeneralSettings.objects.get(department = department)
+        else:
+            return TimeGeneralSettings.objects.get(department = self.department)

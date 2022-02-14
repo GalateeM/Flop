@@ -7,23 +7,612 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-16 16:46+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2021-12-15 11:22+0100\n"
+"PO-Revision-Date: 2021-03-14 13:02+0000\n"
+"Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Translated-Using: django-rosetta 0.9.5\n"
 
-#: FlOpEDT/settings/base.py:150
+#: FlOpEDT/settings/base.py:157
 msgid "French"
 msgstr "Français"
 
-#: FlOpEDT/settings/base.py:151
+#: FlOpEDT/settings/base.py:158
 msgid "English"
 msgstr "Anglais"
+
+#: FlOpEDT/settings/base.py:159
+msgid "Spanish"
+msgstr "Espagnol"
+
+#: FlOpEDT/settings/base.py:160
+msgid "Arabic"
+msgstr "Arabe"
+
+#: FlOpEDT/settings/base.py:161
+msgid "Basque"
+msgstr "Basque"
+
+#: FlOpEDT/settings/base.py:162
+msgid "Breton"
+msgstr "Breton"
+
+#: FlOpEDT/settings/base.py:163
+msgid "Catalan"
+msgstr "Catalan"
+
+#: FlOpEDT/settings/base.py:164
+msgid "Corsican"
+msgstr "Corse"
+
+#: FlOpEDT/settings/base.py:165
+msgid "Danish"
+msgstr "Espagnol"
+
+#: FlOpEDT/settings/base.py:166
+msgid "German"
+msgstr "Allemand"
+
+#: FlOpEDT/settings/base.py:167
+msgid "Dutch"
+msgstr "Néerlandais"
+
+#: FlOpEDT/settings/base.py:168
+msgid "Greek"
+msgstr "Grec"
+
+#: FlOpEDT/settings/base.py:169
+msgid "Italian"
+msgstr "Italien"
+
+#: FlOpEDT/settings/base.py:170
+msgid "Latin"
+msgstr "Latin"
+
+#: FlOpEDT/settings/base.py:171
+msgid "Norwegian"
+msgstr "Norvégien"
+
+#: FlOpEDT/settings/base.py:172
+msgid "Polish"
+msgstr "Polonais"
+
+#: FlOpEDT/settings/base.py:173
+msgid "Portuguese"
+msgstr "Portugais"
+
+#: FlOpEDT/settings/base.py:174
+msgid "Swedish"
+msgstr "Suédois"
+
+#: FlOpEDT/settings/base.py:175
+msgid "Chinese"
+msgstr "Chinois"
+
+#: FlOpEDT/settings/base.py:176
+msgid "Smurf"
+msgstr "Schtroumpf"
+
+#: TTapp/TTConstraint.py:63
+msgid "Is active?"
+msgstr "est active"
+
+#: TTapp/TTConstraints/core_constraints.py:69
+#: TTapp/TTConstraints/core_constraints.py:331
+#: TTapp/TTConstraints/slots_constraints.py:257
+msgid "OK"
+msgstr "OK"
+
+#: TTapp/TTConstraints/core_constraints.py:113
+#: TTapp/TTConstraints/core_constraints.py:124
+#: TTapp/TTConstraints/core_constraints.py:142
+#: TTapp/TTConstraints/core_constraints.py:361
+#: TTapp/TTConstraints/core_constraints.py:417
+#: TTapp/TTConstraints/core_constraints.py:440
+#: TTapp/TTConstraints/slots_constraints.py:281
+#: TTapp/TTConstraints/slots_constraints.py:288
+#: TTapp/TTConstraints/slots_constraints.py:295
+#: TTapp/TTConstraints/slots_constraints.py:309
+#: TTapp/TTConstraints/slots_constraints.py:317
+#: TTapp/TTConstraints/slots_constraints.py:324
+msgid "KO"
+msgstr "KO"
+
+#: TTapp/TTConstraints/core_constraints.py:114
+#, python-brace-format
+msgid ""
+"Group {bg.name} has {group_partition.not_forbidden_duration} available time "
+"but requires minimum {min_course_time_needed}."
+msgstr ""
+"Le groupe {bg.name} a {group_partition.not_forbidden_duration} minutes de "
+"temps disponible mais a besoin de {min_course_time_needed} minimum."
+
+#: TTapp/TTConstraints/core_constraints.py:125
+#, python-brace-format
+msgid ""
+"Group {bg.name} has {group_partition.not_forbidden_duration} available time "
+"but probably requires minimum {course_time_needed}."
+msgstr ""
+"Le groupe {bg.name} a {group_partition.not_forbidden_duration} minutes de "
+"temps disponible mais a probablement besoin d'un minimum de "
+"{course_time_needed} minutes."
+
+#: TTapp/TTConstraints/core_constraints.py:143
+#, python-brace-format
+msgid ""
+"Group {bg.name} has {allowed_slots_nb} slots available of {course_type."
+"duration} minutes and requires {nb_courses}."
+msgstr ""
+"Le groupe {bg.name} a {allowed_slots_nb} créneaux disponibles de "
+"{course_type.duration} minutes, et en nécessite {nb_courses}"
+
+#: TTapp/TTConstraints/core_constraints.py:207
+msgid "No simultaneous courses for one group"
+msgstr "Pas de cours simultanés pour un groupe donné"
+
+#: TTapp/TTConstraints/core_constraints.py:256
+msgid "Schedule once every considered course"
+msgstr "Planifie une fois chaque cours considéré"
+
+#: TTapp/TTConstraints/core_constraints.py:268
+msgid "Pre-assigned courses only"
+msgstr "Cours pré-assignés seulement"
+
+#: TTapp/TTConstraints/core_constraints.py:312
+msgid "Each course is assigned to one tutor (max)"
+msgstr "Chaque cours est affecté à un prof (max)"
+
+#: TTapp/TTConstraints/core_constraints.py:358
+#, python-brace-format
+msgid ""
+"Tutor {tutor} has {tutor_partition.available_duration} minutes of available "
+"time."
+msgstr ""
+"{tutor} a {tutor_partition.available_duration} minutes de temps disponible"
+
+#: TTapp/TTConstraints/core_constraints.py:359
+#: TTapp/TTConstraints/core_constraints.py:415
+msgid ""
+" He or she has to lecture {len(courses)} classes for an amount of {sum(c."
+"type.duration for c in courses)} minutes of courses."
+msgstr ""
+"Il ou elle a {len(courses)} cours pour un total de {sum(c.type.duration for "
+"c in courses)} minutes."
+
+#: TTapp/TTConstraints/core_constraints.py:402
+#, python-brace-format
+msgid ""
+"Tutor {tutor} has {tutor_partition.available_duration} minutes of available "
+"time"
+msgstr ""
+"{tutor} a {tutor_partition.available_duration} minutes de temps disponible"
+
+#: TTapp/TTConstraints/core_constraints.py:404
+msgid " (considering that"
+msgstr "(sachant que"
+
+#: TTapp/TTConstraints/core_constraints.py:406
+#, python-brace-format
+msgid " {forbidden_days} is forbidden"
+msgstr "{forbidden_days} est exclu"
+
+#: TTapp/TTConstraints/core_constraints.py:408
+#, python-brace-format
+msgid " and {holiday_text} is holiday)."
+msgstr "et {holiday_text} est férié)."
+
+#: TTapp/TTConstraints/core_constraints.py:412
+#, python-brace-format
+msgid " {holiday_text} is holiday)."
+msgstr "{holiday_text} est férié)."
+
+#: TTapp/TTConstraints/core_constraints.py:437
+msgid ""
+"Tutor {tutor} has {course_partition."
+"nb_slots_available_of_duration_beginning_at(course_type.duration, "
+"start_times)} available slots of {course_type.duration} mins "
+msgstr ""
+"{tutor} a {course_partition."
+"nb_slots_available_of_duration_beginning_at(course_type.duration, "
+"start_times)} créneaux disponibles de {course_type.duration} minutes."
+
+#: TTapp/TTConstraints/core_constraints.py:438
+msgid "and {len(course_list)} courses that long to attend."
+msgstr "et {len(course_lits)} cours à donner."
+
+#: TTapp/TTConstraints/core_constraints.py:484
+msgid "Consider tutors unavailability"
+msgstr "Considère les indisponibilités des enseignant⋅e⋅s"
+
+#: TTapp/TTConstraints/cosmo_style_constraints.py:158
+msgid "Number of weeks"
+msgstr "Nombre de semaines"
+
+#: TTapp/TTConstraints/groups_constraints.py:115
+msgid "Minimize groups half-days"
+msgstr "Minimise les demies-journées des groupes d'étudiant⋅e⋅s"
+
+#: TTapp/TTConstraints/groups_constraints.py:181
+msgid "Minimize groups non-preferred slots"
+msgstr "Mininimise les créneaux indésirables des groupes"
+
+#: TTapp/TTConstraints/slots_constraints.py:283
+#: TTapp/TTConstraints/slots_constraints.py:290
+#, python-brace-format
+msgid ""
+"There is no available slots for the second course after the first one. "
+"{dependency}"
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le deuxième cours après le "
+"premier. {dependency}"
+
+#: TTapp/TTConstraints/slots_constraints.py:297
+#, python-brace-format
+msgid ""
+"There is no available slots for the first or the second course. {dependency}"
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le deuxième cours après le "
+"premier. {dependency}"
+
+#: TTapp/TTConstraints/slots_constraints.py:311
+#, python-brace-format
+msgid "There is no available successive slots for those courses. {dependency}"
+msgstr ""
+"Il n'y a pas de créneaux succéssifs disponibles pour ces cours. {dependency}"
+
+#: TTapp/TTConstraints/slots_constraints.py:319
+#, python-brace-format
+msgid ""
+"There is no available slots for the second course after a {dependency."
+"day_gap} day gap. {dependency}"
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le second cours {dependency."
+"day_gap} jours après le premier. {dependency}"
+
+#: TTapp/TTConstraints/slots_constraints.py:326
+#, python-brace-format
+msgid "One of the courses has no eligible tutor to lecture it. {dependency}"
+msgstr "Un des cours n'a pas de professeur attribué. {dependency}"
+
+#: TTapp/TTConstraints/test_constraints.py:82 base/models.py:885
+msgid "Successives?"
+msgstr "Successifs ?"
+
+#: TTapp/TTConstraints/test_constraints.py:83 base/models.py:887
+msgid "Minimal day gap between courses"
+msgstr "Nombre de jours minimum entre plusieurs cours"
+
+#: TTapp/TTConstraints/test_constraints.py:105
+msgid "There is no tutor assigned to {self.course1.full_name()}"
+msgstr "Il n'y a pas d'enseignant⋅e assignée à {self.course1.full_name()}"
+
+#: TTapp/TTConstraints/test_constraints.py:120
+msgid "There is no tutor assigned to {self.course2.full_name()}"
+msgstr "Il n'y a pas d'enseignant⋅e assignée à {self.course2.full_name()}"
+
+#: TTapp/TTConstraints/test_constraints.py:232
+msgid "There is no available slots for the second course after the first one."
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le deuxième cours après le premier."
+
+#: TTapp/TTConstraints/test_constraints.py:235
+msgid "There is no available slots for the second course."
+msgstr "Il n'y a pas de créneaux disponibles pour le deuxième cours."
+
+#: TTapp/TTConstraints/test_constraints.py:238
+msgid "There is no available slots for the first or the second course."
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le premier ou le deuxième cours."
+
+#: TTapp/TTConstraints/test_constraints.py:248
+msgid "There is no available successive slots for those courses."
+msgstr "Il n'y a pas de créneaux successifs disponibles pour ces cours."
+
+#: TTapp/TTConstraints/test_constraints.py:252
+#, python-brace-format
+msgid ""
+"There is no available slots for the second course after a {self.day_gap} day "
+"gap."
+msgstr ""
+"Il n'y a pas de créneaux disponibles pour le deuxième cours avec un délai de "
+"{self.day_gap} jour(s)"
+
+#: TTapp/TTConstraints/test_constraints.py:257
+msgid "There is no available tutor for {self.course1.full_name()}"
+msgstr "Il n'y a pas d'enseignant⋅e disponible pour {self.course1.full_name()}"
+
+#: TTapp/TTConstraints/test_constraints.py:259
+msgid "There is no available tutor for {self.course2.full_name()}"
+msgstr "Il n'y a pas d'enseignant⋅e disponible pour {self.course2.full_name()}"
+
+#: base/admin.py:614 base/admin.py:640 base/admin.py:653
+msgid "Week"
+msgstr "Semaine"
+
+#: base/forms.py:33
+msgid "Your e-mail address :"
+msgstr "Votre adresse mail :"
+
+#: base/forms.py:36
+msgid "Recipient :"
+msgstr "Destinataire :"
+
+#: base/forms.py:38
+msgid "Pseudo : 4 characters max"
+msgstr "Pseudo : 4 caractères max"
+
+#: base/forms.py:40
+msgid "Subject of the e-mail :"
+msgstr "Sujet du mail"
+
+#: base/forms.py:42
+msgid "100 characters max"
+msgstr "100 caractères max"
+
+#: base/forms.py:43
+msgid "Body of the message :"
+msgstr "Corps du message :"
+
+#: base/forms.py:50
+msgid "This person doesn't exist."
+msgstr "Cette personne n'existe pas."
+
+#: base/forms.py:58
+msgid "Ideally"
+msgstr "Idéalement"
+
+#: base/forms.py:64 base/templates/base/show-stype.html:134
+msgid "Maximum"
+msgstr "Maximum"
+
+#: base/models.py:121
+msgid "Basic group?"
+msgstr "Groupe basique?"
+
+#: base/models.py:210
+msgid "Half day"
+msgstr "Demie-journée"
+
+#: base/models.py:234
+msgid "Week number"
+msgstr "Numéro de semaine"
+
+#: base/models.py:287
+msgid "Educative"
+msgstr "Educatif"
+
+#: base/models.py:288
+msgid "Coop. (workplace)"
+msgstr "Coop. (poste)"
+
+#: base/models.py:289
+msgid "Coop. (worker)"
+msgstr "Coop. (salarié)"
+
+#: base/models.py:409
+msgid "Abbreviation"
+msgstr "Abbréviation"
+
+#: base/models.py:452
+msgid "graded?"
+msgstr "Noté ?"
+
+#: base/models.py:478
+msgid "Suspens?"
+msgstr "En suspens?"
+
+#: base/models.py:510
+msgid "Graded?"
+msgstr "Noté ?"
+
+#: base/models.py:886 base/models.py:897
+msgid "On different days"
+msgstr "Des jours différents"
+
+#: base/models.py:915
+msgid "Full"
+msgstr "Totale"
+
+#: base/models.py:917
+msgid "Full generation date"
+msgstr "Date de regénération"
+
+#: base/models.py:918
+msgid "Stabilized"
+msgstr "Stabilisée"
+
+#: base/models.py:920
+msgid "Partial generation date"
+msgstr "Date de regénération partielle"
+
+#: base/templates/base/contact.html:34 base/templates/base/visio.html:38
+msgid "Send"
+msgstr "Envoyer"
+
+#: base/templates/base/departments.html:15
+msgid "Please choose your department : "
+msgstr "Veuillez choisir votre département :"
+
+#: base/templates/base/help.html:34
+msgid "Room modification"
+msgstr "Modification de salle"
+
+#: base/templates/base/help.html:35
+msgid ""
+"Right click on the course in question, the available rooms appear. Click on "
+"+ to choose a room that is not available for this course. Don't forget to "
+"validate any changes."
+msgstr ""
+"Cliquer droit sur le cours en question, les salles disponibles apparaissent. "
+"Cliquer sur + pour choisir une salle non prévue pour ce cours. Ne pas "
+"oublier de valider tout changement."
+
+#: base/templates/base/help.html:38
+msgid "Create an account"
+msgstr "Créer un compte"
+
+#: base/templates/base/help.html:39
+msgid "Here"
+msgstr "Ici"
+
+#: base/templates/base/help.html:42
+msgid "Modification of an account"
+msgstr "Modifier un compte"
+
+#: base/templates/base/help.html:43
+msgid "Click on his nickname (his initials) at the top right of the page."
+msgstr "Cliquer sur son pseudo (ses initiales) en haut à droite de la page."
+
+#: base/templates/base/help.html:45
+msgid "Change password"
+msgstr "Mot de passe perdu ?"
+
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
+msgid "Click on"
+msgstr "Click sur"
+
+#: base/templates/base/help.html:46 base/templates/base/help.html:49
+msgid "this link"
+msgstr "ce lien"
+
+#: base/templates/base/help.html:46
+msgid "to change your password."
+msgstr "pour changer votre mot de passe."
+
+#: base/templates/base/help.html:48
+msgid "Password reminder"
+msgstr "Rappel du mot de passe"
+
+#: base/templates/base/help.html:49
+msgid "for a password reminder, or via 'Login' at the top of the page."
+msgstr "pour un rappel de mot de passe, ou via 'Se connecter' en haut de page."
+
+#: base/templates/base/help.html:51
+msgid "Direct link to a particular group"
+msgstr "Lien direct vers l'EDT d'un groupe spécifique"
+
+#: base/templates/base/help.html:52
+msgid "Add \"?promo=...&gp=...\" at the end of the url, for example "
+msgstr "Ajouter \"?promo=...&gp=...\" à la fin de l'url, par exemple "
+
+#: base/templates/base/help.html:53
+msgid "To know the name of your training programme and group, check the list "
+msgstr ""
+"Pour connaître le nom de votre promo et de votre groupe, regardez la liste"
+
+#: base/templates/base/help.html:53
+msgid "here"
+msgstr "ici"
+
+#: base/templates/base/help.html:56
+msgid "How availability entry work"
+msgstr "Fonctionnement de la saisie des disponibilités"
+
+#: base/templates/base/help.html:57
+msgid ""
+"When generating the schedule for a given week, if no availability is entered "
+"for that week, the typical week defines the availability."
+msgstr ""
+" Au moment de la génération de l'emploi du temps d'une semaine donnée, si "
+"aucune disponibilité n'est renseignée pour cette semaine, la semaine type "
+"définit les disponibilités."
+
+#: base/templates/base/help.html:59
+msgid "Some Tutorial Videos"
+msgstr "Quelques Tutos Vidéos"
+
+#: base/templates/base/module_description.html:35
+msgid "Modification of the module description."
+msgstr "Modification de la description du module"
+
+#: base/templates/base/module_description.html:41
+msgid "Modify"
+msgstr "Modifier"
+
+#: base/templates/base/notification.html:29
+msgid "I wish to be notified of changes for the"
+msgstr "Je souhaite être notifié⋅e des modifications pour les"
+
+#: base/templates/base/notification.html:32
+msgid "next weeks."
+msgstr "prochaines semaines."
+
+#: base/templates/base/notification.html:33
+msgid "(0 if no notification, 1 for the next 7 days, etc.)"
+msgstr "(0 si aucune notification, 1 pour les 7 prochains jours, etc.)"
+
+#: base/templates/base/notification.html:36
+msgid "Save"
+msgstr "Enregistrer"
+
+#: base/templates/base/room_preference.html:14
+msgid "Favorite room"
+msgstr "Préférences de salles"
+
+#: base/templates/base/room_preference.html:15
+msgid "(Ranking your favorite rooms, which may contain ties.)"
+msgstr "(Classement de vos salles préférées, pouvant contenir des égalités.)"
+
+#: base/templates/base/show-decale.html:79
+msgid "When ?"
+msgstr "Quand ?"
+
+#: base/templates/base/show-decale.html:81
+msgid "Cancelled class"
+msgstr "Cours annulé"
+
+#: base/templates/base/show-decale.html:82
+msgid "Pending classes"
+msgstr "Cours en attente"
+
+#: base/templates/base/show-decale.html:83
+msgid "Course scheduled on week"
+msgstr "Cours placé en semaine"
+
+#: base/templates/base/show-decale.html:89
+msgid "Why ?"
+msgstr "Pourquoi ?"
+
+#: base/templates/base/show-decale.html:90
+msgid "(Please fill in the date information)"
+msgstr "(Merci de remplir les informations sur la date)"
+
+#: base/templates/base/show-decale.html:98
+msgid " Proposals"
+msgstr "Propositions"
+
+#: base/templates/base/show-decale.html:104
+msgid " How ?"
+msgstr "Comment ?"
+
+#: base/templates/base/show-edt.html:49
+msgid "Check election"
+msgstr "Vérifier élection"
+
+#: base/templates/base/show-edt.html:53
+msgid "Elect this copy"
+msgstr "Elire cette copie"
+
+#: base/templates/base/show-edt.html:57
+msgid "Duplicate this copy"
+msgstr "Dupliquer cette copie"
+
+#: base/templates/base/show-edt.html:61
+msgid "Delete this copy"
+msgstr "Supprimer cette copie"
+
+#: base/templates/base/show-edt.html:65
+msgid "Delete all copies except the 0"
+msgstr "Supprimer toutes les copies sauf la 0"
+
+#: base/templates/base/show-edt.html:68
+msgid "Reassign rooms"
+msgstr "Réassigner les salles"
 
 #: base/templates/base/show-stype.html:95
 msgid "Weeks"
@@ -39,10 +628,13 @@ msgstr "de la semaine"
 
 #: base/templates/base/show-stype.html:98
 #: base/templates/base/show-stype.html:101
+#: configuration/templates/configuration/configuration.html:83
+#: configuration/templates/configuration/configuration.html:86
 msgid "year"
 msgstr "année"
 
 #: base/templates/base/show-stype.html:100
+#: configuration/templates/configuration/configuration.html:85
 msgid "until week"
 msgstr "à la semaine"
 
@@ -58,6 +650,7 @@ msgstr "Semaine type"
 msgid "Update my default week"
 msgstr "Redéfinir ma semaine type"
 
+#: base/templates/base/show-stype.html:112
 #: base/templates/base/show-stype.html:137
 msgid "button_save"
 msgstr "Sauvegarder"
@@ -89,10 +682,6 @@ msgstr ""
 msgid "Preferred"
 msgstr "Idéalement"
 
-#: base/templates/base/show-stype.html:134
-msgid "Maximum"
-msgstr "Maximum"
-
 #: base/templates/base/show-stype.html:144
 msgid "My favorite rooms"
 msgstr "Mes préférences de salles"
@@ -101,31 +690,53 @@ msgstr "Mes préférences de salles"
 msgid "Select my favorite rooms"
 msgstr "Choisir mes salles préférées"
 
+#: base/templates/base/show-stype.html:170
+msgid "Teachers"
+msgstr "Enseignant·e⋅s"
+
+#: base/templates/base/show-stype.html:171
+#: base/templates/base/show-stype.html:191
+msgid "Transformation in : "
+msgstr "Tranformation en : "
+
+#: base/templates/base/show-stype.html:177
+#: base/templates/base/show-stype.html:183
+msgid "Types of classes"
+msgstr "Type de cours"
+
+#: base/templates/base/show-stype.html:190 ics/templates/ics/index.html:82
+msgid "Rooms"
+msgstr "Salles"
+
+#: base/templates/base/statistics.html:105
+msgid "Number of days of innocuousness per room"
+msgstr "Nombre de jours d'innocupation par salle"
+
+#: base/templates/base/statistics.html:106
+msgid "Number of classes given per teacher"
+msgstr "Nombre de cours donnés par professeur"
+
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr "Créer ou modifier un lien"
 
-#: base/templates/base/visio.html:38
-msgid "Send"
-msgstr "Envoyer"
-
-#: base/views.py:1753
+#: base/views.py:1526
 msgid "Not authorized. New link then."
 msgstr "Non autorisé. Création d'un nouveau lien."
 
-#: base/views.py:1756
+#: base/views.py:1529
 msgid "Unknown link. New link then."
 msgstr "Lien inconnu. Création d'un nouveau lien."
 
-#: base/views.py:1768
+#: base/views.py:1541
 msgid "Created"
 msgstr "Créé"
 
-#: base/views.py:1768
+#: base/views.py:1541
 msgid "Modified"
 msgstr "Modifié"
 
-#: base/views.py:1771
+#: base/views.py:1544
 msgid "Tutor does not exist"
 msgstr "L'utilisateur n'existe pas."
 
@@ -157,11 +768,208 @@ msgstr "Sam."
 msgid "Sun."
 msgstr "Dim."
 
+#: configuration/templates/configuration/configuration.html:13
+msgid ""
+"Step 1 - Database configuration (teachers, groups, rooms, course types, etc.)"
+msgstr ""
+"Étape 1 - Configuration de la base de données (profs, groupes, salles, types "
+"de cours, etc.)"
+
+#: configuration/templates/configuration/configuration.html:14
+msgid "Option A: Using a spreadsheet file"
+msgstr "Option A : En utilisant un fichier tableur"
+
+#: configuration/templates/configuration/configuration.html:16
+msgid "Configuration file canvas"
+msgstr "Canevas du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:17
+#: configuration/templates/configuration/configuration.html:52
+msgid "Download and then complete the file below."
+msgstr "Téléchargez puis remplissez le fichier ci-dessous."
+
+#: configuration/templates/configuration/configuration.html:18
+msgid "Click to download the configuration file"
+msgstr "Cliquez pour télécharger le fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:19
+#: configuration/templates/configuration/configuration.html:60
+msgid "Download"
+msgstr "Télécharger"
+
+#: configuration/templates/configuration/configuration.html:23
+msgid "Configuration file completed"
+msgstr "Fichier de configuration complété"
+
+#: configuration/templates/configuration/configuration.html:24
+msgid "Upload the completed configuration file."
+msgstr "Téléversez le fichier de configuration rempli."
+
+#: configuration/templates/configuration/configuration.html:25
+#: configuration/templates/configuration/configuration.html:68
+msgid "Only xlsx format is accepted."
+msgstr "Seul le format xlsx est accepté."
+
+#: configuration/templates/configuration/configuration.html:29
+#: ics/templates/ics/index.html:98
+msgid "Department"
+msgstr "Département"
+
+#: configuration/templates/configuration/configuration.html:30
+#: people/templates/people/login.html:86
+msgid "Create"
+msgstr "Créer"
+
+#: configuration/templates/configuration/configuration.html:31
+msgid "Edit"
+msgstr "Modifier"
+
+#: configuration/templates/configuration/configuration.html:34
+#: configuration/templates/configuration/configuration.html:101
+#: templates/base.html:95
+msgid "Import"
+msgstr "Importer"
+
+#: configuration/templates/configuration/configuration.html:39
+#: configuration/templates/configuration/configuration.html:105
+msgid "Verdict :"
+msgstr "Verdict :"
+
+#: configuration/templates/configuration/configuration.html:43
+msgid "Option B: With Flopeditor"
+msgstr "Option B : Avec Flopeditor"
+
+#: configuration/templates/configuration/configuration.html:45
+msgid "Click here"
+msgstr "Cliquer ici"
+
+#: configuration/templates/configuration/configuration.html:45
+msgid " to go to Flopeditor."
+msgstr "pour vous rendre sur Flopeditor."
+
+#: configuration/templates/configuration/configuration.html:46
+msgid "If you need help, you can consult the Flopeditor documentation on "
+msgstr ""
+"Si vous avez besoin d'aide, vous pouvez consulter la documentation de "
+"Flopeditor sur "
+
+#: configuration/templates/configuration/configuration.html:46
+msgid "this page."
+msgstr "cette page."
+
+#: configuration/templates/configuration/configuration.html:49
+msgid ""
+"Step 2 - Plan the lessons (which lesson in which week, which teacher gives "
+"which lesson)"
+msgstr ""
+"Étape 2 - Planifier les cours (quel cours dans quelle semaine, quel prof "
+"donne quel cours)"
+
+#: configuration/templates/configuration/configuration.html:51
+msgid "Template for the planning file from the configuration file"
+msgstr ""
+"Canevas du fichier de planification à partir du fichier de configuration"
+
+#: configuration/templates/configuration/configuration.html:53
+msgid "Click to download the planning file outline"
+msgstr "Cliquez pour télécharger le canevas du fichier de planification"
+
+#: configuration/templates/configuration/configuration.html:67
+msgid "Completed planning file"
+msgstr "Fichier de planification des cours complété"
+
+#: configuration/templates/configuration/configuration.html:68
+msgid "Upload the completed planning file."
+msgstr "Téléversez le fichier de planification rempli."
+
+#: configuration/templates/configuration/configuration.html:82
+msgid "From week"
+msgstr "De la semaine"
+
+#: configuration/templates/configuration/configuration.html:88
+msgid "Only for periods "
+msgstr "Uniquement les périodes "
+
+#: configuration/templates/configuration/configuration.html:92
+msgid "Stabilization ?"
+msgstr "Stabilisation ?"
+
+#: ics/templates/ics/index.html:35
+msgid "iCal Subscription"
+msgstr "Abonnement iCal"
+
+#: ics/templates/ics/index.html:36
+msgid ""
+"Copy the corresponding link of the calendar you would like to add to your "
+"calendar manager."
+msgstr ""
+"Copiez le lien du calendrier qui vous intéresse, et importez-le dans votre "
+"gestionnaire d'agenda préféré."
+
+#: ics/templates/ics/index.html:38
+msgid "Groups"
+msgstr "Groupes"
+
+#: ics/templates/ics/index.html:40
+msgid "Structural"
+msgstr "Structurels"
+
+#: ics/templates/ics/index.html:42 ics/templates/ics/index.html:54
+msgid "Training program"
+msgstr "Promotion"
+
+#: ics/templates/ics/index.html:42 ics/templates/ics/index.html:54
+msgid "Group name"
+msgstr "Nom du groupe"
+
+#: ics/templates/ics/index.html:47 ics/templates/ics/index.html:59
+#: ics/templates/ics/index.html:76 ics/templates/ics/index.html:89
+#: ics/templates/ics/index.html:102
+msgid "Copy this link"
+msgstr "Copier ce lien"
+
+#: ics/templates/ics/index.html:52
+msgid "Transversal"
+msgstr "Transversaux"
+
+#: ics/templates/ics/index.html:66
+msgid "Tutors"
+msgstr "Enseignant⋅e⋅s"
+
+#: ics/templates/ics/index.html:69
+msgid "Pseudo"
+msgstr "Pseudo"
+
+#: ics/templates/ics/index.html:69
+msgid "First name"
+msgstr "Prénom "
+
+#: ics/templates/ics/index.html:69
+msgid "Last lame"
+msgstr "Nom "
+
+#: ics/templates/ics/index.html:69
+msgid "Department(s)"
+msgstr "Départements"
+
+#: ics/templates/ics/index.html:69 ics/templates/ics/index.html:85
+#: ics/templates/ics/index.html:98
+msgid "Address"
+msgstr "Adresse"
+
+#: ics/templates/ics/index.html:85
+msgid "Name"
+msgstr "Nom"
+
+#: ics/templates/ics/index.html:95
+msgid "Planned generations"
+msgstr "Générations prévues"
+
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
 msgstr "Mot de passe perdu ?"
 
-#: people/templates/people/login.html:58 templates/base.html:106
+#: people/templates/people/login.html:58 templates/base.html:109
 msgid "Sign in"
 msgstr "Se connecter"
 
@@ -189,9 +997,38 @@ msgstr "Vacataire"
 msgid "A tech or administrative staff"
 msgstr "BIATS"
 
-#: people/templates/people/login.html:86
-msgid "Create"
-msgstr "Créer"
+#: people/templates/people/studentPreferencesSelection.html:34
+msgid "Student Preferences"
+msgstr "Préférences des étudiant⋅e⋅s"
+
+#: people/templates/people/studentPreferencesSelection.html:43
+msgid "Preferences for your group"
+msgstr "Préférences pour votre groupe"
+
+#: people/templates/people/studentPreferencesSelection.html:45
+msgid "Morning or evening?"
+msgstr "Du matin ou du soir ?"
+
+#: people/templates/people/studentPreferencesSelection.html:52
+msgid "Busy days VS Free half-days"
+msgstr "Journées chargées VS demie-journées libres"
+
+#: people/templates/people/studentPreferencesSelection.html:60
+msgid "Holes?"
+msgstr "Les trous"
+
+#: people/templates/people/studentPreferencesSelection.html:66
+msgid "Eat early or late?"
+msgstr "Manger tôt ou tard ?"
+
+#: people/views.py:237
+msgid "Not allowed"
+msgstr "Non autorisé"
+
+#: people/views.py:243
+#, python-brace-format
+msgid "No such user as {user}"
+msgstr "Aucun utilisateur {user}"
 
 #: quote/forms.py:41
 msgid "Quote "
@@ -225,61 +1062,129 @@ msgstr "En-tête "
 msgid "Category "
 msgstr "Catégorie "
 
-#: templates/base.html:51
+#: solve_board/templates/solve_board/main-board.html:32
+msgid "Schedule Generation"
+msgstr "Génération d'EDT"
+
+#: solve_board/templates/solve_board/main-board.html:64
+msgid "Constraints"
+msgstr "Contraintes"
+
+#: solve_board/templates/solve_board/main-board.html:65
+msgid ""
+"All constraints appearing in bolded - with no weight - will be considered "
+"mandatory, the other ones will considered as preferences."
+msgstr ""
+"Les contraintes apparaissant en gras - avec un poids non défini - seront "
+"prises en compte de manière obligatoire, les autres seront utilisées dans la "
+"résolution comme des préférences."
+
+#: solve_board/templates/solve_board/main-board.html:70
+msgid "Configuration"
+msgstr "Configuration"
+
+#: solve_board/templates/solve_board/main-board.html:75
+msgid "Week⋅s"
+msgstr "Semaine(s)"
+
+#: solve_board/templates/solve_board/main-board.html:79
+msgid "Training Program"
+msgstr "Promotion"
+
+#: solve_board/templates/solve_board/main-board.html:83
+msgid "Stabilization"
+msgstr "Stabilisation"
+
+#: solve_board/templates/solve_board/main-board.html:88
+msgid "Solver"
+msgstr "Solveur"
+
+#: solve_board/templates/solve_board/main-board.html:99
+msgid "Maximum time limit for resolution (minuts)"
+msgstr "Durée limite de résolution (minutes)"
+
+#: solve_board/templates/solve_board/main-board.html:105
+msgid "Unlimited"
+msgstr "Illimité"
+
+#: templates/base.html:53
 msgid "Schedule_title"
 msgstr "Emplois du temps"
 
-#: templates/base.html:80
+#: templates/base.html:66
+msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
+msgstr "<span id=flopGreen >flop</span>!<span id=EDTRed >EDT</span>"
+
+#: templates/base.html:82
 msgid "Schedule_banner"
 msgstr "Consulter"
 
-#: templates/base.html:82
+#: templates/base.html:84
 msgid "Move/Cancel"
 msgstr "Décaler/Annuler"
 
-#: templates/base.html:84
+#: templates/base.html:86
 msgid "Preferences"
 msgstr "Préférences"
 
-#: templates/base.html:85
+#: templates/base.html:87
 msgid "iCal"
 msgstr "iCal"
 
-#: templates/base.html:86
+#: templates/base.html:88
 msgid "Help"
 msgstr "Aide"
 
-#: templates/base.html:87
+#: templates/base.html:89
 msgid "Messages"
 msgstr "Contact"
 
-#: templates/base.html:88
+#: templates/base.html:90
 msgid "Modules"
 msgstr "Modules"
 
-#: templates/base.html:90
+#: templates/base.html:92
 msgid "Generate"
 msgstr "Générer"
 
-#: templates/base.html:91
-msgid "Statistics"
-msgstr "Statistiques"
-
-#: templates/base.html:92
-msgid "Import"
-msgstr "Importer"
-
 #: templates/base.html:93
-msgid "Admin"
-msgstr ""
+msgid "flop!EDITOR"
+msgstr "flop!EDITOR"
 
-#: templates/base.html:99 templates/base.html:101 templates/base.html:103
+#: templates/base.html:96
+msgid "Admin"
+msgstr "Admin"
+
+#: templates/base.html:102 templates/base.html:104 templates/base.html:106
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: templates/base.html:110
+#: templates/base.html:113
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#~ msgid ""
+#~ "You will erase all courses for chosen periods and weeks. Do you confirm "
+#~ "import ?"
+#~ msgstr ""
+#~ "Vous allez effacez tous les cours des périodes et semaines déclarées. "
+#~ "Confirmez vous l'import ?"
+
+#~ msgid "Statistics"
+#~ msgstr "Statistiques"
+
+#~ msgid "Scheduler"
+#~ msgstr "EDT"
+
+#~ msgid "schedule"
+#~ msgstr "edt"
+
+#~ msgid "Class placed during the week"
+#~ msgstr "Cours placé en semaine"
+
+#, fuzzy
+#~ msgid "Room preferences"
+#~ msgstr "Préférences"
 
 #~ msgid "Choose my video conference rooms"
 #~ msgstr "Mes liens visio"

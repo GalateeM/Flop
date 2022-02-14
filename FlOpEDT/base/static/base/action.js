@@ -83,7 +83,7 @@ function apply_change_simple_pref(d) {
         d.value = Math.floor(d.value / (par_dispos.nmax / 2)) * par_dispos.nmax / 2;
       }
       d.value = (d.value + par_dispos.nmax / 2) % (3 * par_dispos.nmax / 2);
-      if (cosmo && d.value == 0) {
+      if (department_settings.mode.cosmo && d.value == 0) {
         d.value++;
       }
       update_pref_interval(user.name, d.day, d.start_time, d.duration, d.value);
@@ -201,7 +201,7 @@ function select_room_change() {
     var occupied_rooms = [];
     for (let i = 0; i < concurrent_courses.length; i++) {
       // for real rooms
-      if (concurrent_courses[i].room != '') {
+      if (concurrent_courses[i].room != null) {
         busy_rooms = rooms.roomgroups[concurrent_courses[i].room];
         for (j = 0; j < busy_rooms.length; j++) {
           if (occupied_rooms.indexOf(busy_rooms[j]) == -1) {
@@ -310,12 +310,15 @@ function fetch_all_tutors() {
     $.ajax({
       type: "GET",
       dataType: 'json',
-      url: url_all_tutors,
+      url: build_url(url_all_tutors, {dept: department}),
       async: false,
       success: function (data) {
-        all_tutors = data.filter(function (d) {
-          return d > 'A';
-        });
+        
+        all_tutors = data
+          .map(function(d) { return d.username; })
+          .filter(function (d) {
+            return d > 'A';
+          });
         all_tutors.sort();
         show_loader(false);
       },
@@ -339,14 +342,22 @@ function select_tutor_module_change() {
   room_tutor_change.cm_settings = tutor_module_cm_settings;
 
   var c = pending.wanted_course;
-  room_tutor_change.old_value = c.prof;
-  room_tutor_change.cur_value = c.prof;
 
-  var tutor_same_module = cours
+  room_tutor_change.old_value = null ;
+  if (c.tutors.length > 0) {
+    room_tutor_change.old_value = c.tutors[0];
+  }
+  room_tutor_change.cur_value = room_tutor_change.old_value ;
+
+  let courses_same_module = cours
     .filter(function (oth_c) {
       return oth_c.mod == c.mod;
-    })
-    .map(function (oth_c) { return oth_c.prof; });
+    }) ;
+
+  let tutor_same_module = [] ;
+  for (let ic = 0 ; ic < courses_same_module.length ; ic++) {
+    Array.prototype.push.apply(tutor_same_module, courses_same_module[ic].tutors) ;
+  }
 
   // remove duplicate 
   tutor_same_module = tutor_same_module.filter(function (t, i) {
@@ -408,7 +419,7 @@ function select_salarie_change() {
     var possibles = new Set();
     cours.forEach(function (c) {
       if (c.group == tache.group) {
-        possibles.add(c.prof);
+        Set.prototype.add.apply(possibles, c.tutors);
       }
     });
     room_tutor_change.proposal = Array.from(possibles);
@@ -460,7 +471,9 @@ function select_tutor_change(f) {
 
 
 function confirm_tutor_change(d) {
-  Object.assign(pending.wanted_course, { prof: d.content });
+
+  pending.wanted_course.tutors.shift();
+  pending.wanted_course.tutors.unshift(d.content);
 
   room_tutor_change.proposal = [];
 
@@ -590,8 +603,8 @@ var is_no_hidden_grp = true;
 function check_hidden_groups() {
   is_no_hidden_grp = true;
   for (let a in groups) {
-    for (let g in groups[a]) {
-      if (groups[a][g].display == false) {
+    for (let g in groups[a]["structural"]) {
+      if (groups[a]["structural"][g].display == false) {
         is_no_hidden_grp = false;
         return;
       }
@@ -603,8 +616,8 @@ function are_all_groups_hidden() {
   // if all groups are hidden
   // all groups are automatically displayed
   for (let a in groups) {
-    for (let g in groups[a]) {
-      if (groups[a][g].display == true) {
+    for (let g in groups[a]["structural"]) {
+      if (groups[a]["structural"][g].display == true) {
         return;
       }
     }
@@ -614,8 +627,8 @@ function are_all_groups_hidden() {
 
 function set_all_groups_display(isDisplayed) {
   for (let a in groups) {
-    for (let g in groups[a]) {
-      groups[a][g].display = isDisplayed;
+    for (let g in groups[a]["structural"]) {
+      groups[a]["structural"][g].display = isDisplayed;
     }
   }
 }
@@ -625,7 +638,7 @@ function set_all_groups_display(isDisplayed) {
 // start == true iff a particular group is chosen by a GET request
 // go_button == true iff the group buttons are to be updated
 function apply_gp_display(gp, start, go_button) {
-  if (fetch.done || start) {
+  if (fetch_status.done || start) {
     if (is_no_hidden_grp) {
       set_all_groups_display(false);
       gp.display = true;
@@ -644,7 +657,7 @@ function apply_gp_display(gp, start, go_button) {
       go_gp_buttons();
     }
   }
-  if (fetch.done) {
+  if (fetch_status.done) {
     go_edt();
   }
 }
@@ -655,7 +668,7 @@ function apply_gp_display(gp, start, go_button) {
 function propagate_display_down(gp, b) {
   gp.display = b;
   for (let i = 0; i < gp.children.length; i++) {
-    propagate_display_down(groups[gp.promo][gp.children[i]], b);
+    propagate_display_down(groups[gp.promo]["structural"][gp.children[i]], b);
   }
 }
 
@@ -665,19 +678,19 @@ function propagate_display_up(gp, b) {
   gp.display = b;
   if (gp.parent != null) {
     if (b) { // ancestors should be displayed too 
-      propagate_display_up(groups[gp.promo][gp.parent], true);
+      propagate_display_up(groups[gp.promo]["structural"][gp.parent], true);
     } else { // is there any sibling still displayed?
       var i = 0;
       var hidden_child = true;
-      while (hidden_child && i < groups[gp.promo][gp.parent].children.length) {
-        if (groups[gp.promo][groups[gp.promo][gp.parent].children[i]].display) {
+      while (hidden_child && i < groups[gp.promo]["structural"][gp.parent].children.length) {
+        if (groups[gp.promo]["structural"][groups[gp.promo]["structural"][gp.parent].children[i]].display) {
           hidden_child = false;
         } else {
           i += 1;
         }
       }
       if (hidden_child) {
-        propagate_display_up(groups[gp.promo][gp.parent], false);
+        propagate_display_up(groups[gp.promo]["structural"][gp.parent], false);
       }
     }
   }
@@ -690,7 +703,7 @@ function propagate_display_up(gp, b) {
 
 // apply the updates resulting from a change in a checkbox
 function apply_ckbox(dk) {
-  if (ckbox[dk].en && fetch.done) {
+  if (ckbox[dk].en && fetch_status.done) {
 
     if (ckbox[dk].cked) {
       ckbox[dk].cked = false;
@@ -701,6 +714,11 @@ function apply_ckbox(dk) {
     if (dk == "dis-mod") {
 
       if (ckbox[dk].cked) {
+
+        if(user.name == '') {
+          window.location.href = $('#sign_in').attr('href');
+        }
+        
         //create_dispos_user_data();
         //ckbox["dis-mod"].disp = true;
         svg.get_dom("stg").attr("visibility", "visible");
@@ -738,11 +756,11 @@ function apply_ckbox(dk) {
           "lunch_break_start_time", "lunch_break_finish_time"
         ] ;
         for (let i = 0 ; i < bus.length ; i ++) {
-          if (typeof time_settings.time.bu[bus[i]] !== 'undefined') {
-            time_settings.time[bus[i]] = time_settings.time.bu[bus[i]] ;
+          if (typeof department_settings.time.bu[bus[i]] !== 'undefined') {
+            department_settings.time[bus[i]] = department_settings.time.bu[bus[i]] ;
           }
         }
-        time_settings.time.bu = {} ;
+        department_settings.time.bu = {} ;
         
         user.dispos = [];
         //ckbox["dis-mod"].disp = false;
@@ -766,8 +784,8 @@ function apply_ckbox(dk) {
             but: { list: [{ txt: "Ok", click: function (d) { } }] },
             com: {
               list: [{ txt: "Avis", ftsi: 23 }, { txt: "" },
-                { txt: "L'emploi du temps va être regénéré totalement (cf. en bas à droite)." },
-                { txt: "Contentez-vous de mettre à jour vos disponibilités : elles seront prises en compte lors de la regénération." }]
+                { txt: gettext("The schedule shall be fully regenerated (see downside to the right).") },
+                { txt: gettext("Just update your availabilities : they will be considered for the next generation.")}]
             }
           };
           splash(splash_disclaimer);
@@ -869,7 +887,7 @@ function compute_changes(changes, conc_tutors, gps) {
       // } else 
 
 
-      if (cur_course.room == "" && cur_course.id_visio == -1) {
+      if (cur_course.room == null && cur_course.id_visio == -1) {
         splash_case = {
           id: "def-room",
           but: butOK,
@@ -891,17 +909,24 @@ function compute_changes(changes, conc_tutors, gps) {
       /* Compute who is concerned by the change */
 
       // add instructor if never seen
-      if (conc_tutors.indexOf(cur_course.prof) == -1
-        && cur_course.prof != logged_usr.name) {
-        conc_tutors.push(cur_course.prof);
+      let it ;
+      for (it = 0 ; it < cur_course.tutors.length ; it++) {
+        if (conc_tutors.indexOf(cur_course.tutors[it]) == -1
+            && cur_course.tutors[it] != logged_usr.name
+            && cur_course.tutors[it] !== null) {
+          conc_tutors.push(cur_course.tutors[it]);
+        }
       }
-      if (conc_tutors.indexOf(cb.prof) == -1
-        && cur_course.prof != logged_usr.name) {
-        conc_tutors.push(cb.prof);
+      for (it = 0 ; it < cb.tutors.length ; it++) {
+        if (conc_tutors.indexOf(cb.tutors[it]) == -1
+            && cb.tutors[it] != logged_usr.name
+            && cb.tutors[it] != null) {
+          conc_tutors.push(cb.tutors[it]);
+        }
       }
 
       // add group if never seen
-      gp_changed = groups[cur_course.promo][cur_course.group];
+      gp_changed = groups[cur_course.promo]["structural"][cur_course.group];
       gp_named = set_promos[gp_changed.promo] + gp_changed.name;
       if (gps.indexOf(gp_named) == -1) {
         gps.push(gp_named);
@@ -915,10 +940,13 @@ function compute_changes(changes, conc_tutors, gps) {
         day: cur_course.day,
         start: cur_course.start,
         room: cur_course.room,
-        tutor: cur_course.prof,
+        tutor: null, 
         id_visio: cur_course.id_visio
       };
 
+      if (cur_course.tutors.length > 0) {
+        change.tutor = cur_course.tutors[0] ;
+      }
 
       console.log("change", change);
       changes.push(change);
@@ -1008,7 +1036,7 @@ function get_courses(tutor, day_desc) {
   });
   if (typeof full_week !== 'undefined') {
     return full_week.courses.filter(function (d) {
-      return d.day == day_desc.ref && d.prof == tutor;
+      return d.day == day_desc.ref && d.tutors.includes(tutor);
     });
   }
   return [];
@@ -1079,7 +1107,7 @@ function aggregate_hours(tutor, iweek) {
   }
 
   week_desc.courses.filter(function (d) {
-    return d.prof == tutor;
+    return d.tutors.includes(tutor) ;
   }).forEach(function (d) {
     ret[day_shifts[d.day]].duration += d.duration;
   });
@@ -1188,7 +1216,7 @@ function check_constraints_tutor(tutor) {
   var issues = [];
 
   var tut_courses = cours.filter(function (d) {
-    d.prof == tutor;
+    d.tutors.includes(tutor) ;
   });
 
   var icur_week = wdw_weeks.get_iselected_pure();
@@ -1328,7 +1356,7 @@ function confirm_change() {
     ack.more = "Rien à signaler.";
     go_ack_msg();
   } else {
-    if (!cosmo) {
+    if (!department_settings.mode.cosmo) {
       confirm_contact_all(changes, conc_tutors, gps);
     } else {
       confirm_law_constraints(changes, conc_tutors, gps);
@@ -1495,7 +1523,10 @@ function send_edt_change(changes) {
       edt_change_ack(msg);
       show_loader(false);
     },
-    error: function (msg) {
+    error: function (xhr, ajaxOptions, thrownError) {
+      console.log(xhr);
+      console.log(ajaxOptions);
+      console.log(thrownError);
       edt_change_ack({
         status: 'KO',
         more: 'Pb de communication avec le serveur'
@@ -1867,8 +1898,12 @@ function select_pref_links_change() {
   ["users", "groups"].forEach(function(link_type) {
     switch(link_type) {
     case 'users':
-      key = pending.wanted_course.prof ;
       pref_links = preferred_links.users ;
+      //TBD supp_tutor
+      key = Object.keys(pref_links)[0];
+      if (pending.wanted_course.tutors.length > 0) {
+        key = pending.wanted_course.tutors[0] ;
+      }
       break;
     case 'groups':
       key = gp_training_prog_to_str(pending.wanted_course) ;
@@ -1899,8 +1934,10 @@ function select_pref_links_change() {
 
   if (room_tutor_change.proposal.length == 0) {
     console.log('Pas de lien...');
-    window.location.href =
-      url_change_preferred_links + pending.wanted_course.prof ;
+    if (pending.wanted_course.tutors.length > 0) {
+      window.location.href =
+        url_change_preferred_links + pending.wanted_course.tutors[0] ;
+    }
   }
   
   
@@ -1912,7 +1949,7 @@ function select_pref_links_change() {
 function confirm_pref_links_change(d) {
   Object.assign(
     pending.wanted_course,
-    { id_visio: d.id, room: '' }
+    { id_visio: d.id, room: null }
   );
 
   room_tutor_change.proposal = [];
@@ -1932,7 +1969,7 @@ function add_bouge(pending) {
       day: pending.init_course.day,
       start: pending.init_course.start,
       room: pending.init_course.room,
-      prof: pending.init_course.prof,
+      tutors: pending.init_course.tutors.slice(),
       id_visio: pending.init_course.id_visio
     };
     cours.forEach(function(c) {
@@ -1940,7 +1977,7 @@ function add_bouge(pending) {
         c.day = pending.wanted_course.day ;
         c.start = pending.wanted_course.start ;
         c.room = pending.wanted_course.room ;
-        c.prof = pending.wanted_course.prof ;
+        c.tutors = pending.wanted_course.tutors.slice() ;
         id_visio = pending.wanted_course.id_visio ;
       }
     });
@@ -1949,11 +1986,24 @@ function add_bouge(pending) {
 }
 
 function has_changed(cb, c) {
-  return cb.day != c.day
+  let except_tutors = cb.day != c.day
     || cb.start != c.start
     || cb.room != c.room
-    || cb.prof != c.prof
     || cb.id_visio != c.id_visio;
+  if (except_tutors) {
+    return true;
+  } else {
+    if (cb.tutors.length != c.tutors.length) {
+      return true ;
+    } else {
+      for (let it = 0 ; it < cb.tutors.length ; it++) {
+        if (cb.tutors[it] != c.tutors[it]) {
+          return true ;
+        }
+      }
+      return false ;
+    }
+  }
 }
 
 
@@ -1995,10 +2045,34 @@ function compute_cm_room_tutor_direction() {
   }
 }
 
+
+function find_overlapping_courses(reference_course) {
+  let start_time = reference_course["start"];
+  let finish_time = reference_course["start"]+reference_course["duration"];
+  let reference_group_name = reference_course["group"];
+  let reference_train_prog_name = reference_course["promo"];
+  let reference_day = reference_course["day"];
+  overlapping_courses = [];
+  
+  for (let i = 0; i<cours.length ; i++) {
+    if (cours[i]["group"] == reference_group_name
+        && cours[i]["promo"] == reference_train_prog_name
+        && cours[i]["day"]==reference_day ){
+      let cours_finish_time = cours[i]["start"]+cours[i]["duration"];
+      if (cours[i]["start"] < finish_time && cours_finish_time > start_time){
+        overlapping_courses.push(cours[i]);
+      }
+    }
+  }
+  return overlapping_courses;
+}
+
 function show_detailed_courses(cours) {
-  remove_details();
+  remove_details(); 
   var details = svg.get_dom("dg").append("g")
     .attr("id", "course_details");
+
+  let overlapping_courses = find_overlapping_courses(cours);
 
   var strokeColor;
   var strokeWidth;
@@ -2021,14 +2095,65 @@ function show_detailed_courses(cours) {
     }
   }
   
+  let modinfo = {name: '', url: ''} ;
+  let tutinfo = {name: '', mail: ''} ;
+  if (cours.mod in modules_info){
+    modinfo.name = modules_info[cours.mod].name;
+    modinfo.url = modules_info[cours.mod].url;
+  } else {
+    if (cours.mod == null) {
+      modinfo.name = 'Pas de module';
+    } else {
+      modinfo.name = 'Module inconnu';
+    }
+  }
+  if (cours.tutors.length > 0) {
+    let tutor = cours.tutors[0] ;
+    if (tutor in tutors_info) {
+      tutinfo.name = tutors_info[tutor].full_name;
+      tutinfo.mail = tutors_info[tutor].email;
+    } else {
+      tutinfo.name = 'Prof inconnu·e' ;
+    }
+  } else {
+    tutinfo.name = 'Pas de prof attitré·e';
+  }
   
+  // TBD supp_tutor
+  let tutor = null ;
+  if (cours.tutors.length > 0) {
+    tutor = cours.tutors[0] ;
+  }
   let infos = [
-    {'txt':modules_info[cours.mod].name, 'url':modules_info[cours.mod].url},
+    {
+      'txt': modinfo.name,
+      'url': modinfo.url
+    },
     room_info,
-    {'txt':cours.comment},
-    {'txt':tutors_info[cours.prof].full_name},
-    {'txt':tutors_info[cours.prof].email, 'url': url_contact + cours.prof}
-  ];
+    {'txt': cours.comment},
+    {'txt': tutinfo.name},
+    {
+      'txt': tutinfo.mail,
+      'url': tutor==null?url_contact:(url_contact + tutor)
+    },
+  ]; 
+  
+  if (overlapping_courses.length > 1) {
+    infos.push( {'txt':""} );
+    infos.push( {'txt':"Cours ayant lieu en même temps:"} );
+    infos.push( {'txt':""} );
+    
+    for (let i=1; i<overlapping_courses.length; i++) {
+      infos.push( {'txt':overlapping_courses[i]["mod"] + ' - '
+                   + overlapping_courses[i]["from_transversal"] + ' - '
+                   + overlapping_courses[i]["prof"] + ' - '
+                   + overlapping_courses[i]["start"]/60+"h à "
+                   +(overlapping_courses[i]["start"]
+                     +overlapping_courses[i]["duration"])/60+"h"} );
+      infos.push( {'txt':''});
+    }
+  }
+  
   nb_detailed_infos = infos.length ;
 
   details
@@ -2068,7 +2193,7 @@ function remove_details() {
 }
 
 function apply_selection_display(choice) {
-  if (fetch.done) {
+  if (fetch_status.done) {
 
     var sel_list = choice.panel.list;
 
@@ -2082,21 +2207,29 @@ function apply_selection_display(choice) {
 
 
     if (choice.panel.type == "tutor"
-      && logged_usr.dispo_all_change && ckbox["dis-mod"].cked) {
+        && logged_usr.dispo_all_change && ckbox["dis-mod"].cked) {
+      // special mode
       tutors.all.forEach(function (t) { t.display = false; });
       concerned.display = true;
       user.name = choice.name;
       create_dispos_user_data();
       go_pref(true);
+
+      
     } else {
 
       if (concerned.display) {
+        // click when displayed
+        
         var nb_displayed = sel_list.filter(function (t) {
           return t.display;
         }).length;
+        
         if (nb_displayed == sel_list.length) {
+          // click when all displayed
           sel_list.forEach(function (t) { t.display = false; });
           concerned.display = true;
+          
         } else {
           concerned.display = false;
           nb_displayed--;
@@ -2121,7 +2254,7 @@ function apply_selection_display_all(p) {
   var sel_list = [];
 
   if (p.type != "tutor"
-    || (fetch.done
+    || (fetch_status.done
       && (!logged_usr.dispo_all_change
         || !ckbox["dis-mod"].cked))) {
     p.list.forEach(function (d) {

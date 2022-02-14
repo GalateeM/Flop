@@ -47,7 +47,7 @@ class ModuleDisplay(models.Model):
     module = models.OneToOneField('base.Module',
                                   related_name='display',
                                   on_delete=models.CASCADE)
-    color_bg = ColorField(default="#FF0000")
+    color_bg = ColorField(default="#D3D3D3")
     color_txt = ColorField(default="#000000")
 
     def __str__(self):
@@ -67,7 +67,7 @@ class TrainingProgrammeDisplay(models.Model):
 
 
 class GroupDisplay(models.Model):
-    group = models.OneToOneField('base.Group',
+    group = models.OneToOneField('base.StructuralGroup',
                                  related_name='display',
                                  on_delete=models.CASCADE)
     button_height = models.PositiveIntegerField(null=True, default=None)

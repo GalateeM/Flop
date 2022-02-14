@@ -30,12 +30,12 @@ from django.db import transaction
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.models import Group, RoomType, Room, \
+from base.models import StructuralGroup, RoomType, Room, \
                         ScheduledCourse, EdtVersion, Department, Regen, \
                         RoomSort, Period, CourseType, \
                         TutorCost, CourseStartTimeConstraint, \
                         TimeGeneralSettings, GroupType, CourseType, \
-                        TrainingProgramme, Course
+                        TrainingProgramme, Course, Week
 
 from displayweb.models import GroupDisplay, TrainingProgrammeDisplay, BreakingNews
 
@@ -74,22 +74,15 @@ def create_first_department():
 
     for type in types:
         type.objects.all().update(department=department)
-
-    # Init TimeGeneralSettings with default values
-    TimeGeneralSettings.objects.create(
-                        department=department,
-                        day_start_time=8*60,
-                        day_finish_time=18*60+45,
-                        lunch_break_start_time=12*60+30,
-                        lunch_break_finish_time=14*60,
-                        days=["m", "tu", "w", "th", "f"])
-
+        
     return department
 
 
-def get_edt_version(department, week, year, create=False):
+def get_edt_version(department, week_nb, year, create=False):
 
-    params = {'week': week, 'year': year, 'department': department}
+    week = Week.objects.get(nb=week_nb, year=year)
+
+    params = {'week': week, 'department': department}
 
     if create:
         try:
@@ -111,13 +104,12 @@ def get_edt_version(department, week, year, create=False):
     return version
 
 
-def get_scheduled_courses(department, week, year, num_copy):
+def get_scheduled_courses(department, week, num_copy=0):
 
     qs = ScheduledCourse.objects \
                     .filter(
-                        course__module__train_prog__department=department,
+                        course__type__department=department,
                         course__week=week,
-                        course__year=year,
                         day__in=get_working_days(department),
                         work_copy=num_copy).select_related('course',
                                                            'course__tutor',
@@ -134,8 +126,8 @@ def get_scheduled_courses(department, week, year, num_copy):
 def get_unscheduled_courses(department, week, year, num_copy):
     return Course.objects.filter(
         module__train_prog__department=department,
-        week=week,
-        year=year
+        week__nb=week,
+        week__year=year
     ).exclude(pk__in=ScheduledCourse.objects.filter(
         course__module__train_prog__department=department,
         work_copy=num_copy
@@ -162,7 +154,7 @@ def get_groups(department_abbrev):
 
         gp_dict_children = {}
         gp_master = None
-        for gp in Group.objects.filter(train_prog=train_prog):
+        for gp in StructuralGroup.objects.filter(train_prog=train_prog):
             if gp.full_name in gp_dict_children:
                 raise Exception('Group name should be unique')
             if gp.parent_groups.all().count() == 0:
@@ -179,13 +171,19 @@ def get_groups(department_abbrev):
             raise Exception(f"Training program {train_prog} does not have any group"
                             f" with no parent.")
 
-        for gp in Group.objects.filter(train_prog=train_prog).order_by('name'):
+        for gp in StructuralGroup.objects.filter(train_prog=train_prog).order_by('name'):
             for new_gp in gp.parent_groups.all():
                 gp_dict_children[new_gp.full_name].append(gp)
 
         final_groups.append(get_descendant_groups(gp_master, gp_dict_children))
 
     return final_groups
+
+
+def get_all_connected_courses(group, week, num_copy=0):
+    qs = get_scheduled_courses(group.train_prog.department,
+                               week, num_copy=num_copy)
+    return qs.filter(groups__in = group.connected_groups())
 
 
 def get_descendant_groups(gp, children):
@@ -244,9 +242,9 @@ def get_room_types_groups(department_abbrev):
 
     return {'roomtypes': {str(rt): list(set(
         [room.name for room in rt.members.all()]
-    )) for rt in RoomType.objects.filter(department=dept)},
+    )) for rt in RoomType.objects.prefetch_related('members').filter(department=dept)},
             'roomgroups': {room.name: [sub.name for sub in room.and_subrooms()] \
-                           for room in Room.objects.filter(departments=dept)}
+                           for room in Room.objects.prefetch_related('subrooms', 'subrooms__subrooms').filter(departments=dept)}
             }
 
 
@@ -305,19 +303,25 @@ def get_coursetype_constraints(department_abbrev):
     return dic
 
 
-def get_time_settings(dept):
+def get_department_settings(dept):
     """
     :return: time general settings
     """
-    ts = TimeGeneralSettings.objects.get(department=dept)
-    time_settings = {'time':
-                     {'day_start_time': ts.day_start_time,
-                      'day_finish_time': ts.day_finish_time,
-                      'lunch_break_start_time': ts.lunch_break_start_time,
-                      'lunch_break_finish_time': ts.lunch_break_finish_time,
-                      'def_pref_duration':ts.default_preference_duration},
-                     'days': ts.days}
-    return time_settings
+    ts = dept.timegeneralsettings
+    mode = dept.mode
+    department_settings = \
+        {'time':
+         {'day_start_time': ts.day_start_time,
+          'day_finish_time': ts.day_finish_time,
+          'lunch_break_start_time': ts.lunch_break_start_time,
+          'lunch_break_finish_time': ts.lunch_break_finish_time,
+          'def_pref_duration': ts.default_preference_duration},
+         'days': ts.days,
+         'mode':
+         {'cosmo': mode.cosmo,
+          'visio': str(mode.visio)}
+        }
+    return department_settings
 
 
 def get_departments():
