@@ -140,6 +140,10 @@ class Tutor(User):
     class Meta:
         verbose_name = 'Tutor'
 
+    def save(self, *args, **kwargs):
+        self.is_tutor = True
+        super(Tutor, self).save(*args, **kwargs)
+
 
 class FullStaff(Tutor):
     is_iut = models.BooleanField(default=True)
@@ -194,8 +198,8 @@ class BIATOS(Tutor):
 
 
 class Student(User):  # for now: representative
-    belong_to = models.ManyToManyField('base.Group',
-                                       blank=True)
+    belong_to = models.ManyToManyField('base.GenericGroup',
+                                               blank=True)
 
     def __str__(self):
         return str(self.username)
@@ -211,6 +215,10 @@ class Preferences(models.Model):
     morning_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
     free_half_day_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
+    hole_weight = models.DecimalField(
+        default=.5, blank=True, max_digits=3, decimal_places=2)
+    eat_weight = models.DecimalField(
         default=.5, blank=True, max_digits=3, decimal_places=2)
 
     def get_morning_weight(self):
@@ -236,32 +244,37 @@ class StudentPreferences(Preferences):
 
 
 class GroupPreferences(Preferences):
-    group = models.OneToOneField('base.Group',
+    group = models.OneToOneField('base.StructuralGroup',
                                  related_name='preferences',
                                  on_delete=models.CASCADE)
 
     def calculate_fields(self):
         # To pull students from the group
-        students_preferences = StudentPreferences.objects.filter(
-            student__belong_to=self.group)
+        students_preferences = StudentPreferences.objects.filter(student__belong_to=self.group)
 
         # To initialise variables and getting the divider to get the average
         local_morning_weight = 0
         local_free_half_day_weight = 0
+        local_hole_weight = 0
+        local_eat_weight = 0
         nb_student_prefs = len(students_preferences)
         if nb_student_prefs == 0:
             self.morning_weight = 0.5
             self.free_half_day_weight = 0.5
-
+            self.hole_weight = 0.5
+            self.eat_weight = 0.5
         else:
             # To range the table
             for student_pref in students_preferences:
                 local_morning_weight += student_pref.morning_weight
                 local_free_half_day_weight += student_pref.free_half_day_weight
-
+                local_hole_weight += student_pref.hole_weight
+                local_eat_weight += student_pref.eat_weight
             # To calculate the average of each attributs
             self.morning_weight = local_morning_weight/nb_student_prefs
             self.free_half_day_weight = local_free_half_day_weight/nb_student_prefs
+            self.hole_weight = local_hole_weight/nb_student_prefs
+            self.eat_weight = local_eat_weight/nb_student_prefs
             self.save()
 
 
@@ -287,8 +300,7 @@ class UserPreferredLinks(models.Model):
 class PhysicalPresence(models.Model):
     user = models.ForeignKey('people.User', on_delete=models.CASCADE, related_name='physical_presences')
     day = models.CharField(max_length=2, choices=Day.CHOICES, default=Day.MONDAY)
-    week = models.PositiveSmallIntegerField(validators=[MinValueValidator(0), MaxValueValidator(53)])
-    year = models.PositiveSmallIntegerField()
+    week = models.ForeignKey('base.Week', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} is present {self.day} of week {self.week}-{self.year}"
+        return f"{self.user.username} is present {self.day} of week {self.week}"

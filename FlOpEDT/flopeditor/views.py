@@ -26,13 +26,13 @@ you develop activities involving the FlOpEDT/FlOpScheduler software
 without disclosing the source code of your own applications.
 
 
-This module is used to declare the views related to FlopEditor, an app used
+This module is used to declare the views related to flop!EDITOR, an app used
 to manage a department statistics for FlOpEDT.
 """
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseForbidden
-from base.models import Department, TimeGeneralSettings, Day
+from base.models import Department, TimeGeneralSettings, Day, Mode
 from base.timing import min_to_str, str_to_min
 from FlOpEDT.decorators import superuser_required, \
     tutor_or_superuser_required, tutor_required
@@ -60,11 +60,11 @@ def has_any_dept_perm(request):
 
 @tutor_or_superuser_required
 def home(request):
-    """Main view of FlopEditor.
+    """Main view of flop!EDITOR.
 
     :param request: Client request.
     :type request:  django.http.HttpRequest
-    :return: Home page rendered from the home template of FlopEditor.
+    :return: Home page rendered from the home template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -118,7 +118,7 @@ def department_default(request, department_abbrev):
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the default template of FlopEditor.
+    :return: Parameters page rendered from the default template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -128,13 +128,13 @@ def department_default(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_parameters(request, department_abbrev):
-    """Parameters view of FlopEditor.
+    """Parameters view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the parameters template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -159,18 +159,20 @@ def department_parameters(request, department_abbrev):
         'employer':employer,
         'is_iut': get_is_iut(request),
         'has_any_dept_perm': has_any_dept_perm(request),
+        'visio_mode': department.mode.visio,
+        'cosmo_mode': department.mode.get_cosmo_display()
     })
 
 
 @tutor_or_superuser_required
 def department_parameters_edit(request, department_abbrev):
-    """Parameters edit view of FlopEditor.
+    """Parameters edit view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Parameters page rendered from the parameters template of FlopEditor.
+    :return: Parameters page rendered from the parameters template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -195,6 +197,7 @@ def department_parameters_edit(request, department_abbrev):
         'employer':employer,
         'is_iut': get_is_iut(request),
         'has_any_dept_perm': has_any_dept_perm(request),
+        'mode': department.mode
     })
 
 
@@ -263,6 +266,12 @@ def ajax_edit_parameters(request, department_abbrev):
     lunch_break_start_time = request.POST['lunch_break_start_time']
     lunch_break_finish_time = request.POST['lunch_break_finish_time']
     default_preference_duration = request.POST['default_preference_duration']
+    visio_mode = request.POST['visio_mode']
+    if visio_mode == "True":
+        visio_mode = True
+    else:
+        visio_mode = False
+    cosmo_mode = request.POST['cosmo_mode']
     response = validate_parameters_edit(
         days,
         day_start_time,
@@ -282,6 +291,10 @@ def ajax_edit_parameters(request, department_abbrev):
         parameters.default_preference_duration = str_to_min(
             default_preference_duration)
         parameters.save()
+        mode, created = Mode.objects.get_or_create(department=department)
+        mode.cosmo = cosmo_mode
+        mode.visio = visio_mode
+        mode.save()
         response['message'] = "Les modifications ont bien été enregistrées."
     return JsonResponse(response)
 
@@ -302,7 +315,7 @@ def crud_view(request, department_abbrev, view_name, title):
     :type title:                str
     :param department_abbrev: Department abbreviation.
     :type department_abbrev:  str
-    :return: page rendered from the corresponding template of FlopEditor.
+    :return: page rendered from the corresponding template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -324,13 +337,13 @@ def crud_view(request, department_abbrev, view_name, title):
 
 @tutor_or_superuser_required
 def department_tutors(request, department_abbrev):
-    """Tutors view of FlopEditor.
+    """Tutors view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: page rendered from the rooms template of FlopEditor.
+    :return: page rendered from the rooms template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -342,13 +355,13 @@ def department_tutors(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_rooms(request, department_abbrev):
-    """Rooms view of FlopEditor.
+    """Rooms view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: page rendered from the rooms template of FlopEditor.
+    :return: page rendered from the rooms template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -357,13 +370,13 @@ def department_rooms(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_room_types(request, department_abbrev):
-    """Student groups view of FlopEditor.
+    """Student groups view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Page rendered from the template of FlopEditor.
+    :return: Page rendered from the template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -374,8 +387,25 @@ def department_room_types(request, department_abbrev):
 
 
 @tutor_or_superuser_required
-def department_student_groups(request, department_abbrev):
-    """Student groups view of FlopEditor.
+def department_student_structural_groups(request, department_abbrev):
+    """Student groups view of flop!EDITOR.
+    :param request:           Client request.
+    :param department_abbrev: Department abbreviation.
+    :type request:            django.http.HttpRequest
+    :type department_abbrev:  str
+    :return: Page rendered from the template of flop!EDITOR.
+    :rtype:  django.http.HttpResponse
+
+    """
+    return crud_view(request,
+                     department_abbrev,
+                     "flopeditor/student_structural_groups.html",
+                     "Groupes structuraux")
+
+
+@tutor_or_superuser_required
+def department_student_transversal_groups(request, department_abbrev):
+    """Student groups view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
@@ -387,19 +417,19 @@ def department_student_groups(request, department_abbrev):
     """
     return crud_view(request,
                      department_abbrev,
-                     "flopeditor/student_groups.html",
-                     "Groupes d'élèves")
+                     "flopeditor/student_transversal_groups.html",
+                     "Groupes transversaux")
 
 
 @tutor_or_superuser_required
 def department_student_group_types(request, department_abbrev):
-    """Student group types view of FlopEditor.
+    """Student group types view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Page rendered from the template of FlopEditor.
+    :return: Page rendered from the template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -411,13 +441,13 @@ def department_student_group_types(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_course_types(request, department_abbrev):
-    """course_types view of FlopEditor.
+    """course_types view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Page rendered from the template of FlopEditor.
+    :return: Page rendered from the template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -426,13 +456,13 @@ def department_course_types(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_modules(request, department_abbrev):
-    """Modules view of FlopEditor.
+    """Modules view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Page rendered from the modules template of FlopEditor.
+    :return: Page rendered from the modules template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -441,13 +471,13 @@ def department_modules(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_periods(request, department_abbrev):
-    """Periods/Semesters view of FlopEditor.
+    """Periods/Semesters view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: Page rendered from the modules template of FlopEditor.
+    :return: Page rendered from the modules template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """
@@ -456,13 +486,13 @@ def department_periods(request, department_abbrev):
 
 @tutor_or_superuser_required
 def department_training_programmes(request, department_abbrev):
-    """Training programme view of FlopEditor.
+    """Training programme view of flop!EDITOR.
 
     :param request:           Client request.
     :param department_abbrev: Department abbreviation.
     :type request:            django.http.HttpRequest
     :type department_abbrev:  str
-    :return: page rendered from the training programme template of FlopEditor.
+    :return: page rendered from the training programme template of flop!EDITOR.
     :rtype:  django.http.HttpResponse
 
     """

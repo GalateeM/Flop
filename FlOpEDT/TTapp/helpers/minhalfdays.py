@@ -41,39 +41,61 @@ class MinHalfDaysHelperBase():
         self.ponderation = ponderation
         self.week = week
 
-
     def build_variables(self):
-        return None, None, None
-
+        return None, None
 
     def add_cost(self, cost):
         pass
 
-
-    def add_constraint(self, expression, courses, local_var):
-        self.ttmodel.add_constraint(local_var, '==', 1,
-                                    Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_LOCAL))
-        course_time = sum(c.type.duration for c in courses)
+    def minimal_half_days_number(self, courses):
+        """
+        Ce code (pas encore idéal) remplace le code suivant
+            course_time = sum(c.type.duration for c in courses)
+            limit = (course_time - 1) // half_days_min_time + 1
+        qui avait le défaut que :
+        si par exemple la demie-journée fait 4h30 et qu'on a 3 cours de 3h (soit 9h en tout) ça impose de le faire tenir
+        en 2 demies-journées... impossible !
+        """
         t = TimeGeneralSettings.objects.get(department=self.ttmodel.department)
         half_days_min_time = min(t.lunch_break_start_time-t.day_start_time, t.day_finish_time-t.lunch_break_finish_time)
-        limit = (course_time - 1) // half_days_min_time + 1
+        considered_courses = list(courses)
+        considered_courses.sort(key=lambda x: x.type.duration)
+        limit = 0
+        while considered_courses:
+            c = considered_courses.pop()
+            d = c.type.duration
+            for c2 in considered_courses[-1::-1]:
+                if d + c2.type.duration <= half_days_min_time:
+                    d += c2.type.duration
+                    considered_courses.remove(c2)
+            limit+=1
+        return limit
 
-        if self.constraint.weight:
-            cost = self.constraint.local_weight() * self.ponderation * (expression - limit * local_var)
-            self.add_cost(cost)
-        else:
-            self.ttmodel.add_constraint(expression, '<=', limit,
+    def add_constraint(self, expression, courses):
+        limit = self.minimal_half_days_number(courses)
+        # TODO : change 2*5 in number of possible half_days
+        max_diff = min(len(courses), 2 * 5) - limit
+        if max_diff < 1:
+            return
+        excess_of_half_days = {i : self.ttmodel.add_floor(expression, limit + i, 100) for i in range(1, max_diff+1)}
+        if self.constraint.weight is None:
+            self.ttmodel.add_constraint(excess_of_half_days[1], '==', 0,
                                         Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_LIMIT))
+        else:
+            cost = self.ttmodel.lin_expr()
+            for i in excess_of_half_days:
+                cost += self.constraint.local_weight() * self.ponderation * excess_of_half_days[i]
+            self.add_cost(cost)
 
     def enrich_model(self, **args):
-        expression, courses, local_var = self.build_variables()
-        self.add_constraint(expression, courses, local_var)
+        expression, courses = self.build_variables()
+        self.add_constraint(expression, courses)
 
 
 class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        days = set(day for day in self.ttmodel.wdb.days if day.week==self.week)
+        days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         mod_b_h_d = {}
         for d in days:
             mod_b_h_d[(self.module, d, Time.AM)] \
@@ -98,7 +120,6 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
                 self.ttmodel.add_constraint(expr, '<=', card - 1,
                                             Constraint(constraint_type=ConstraintType.MIN_HALF_DAYS_INF))
 
-        local_var = self.ttmodel.add_var("MinMBHD_var_%s" % self.module)
         # no year?
         courses = self.ttmodel.wdb.courses.filter(module=self.module, week=self.week)
         expression = self.ttmodel.sum(
@@ -106,42 +127,35 @@ class MinHalfDaysHelperModule(MinHalfDaysHelperBase):
             for d in days
             for apm in [Time.AM, Time.PM])
 
-        return expression, courses, local_var
-
+        return expression, courses
 
     def add_cost(self, cost):
         self.ttmodel.add_to_generic_cost(cost)
-
 
     def enrich_model(self, module=None):
         if module:
             self.module = module
             super().enrich_model()
         else:
-            raise("MinHalfDaysHelperModule requires a module argument")
+            raise "MinHalfDaysHelperModule requires a module argument"
 
 
 class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        courses = self.ttmodel.wdb.courses.filter(groups=self.group, week=self.week)
+        courses = set(c for c in self.ttmodel.wdb.all_courses_for_basic_group[self.group]
+                      if c.week == self.week)
 
-        expression = self.ttmodel.check_and_sum(
-            self.ttmodel.GBHD,
-            ((self.group, d, apm) for apm in self.ttmodel.possible_apms
-             for d in self.ttmodel.wdb.days if d.week == self.week))
+        expression = self.ttmodel.sum(self.ttmodel.GBHD[self.group, d, apm] for apm in self.ttmodel.possible_apms
+             for d in self.ttmodel.wdb.days if d.week == self.week)
 
-        local_var = self.ttmodel.add_var("MinGBHD_var_%s" % self.group)
-
-        return expression, courses, local_var
-
+        return expression, courses
 
     def add_cost(self, cost):
         g_pref = self.group.preferences
         g_pref.calculate_fields()
-        free_half_day_weight = 2 * g_pref.get_free_half_day_weight()
+        free_half_day_weight = g_pref.get_free_half_day_weight()
         self.ttmodel.add_to_group_cost(self.group, free_half_day_weight * cost, self.week)
-
 
     def enrich_model(self, group=None):
         if group:
@@ -151,26 +165,23 @@ class MinHalfDaysHelperGroup(MinHalfDaysHelperBase):
             raise Exception("MinHalfDaysHelperGroup requires a group argument")
 
 
-
 class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
 
     def build_variables(self):
-        # no year?
-        courses = self.ttmodel.wdb.courses.filter(tutor=self.tutor, week=self.week)
+        courses = set(c for c in self.ttmodel.wdb.possible_courses[self.tutor] if c.week == self.week)
         days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         expression = self.ttmodel.sum(
             self.ttmodel.IBHD[(self.tutor, d, apm)]
             for d in days
             for apm in [Time.AM, Time.PM])
-        local_var = self.ttmodel.add_var("MinIBHD_var_%s" % self.tutor)
 
-        return expression, courses, local_var
+        return expression, courses
 
     def add_cost(self, cost):
         self.ttmodel.add_to_inst_cost(self.tutor, cost, self.week)
 
-    def add_constraint(self, expression, courses, local_var):
-        super().add_constraint(expression, courses, local_var)
+    def add_constraint(self, expression, courses):
+        super().add_constraint(expression, courses)
         days = set(day for day in self.ttmodel.wdb.days if day.week == self.week)
         # Try to joincourses
         if self.constraint.join2courses and len(courses) in [2, 4]:
@@ -178,7 +189,7 @@ class MinHalfDaysHelperTutor(MinHalfDaysHelperBase):
                 for c in courses:
                     sl8h = min(slots_filter(self.ttmodel.wdb.courses_slots, day=d, apm=Time.AM) & self.ttmodel.wdb.compatible_slots[c])
                     sl14h = min(slots_filter(self.ttmodel.wdb.courses_slots, day=d, apm=Time.PM) & self.ttmodel.wdb.compatible_slots[c])
-                    for c2 in courses.exclude(id=c.id):
+                    for c2 in courses - {c}:
                         sl11h = max(
                             slots_filter(self.ttmodel.wdb.courses_slots, day=d, apm=Time.AM) & self.ttmodel.wdb.compatible_slots[c2])
                         sl17h = max(

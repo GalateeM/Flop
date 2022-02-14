@@ -26,7 +26,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 
-from base.models import ScheduledCourse
+from base.models import ScheduledCourse, Week
 
 from TTapp.TTUtils import get_conflicts
 
@@ -35,12 +35,16 @@ from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak
 
 from MyFlOp import MyTTUtils
 
+from django.utils.translation import gettext as _
+
             
 def available_work_copies(req, department, year, week):
     '''
     Send the content of the side panel.
     '''
-    copies = list(ScheduledCourse.objects.filter(course__year=year, course__week=week, course__type__department__abbrev=department).distinct('work_copy').values_list('work_copy'))
+    copies = list(ScheduledCourse.objects.filter(course__week__year=year, course__week__nb=week,
+                                                 course__type__department__abbrev=department).distinct('work_copy')
+                  .values_list('work_copy'))
     copies = [n for (n,) in copies]
     copies.sort()
     return JsonResponse({'copies': copies})
@@ -53,7 +57,8 @@ def check_swap(req, department, year, week, work_copy):
     against the scheduled courses in other departments
     '''
     print(department, week, year, work_copy)
-    return JsonResponse(get_conflicts(department, week, year, work_copy))
+    week_o = Week.objects.get(nb=week, year=year)
+    return JsonResponse(get_conflicts(department, week_o, work_copy))
 
 
 def swap(req, department, year, week, work_copy):

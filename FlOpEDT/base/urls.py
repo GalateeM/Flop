@@ -62,9 +62,6 @@ urlpatterns = [
     # ---------------------------------
 
     # from db to screen
-    url(r'^fetch_cours_pl/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pl, name="fetch_cours_pl"),
-    url(r'^fetch_cours_pp/(?P<year>\d+)/(?P<week>\d+)/(?P<num_copy>\d+)$', views.fetch_cours_pp, name="fetch_cours_pp"),
-    url(r'^fetch_dispos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_dispos, name="fetch_dispos"),
     path('fetch_user_default_week/<str:username>', views.fetch_user_default_week, name="fetch_user_dweek"),
     path('fetch_course_default_week/<str:train_prog>/<str:course_type>', views.fetch_course_default_week, name="fetch_course_dweek"),
     path('fetch_room_default_week/<str:room>', views.fetch_room_default_week, name="fetch_room_dweek"),
@@ -80,7 +77,6 @@ urlpatterns = [
     url(r'^fetch_unavailable_rooms/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_unavailable_rooms, name="fetch_unavailable_rooms"),
     url(r'^fetch_all_tutors/$', views.fetch_all_tutors, name="fetch_all_tutors"),
     url(r'^fetch_all_versions/$', views.fetch_all_versions, name="fetch_all_versions"),
-    url(r'^fetch_week_infos/(?P<year>\d+)/(?P<week>\d+)$', views.fetch_week_infos, name="fetch_week_infos"),
     path('fetch_departments', views.fetch_departments, name="fetch_departments"),
     path('fetch_tutor_courses/<int:year>/<int:week>/<str:tutor>', views.fetch_tutor_courses, name="fetch_tutor_courses"),
     path('fetch_extra_sched/<int:year>/<int:week>', views.fetch_extra_sched, name="fetch_extra_sched"),

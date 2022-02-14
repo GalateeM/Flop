@@ -62,6 +62,11 @@ function create_alarm_dispos() {
     .append("text")
     .attr("class", "disp-filled")
     .text(txt_filDispos);
+
+  di
+    .append("text")
+    .attr("class", "disp-comm")
+    .text(txt_comDispos);
 }
 
 
@@ -134,7 +139,7 @@ function add_slot_grid_data(c) {
 
 
 function create_grid_data() {
-  if (fetch.constraints_ok && fetch.groups_ok) {
+  if (fetch_status.constraints_ok && fetch_status.groups_ok) {
     for (let p = 0; p < set_promos.length; p++) {
       compute_promo_leaves(root_gp[p].gp);
     }
@@ -144,7 +149,7 @@ function create_grid_data() {
       for (let s = 0; s < Object.keys(rev_constraints).length; s++) {
         for (let r = 0; r < set_rows.length; r++) {
           var start = Object.keys(rev_constraints)[s];
-          if (start < time_settings.time.day_finish_time) {
+          if (start < department_settings.time.day_finish_time) {
             var gscp = {
               row: r,
               start: start,
@@ -220,7 +225,7 @@ function create_but_scale() {
 function def_drag_sca() {
   drag_listener_hs = d3.drag()
     .on("start", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.sel = d3.select(this);
         drag.x = 0;
         drag.y = 0;
@@ -245,7 +250,7 @@ function def_drag_sca() {
       }
     })
     .on("drag", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.x += d3.event.dx;
         if (drag.x + drag.init > 0) {
           drag.sel.attr("transform", "translate(" + drag.x + "," + drag.y + ")");
@@ -256,7 +261,7 @@ function def_drag_sca() {
       }
     })
     .on("end", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         if (drag.x + drag.init <= 0) {
           drag.x = -drag.init;
         }
@@ -275,7 +280,7 @@ function def_drag_sca() {
 
   drag_listener_vs = d3.drag()
     .on("start", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.sel = d3.select(this);
         drag.x = 0;
         drag.y = 0;
@@ -299,7 +304,7 @@ function def_drag_sca() {
       }
     })
     .on("drag", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         drag.y += d3.event.dy;
         if (drag.init + drag.y >= 0) {
           drag.sel.attr("transform",
@@ -309,7 +314,7 @@ function def_drag_sca() {
       }
     })
     .on("end", function (c) {
-      if (fetch.done) {
+      if (fetch_status.done) {
         if (drag.init + drag.y < 0) {
           drag.y = -(drag.init);
         }
@@ -335,18 +340,20 @@ function def_drag_sca() {
   ------- GROUPS -------
   ----------------------*/
 
-// Only for the current case
+// set dimensions and locations of/inside group selection popup
 function set_butgp() {
-  var topx = 0;//615 + 4*30;
+  const topx = 0;//615 + 4*30;
 
-  var cur_buty = 0;
-  var cur_rootgp;
-  for (var nrow = 0; nrow < set_rows.length; nrow++) {
-    var cur_maxby = 0;
-    var tot_row_gp = 0;
-    var cur_butx = topx;
+  let cur_buty = 0;
+  let cur_rootgp;
 
-    for (var npro = 0; npro < row_gp[nrow].promos.length; npro++) {
+  // set the coordinates of the root groups in the group selection popup
+  for (let nrow = 0 ; nrow < set_rows.length ; nrow++) {
+    let cur_maxby = 0;
+    let tot_row_gp = 0;
+    let cur_butx = topx;
+
+    for (let npro = 0 ; npro < row_gp[nrow].promos.length ; npro++) {
       cur_rootgp = root_gp[row_gp[nrow].promos[npro]];
       cur_rootgp.buty = cur_buty;
       if (cur_rootgp.maxby > cur_maxby) {
@@ -364,9 +371,9 @@ function set_butgp() {
 
   // Compute dimensions of the group selection popup
 
-  var minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp;
+  let minx, maxx, miny, maxy, curminx, curmaxx, curminy, curmaxy, curp;
 
-  for (var p = 0; p < set_promos.length; p++) {
+  for (let p = 0; p < set_promos.length; p++) {
     curp = root_gp[p];
     curminx = curp.butx;
     curminy = curp.buty;
@@ -395,7 +402,7 @@ function set_butgp() {
 
 function indexOf_promo(promo) {
   for (var p = 0; p < set_promos.length; p++) {
-    if (set_promos[p] == promo_init) {
+    if (set_promos[p] == promo) {
       return p;
     }
   }
@@ -411,18 +418,18 @@ function go_promo_gp_init(button_available) {
     if (gp_init == "") {
       gp_init = root_gp[promo_init].gp.name;
     }
-    if (Object.keys(groups[promo_init]).map(function (g) { return groups[promo_init][g].name; }).indexOf(gp_init) != -1) {
-      apply_gp_display(groups[promo_init][gp_init], true, button_available);
+    if (Object.keys(groups[promo_init]["structural"]).map(function (g) { return groups[promo_init]["structural"][g].name; }).indexOf(gp_init) != -1) {
+      apply_gp_display(groups[promo_init]["structural"][gp_init], true, button_available);
     }
   } else if (gp_init != "") {
-    if (Object.keys(groups[0]).map(function (g) { return groups[0][g].name; }).indexOf(gp_init) != -1) {
-      apply_gp_display(groups[0][gp_init], true, button_available);
+    if (Object.keys(groups[0]["structural"]).map(function (g) { return groups[0]["structural"][g].name; }).indexOf(gp_init) != -1) {
+      apply_gp_display(groups[0]["structural"][gp_init], true, button_available);
     }
   }
 }
 
 
-function create_groups(data_groups) {
+function create_structural_groups(data_groups) {
   var root;
 
   extract_all_groups_structure(data_groups);
@@ -443,14 +450,69 @@ function create_groups(data_groups) {
     }
   }
   for (let p = 0; p < set_promos.length; p++) {
-    var keys = Object.keys(groups[p]);
+    var keys = Object.keys(groups[p]["structural"]);
     for (let g = 0; g < keys.length; g++) {
-      groups[p][keys[g]].bx = groups[p][keys[g]].x;
-      groups[p][keys[g]].bw = groups[p][keys[g]].width;
+      groups[p]["structural"][keys[g]].bx = groups[p]["structural"][keys[g]].x;
+      groups[p]["structural"][keys[g]].bw = groups[p]["structural"][keys[g]].width;
     }
   }
-
+	
   set_butgp();
+}
+
+
+function create_transversal_groups(data_groups) {
+	var nb_promos = groups.length;
+	for (let nprom =0; nprom<nb_promos; nprom++){
+		groups[nprom]["transversal"] = {};
+	}
+
+
+  var nb_groups = data_groups.length;
+  
+  //First pass: create groups and fill their attribute: "conflicting_groups"
+  for (let ngrp = 0; ngrp < nb_groups; ngrp++) {
+  	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
+  	
+
+  	if (group_prom == -1) {
+  		console.log("The group named "+data_groups[ngrp]['name']+" has invalid training program.")
+  		
+  	} else {  	
+  		var gr = {
+  			name: data_groups[ngrp]['name'],
+  			promo: group_prom,
+  			display: true,
+  			x: 0,
+    		maxx: 0,
+    		width: 0,
+    		est: 0,
+    		lft: 0,
+    		conflicting_groups: [],
+    		parallel_groups: [],
+  		}
+  		
+  		
+  		var nb_conflict_groups = data_groups[ngrp]["conflicting_groups"].length;
+  		for (let conflict_group_nb = 0; conflict_group_nb < nb_conflict_groups; conflict_group_nb++) {
+  			if (data_groups[ngrp]["conflicting_groups"][conflict_group_nb].name in groups[group_prom]["structural"]) {
+  				gr["conflicting_groups"].push(groups[group_prom]["structural"][data_groups[ngrp]["conflicting_groups"][conflict_group_nb].name]);
+  			}
+  		}
+  		groups[group_prom]["transversal"][gr.name]=gr;
+  	}
+  } 
+  
+  // Second pass: Complete transversal groups by adding their parallel groups (which are transversal groups) 
+  for (let ngrp = 0; ngrp < nb_groups; ngrp++){
+  	group_prom = set_promos.indexOf(data_groups[ngrp]['train_prog']);
+  	if (group_prom != -1) {
+  		nb_para_groups = data_groups[ngrp]["parallel_groups"].length;
+  		for (let n_pargrp; n_pargrp < nb_para_groups; n_pargrp++) {
+  			groups[group_prom]["transversal"][data_groups[ngrp]["name"]]["parallel_groups"].push(groups[group_prom]["transversal"][data_groups[ngrp]["parallel_groups"][n_pargrp]]);
+  		}
+  	}
+  }
 }
 
 
@@ -459,6 +521,8 @@ function extract_all_groups_structure(r) {
   for (let npro = 0; npro < init_nbPromos; npro++) {
     extract_groups_structure(r[npro], -1, -1);
   }
+
+  // sort rows
   var sorted_rows = set_rows.sort();
   for (let npro = 0; npro < set_promos.length; npro++) {
     root_gp[npro].row = sorted_rows.indexOf(set_rows[root_gp[npro].row]);
@@ -466,6 +530,7 @@ function extract_all_groups_structure(r) {
   set_rows = sorted_rows;
 }
 
+// set group hierarchy and promos
 function extract_groups_structure(r, npro, nrow) {
   var gr = {
     name: r.name,
@@ -504,7 +569,7 @@ function extract_groups_structure(r, npro, nrow) {
 
 
     // promo number should be unique
-    groups[npro] = [];
+    groups[npro] = {"structural":{}};
     root_gp[npro] = {};
 
 
@@ -538,11 +603,11 @@ function extract_groups_structure(r, npro, nrow) {
       extract_groups_structure(r.children[i], npro, nrow);
     }
   }
-  groups[npro][gr.name] = gr;
+  groups[npro]["structural"][gr.name] = gr;
 }
 
 
-
+// set button height parameters for group selection popup
 function create_static_att_groups(node) {
   var child;
 
@@ -559,7 +624,7 @@ function create_static_att_groups(node) {
 
   if (node.children.length != 0) {
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       child.by = node.by + node.buth;
       create_static_att_groups(child);
     }
@@ -589,7 +654,7 @@ function compute_promo_est_n_wh(node) {
     }
   } else {
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       child.est = node.est + node.width;
       if (!child.display) {
         child.width = 0;
@@ -611,7 +676,7 @@ function compute_promo_lft(node) {
   var child;
   var eaten = 0;
   for (var i = node.children.length - 1; i >= 0; i--) {
-    child = groups[node.promo][node.children[i]];
+    child = groups[node.promo]["structural"][node.children[i]];
     child.lft = node.lft - eaten;
     compute_promo_lft(child);
     eaten += child.width;
@@ -638,7 +703,7 @@ function compute_promo_lmx(node) {
     var lastmax = node.x;
     var lastmin = -1;
     for (var i = 0; i < node.children.length; i++) {
-      child = groups[node.promo][node.children[i]];
+      child = groups[node.promo]["structural"][node.children[i]];
       if (child.display) {
         if (child.x < lastmax) {
           child.x = lastmax;
@@ -757,7 +822,7 @@ function compute_promo_leaves(node) {
   }
 
   for (var i = 0; i < node.children.length; i++) {
-    child = groups[node.promo][node.children[i]];
+    child = groups[node.promo]["structural"][node.children[i]];
     compute_promo_leaves(child);
   }
 }
@@ -800,14 +865,14 @@ function create_menus() {
     .attr("x", menus.mx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Cours :");
+    .text(gettext("Courses :"));
 
   svg.get_dom("meg")
     .append("text")
     .attr("x", menus.mx + menus.dx)
     .attr("y", menus.h - 10)
     .attr("fill", "black")
-    .text("Dispos :");
+    .text(gettext("Avail :"));
 
   go_menus();
 }
@@ -820,7 +885,7 @@ function create_menus() {
 
 function create_regen() {
   svg.get_dom("vg")
-    .append("g")
+    .append("a")
     .attr("class", "ack-reg")
     .append("text");
 }
@@ -879,20 +944,11 @@ function create_quote() {
     dataType: 'text',
     url: url_quote,
     async: true,
-    contentType: "text/csv",
     success: function (msg) {
-      // console.log(msg);
-
-      var quotes = d3.csvParse(msg, translate_quote_from_csv);
-      if (quotes.length > 0) {
-        quote = quotes[0];
-      } else {
-        quote = '';
-      }
+      var quote = msg.slice(1,-1) ;
 
       svg.get_dom("vg").select(".quote").select("text")
         .text(quote);
-
 
       show_loader(false);
 
@@ -915,7 +971,7 @@ function translate_quote_from_csv(d) {
   ----------------------*/
 
 function run_course_drag(d) {
-  if (ckbox["edt-mod"].cked && fetch.done) {
+  if (ckbox["edt-mod"].cked && fetch_status.done) {
 
     // get the time interval, whatever the group
     cur_over = which_slot(
@@ -949,7 +1005,7 @@ function def_drag() {
     .on("start", function (c) {
       cancel_cm_adv_preferences();
       cancel_cm_room_tutor_change();
-      if (ckbox["edt-mod"].cked && fetch.done) {
+      if (ckbox["edt-mod"].cked && fetch_status.done) {
 
         // compute available slots for this course
         pending.prepare_modif(c);
@@ -988,7 +1044,7 @@ function def_drag() {
           svg.get_dom("edt-mg").node().appendChild(n);
         });
 
-        if (cur_over != null && ckbox["edt-mod"].cked && fetch.done) {
+        if (cur_over != null && ckbox["edt-mod"].cked && fetch_status.done) {
 
           data_slot_grid = [];
 
@@ -1129,10 +1185,10 @@ function gp_courses(target_course) {
         && (
           c.group == target_course.group
           ||
-          groups[target_course.promo][target_course.group]
+          groups[target_course.promo]["structural"][target_course.group]
             .ancetres.indexOf(c.group) > -1
           ||
-          groups[target_course.promo][target_course.group]
+          groups[target_course.promo]["structural"][target_course.group]
             .descendants.indexOf(c.group) > -1
         )
     ) ;
@@ -1141,15 +1197,21 @@ function gp_courses(target_course) {
   return ret ;
 }
 
-// return courses that involve the tutor of target_course during
+// return courses that involve the tutors of target_course during
 // during the same day
 function tutor_courses(target_course) {
   return cours.filter(function (c) {
-    return (
-      c.day == target_course.day
-        && c.id_course != target_course.id_course
-        && c.prof == target_course.prof
-    ) ;
+    let day_id = c.day == target_course.day
+      && c.id_course != target_course.id_course ;
+    if (!day_id) {
+      return false ;
+    }
+    for (let it = 0 ; it < c.tutors.length ; it++) {
+      if (target_course.includes(c.tutors[it])) {
+        return true ;
+      }
+    }
+    return false ;
   });
 }
 
@@ -1279,7 +1341,7 @@ function check_course() {
     return ret;
   }
 
-  if (cosmo) {
+  if (department_settings.mode.cosmo) {
     pending.pass.room = true;
   }
 
@@ -1307,13 +1369,16 @@ function check_course() {
 
   // tutor availability
   if (!pending.pass.tutor) {
-    
-    check_tutor_busy(ret, possible_conflicts) ;
-    
-    // tutor availability
-    if (!check_tutor_free_week(ret)) {
-      check_tutor_preferences(ret) ;
-      check_tutor_busy_other_departments(ret) ;
+
+    for (let it = 0 ; it < pending.wanted_course.tutors.length ; it ++) {
+      let tutor = pending.wanted_course.tutors[it] ;
+      check_tutor_busy(ret, possible_conflicts, tutor) ;
+      
+      // tutor availability
+      if (!check_tutor_free_week(ret, tutor)) {
+        check_tutor_preferences(ret, tutor) ;
+        check_tutor_busy_other_departments(ret, tutor) ;
+      }
     }
         
     // we will ask later about room constraints
@@ -1359,8 +1424,8 @@ function check_busy_group(issues, possible_conflicts) {
     conflicts = possible_conflicts.filter(function (c) {
       return (
         (c.group == wanted.group
-         || groups[wanted.promo][wanted.group].ancetres.indexOf(c.group) > -1
-         || groups[wanted.promo][wanted.group].descendants.indexOf(c.group) > -1
+         || groups[wanted.promo]["structural"][wanted.group].ancetres.indexOf(c.group) > -1
+         || groups[wanted.promo]["structural"][wanted.group].descendants.indexOf(c.group) > -1
         )
           && c.promo == wanted.promo
       );
@@ -1377,12 +1442,14 @@ function check_busy_group(issues, possible_conflicts) {
 
 // tutor does not teach this week
 // return true iff does not teach  
-function check_tutor_free_week(issues) {
-  if (typeof dispos[pending.wanted_course.prof] === 'undefined') {
-    issues.push({
-      nok: 'tutor_free_week',
-      more: { tutor: pending.wanted_course.prof }
-    });
+function check_tutor_free_week(issues, tutor) {
+  if (typeof dispos[tutor] === 'undefined') {
+    if (tutor !== null) {
+      issues.push({
+        nok: 'tutor_free_week',
+        more: { tutor: tutor }
+      });
+    }
     return true ;
   }
   return false ;
@@ -1390,50 +1457,54 @@ function check_tutor_free_week(issues) {
 
 
 // tutor teaches already in the current department
-function check_tutor_busy(issues, possible_conflicts) {
-  let conflicts = possible_conflicts.filter(function (c) {
-    return (c.prof == pending.wanted_course.prof);
-  });
+function check_tutor_busy(issues, possible_conflicts, tutor) {
+  let conflicts = [] ;
+
+  if (tutor !== null) {
+    conflicts = possible_conflicts.filter(function (c) {
+      return (c.tutors.includes(tutor));
+    });
+  }
   
   if (conflicts.length > 0) {
     issues.push({
       nok: 'tutor_busy',
-      more: { tutor: pending.wanted_course.prof }
+      more: { tutor: tutor }
     });
   }
 }
 
 
 // tutor teaches already in another department
-function check_tutor_busy_other_departments(issues) {
+function check_tutor_busy_other_departments(issues, tutor) {
   let extra_unavailable = find_in_pref(
     extra_pref.tutors,
-    pending.wanted_course.prof,
+    tutor,
     pending.wanted_course);
   
   if (extra_unavailable == 0) {
     issues.push({
       nok: 'tutor_busy_other_dept',
-      more: { tutor: pending.wanted_course.prof }
+      more: { tutor: tutor }
     });
   }
 }
 
 // tutor is a priori available
-function check_tutor_preferences(issues) {
+function check_tutor_preferences(issues, tutor) {
   let wanted_course = pending.wanted_course ;
   let pref_tut = get_preference(
-    dispos[wanted_course.prof][wanted_course.day],
+    dispos[tutor][wanted_course.day],
     wanted_course.start, wanted_course.duration);
   if (pref_tut == 0) {
     issues.push({
       nok: 'tutor_unavailable',
-      more: { tutor: wanted_course.prof }
+      more: { tutor: tutor }
     });
   } else if (pref_tut == -1) {
     issues.push({
       nok: 'tutor_availability_unknown',
-      more: { tutor: wanted_course.prof }
+      more: { tutor: tutor }
     });
   }
 }
@@ -1654,7 +1725,7 @@ function which_slot(x, y, c) {
 
 // date {day, start_time}
 function is_garbage(date) {
-  var t = time_settings.time;
+  var t = department_settings.time;
   return (date.start_time < t.day_start_time
     || date.start_time >= t.day_finish_time);
 }
@@ -1680,7 +1751,7 @@ function indexOf_constraints(c, y) {
       };
     }
   );
-  var t = time_settings.time;
+  var t = department_settings.time;
 
   var after = false;
   var i = 0;
@@ -1757,7 +1828,7 @@ function create_val_but() {
     .append("text")
     .attr("class", "menu-btn")
     .attr("fill", "white")
-    .text("Valider EdT")
+    .text(gettext('Validate timetable'))
     .attr("x", menus.x + menus.mx + .5 * valid.w)
     .attr("y", did.tly + .5 * valid.h);
 
@@ -1880,7 +1951,7 @@ function create_stype() {
     .append("text")
     .attr("fill", "white")
     .attr("class", "menu-btn")
-    .text("Valider disponibilités")
+    .text(gettext('Validate availabilities'))
     .attr("x", did.tlx + .5 * valid.w)
     .attr("y", did.tly + .5 * valid.h);
 
@@ -1910,7 +1981,7 @@ function create_stype() {
     .attr("fill", "white")
     .attr("x", dispot_but_txt_x)
     .attr("y", dispot_but_txt_y("app") - 10)
-    .text("Appliquer");
+    .text(gettext('Apply'));
 
   stap_but
     .append("text")
@@ -1918,7 +1989,7 @@ function create_stype() {
     .attr("fill", "white")
     .attr("x", dispot_but_txt_x)
     .attr("y", dispot_but_txt_y("app") + 10)
-    .text("semaine type");
+    .text(gettext('tipical week'));
 
 }
 
@@ -1928,16 +1999,21 @@ function fetch_dispos_type() {
   if (user.name != "") {
     show_loader(true);
     $.ajax({
-      type: "GET", //rest Type
+      type: "GET",
+      headers: {Accept: 'text/csv'},
       dataType: 'text',
-      url: url_fetch_user_dweek + logged_usr.name,
+      url: build_url(url_user_pref_default, {user: user.name}),
       async: true,
-      contentType: "text/csv",
       success: function (msg) {
         //console.log(msg);
         user.dispos_type = [];
 
         user.dispos_type = d3.csvParse(msg, translate_dispos_type_from_csv);
+
+        user.dispos_type = user.dispos_type.filter(function(p) {
+          return Object.keys(week_days.day_dict).includes(p.day) ;
+        });
+
         create_stype();
         show_loader(false);
       },
@@ -2163,7 +2239,7 @@ function def_cm_change() {
       select_tutor_module_change();
     } else {
       pending.pass.tutor = true ;
-      select_pref_link_types_change();
+      select_pref_links_change();
     }
     go_cm_room_tutor_change();
   };
@@ -2450,37 +2526,4 @@ function go_selection_popup() {
 
   go_selection_buttons();
 
-}
-
-
-// create buttons for department redirection
-function create_dept_redirection() {
-  var avg = svg.get_dom("catg")
-    .selectAll(".dept-selection")
-    .data(departments.data);
-
-  var contg = avg
-    .enter()
-    .append("g")
-    .attr("class", "dept-selection")
-    .attr("transform", depts_trans)
-    .attr("cursor", "pointer")
-    .on("click", redirect_dept);
-
-  contg
-    .append("rect")
-    .attr("class", "select-highlight")
-    .attr("width", departments.w)
-    .attr("height", departments.h)
-    .attr("rx", 5)
-    .attr("ry", 10)
-    .attr("fill", "forestgreen")
-    .attr("x", 0)
-    .attr("y", 0);
-
-  contg
-    .append("text")
-    .text(dept_txt)
-    .attr("x", .5 * departments.w)
-    .attr("y", .5 * departments.h);
 }

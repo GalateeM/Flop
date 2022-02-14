@@ -2,8 +2,6 @@ from django.shortcuts import render
 
 from django.http import HttpResponse
 
-from FlOpEDT.settings.base import COSMO_MODE
-
 from people.models import Tutor
 from base.models import Module, ScheduledCourse
 import base.queries as queries
@@ -18,14 +16,14 @@ def fetch_rectangle_colors(req, **kwargs):
     year = req.GET.get('year', None)
     work_copy = int(req.GET.get('work_copy', '0'))
     filters = {}
-    if COSMO_MODE:
-        Display = TutorDisplay.objects
+    if req.department.mode.cosmo == 1:
+        Display = TutorDisplay.objects.select_related('tutor')
         Resource = TutorDisplayResource
     else:
-        Display = ModuleDisplay.objects
+        Display = ModuleDisplay.objects.select_related('module')
         Resource = ModuleDisplayResource
     if week is None or year is None:
-        if COSMO_MODE:
+        if req.department.mode.cosmo == 1:
             filters['tutor__in'] = \
                 Tutor.objects.filter(departments=req.department)
         else:
@@ -33,8 +31,8 @@ def fetch_rectangle_colors(req, **kwargs):
                 Module.objects.filter(train_prog__department=req.department)
     else:
         scheds = ScheduledCourse.objects.filter(
-            course__week=week,
-            course__year=year,
+            course__week__nb=week,
+            course__week__year=year,
             course__module__train_prog__department=req.department)\
                 .prefetch_related('course__module__train_prog')
         unscheds = queries.get_unscheduled_courses(
@@ -44,7 +42,7 @@ def fetch_rectangle_colors(req, **kwargs):
             work_copy)
 
         to_be_colored_set = set()
-        if COSMO_MODE:
+        if req.department.mode.cosmo == 1:
             for sc in scheds.distinct('tutor'):
                 to_be_colored_set.add(sc.tutor)
             for usc in unscheds.distinct('tutor'):

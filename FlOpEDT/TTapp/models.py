@@ -34,17 +34,24 @@ from django.db import models
 # Import constraints from other files
 
 from TTapp.TTConstraint import TTConstraint, max_weight
-from TTapp.TTConstraints.stabilization_constraints import Stabilize, StabilizationThroughWeeks
+from TTapp.TTConstraints.core_constraints import ScheduleAllCourses, NoSimultaneousGroupCourses, AssignAllCourses, \
+    ConsiderTutorsUnavailability
+from TTapp.TTConstraints.stabilization_constraints import StabilizeTutorsCourses, StabilizeGroupsCourses,\
+    StabilizationThroughWeeks
 from TTapp.TTConstraints.groups_constraints import MinGroupsHalfDays, MinNonPreferedTrainProgsSlot
+from TTapp.TTConstraints.no_course_constraints import NoGroupCourseOnDay, NoTutorCourseOnDay
 from TTapp.TTConstraints.tutors_constraints import MinTutorsHalfDays, MinNonPreferedTutorsSlot, \
     MinimizeBusyDays, RespectBoundPerDay, LowerBoundBusyDays
 from TTapp.TTConstraints.modules_constraints import MinModulesHalfDays
-from TTapp.TTConstraints.slots_constraints import SimultaneousCourses, AvoidBothTimes, LimitedStartTimeChoices
+from TTapp.TTConstraints.slots_constraints import SimultaneousCourses, AvoidBothTimes, LimitedStartTimeChoices, \
+    ConsiderDependencies, ConsiderPivots, LimitUndesiredSlotsPerWeek, LimitSimultaneousCoursesNumber
 from TTapp.TTConstraints.rooms_constraints import LimitedRoomChoices
 from TTapp.TTConstraints.limit_time_constraints import LimitModulesTimePerPeriod, \
     LimitGroupsTimePerPeriod, LimitTutorsTimePerPeriod, LimitTimePerPeriod
 from TTapp.TTConstraints.orsay_constraints import GroupsLunchBreak, BreakAroundCourseType, TutorsLunchBreak
-from TTapp.TTConstraints.visio_constraints import NoVisio, BoundVisioHalfDays, LimitGroupsPhysicalPresence, VisioOnly
+from TTapp.TTConstraints.visio_constraints import NoVisio, BoundPhysicalPresenceHalfDays, LimitGroupsPhysicalPresence, \
+    VisioOnly, Curfew
+from TTapp.TTConstraints.cosmo_style_constraints import LimitHoles, LimitTutorTimePerWeeks, ModulesByBloc
 
 #
 #   CustomConstraint
@@ -78,7 +85,7 @@ class CustomConstraint(TTConstraint):
                     max_length=200,
                     null=False,
                     blank=False)
-    groups = models.ManyToManyField('base.Group', blank=True)
+    groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     tutors = models.ManyToManyField('people.Tutor', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 

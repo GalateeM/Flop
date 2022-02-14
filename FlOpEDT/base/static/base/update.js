@@ -205,7 +205,24 @@ function go_pref(quick) {
 
   go_cm_advanced_pref(quick);
 
+  go_alarm_pref() ;
+}
 
+
+// recompute the total duration of availability
+function compare_required_filled_pref() {
+  if (user.dispos.length > 0) {
+    filled_dispos = user.dispos.reduce(
+      function(accu, pref) {
+        let r = accu ;
+        if (pref.value > 0) {
+          r += pref.duration ;
+        }
+        return r ;
+      },
+      0
+    ) ;
+  }
 }
 
 
@@ -436,6 +453,9 @@ function go_cm_advanced_pref(quick) {
 // check and inform whenever there is not enough available slots
 function go_alarm_pref() {
 
+  compare_required_filled_pref() ;
+
+
   var dig = svg.get_dom("dig");
 
   // escape if there is no alarm 
@@ -453,10 +473,19 @@ function go_alarm_pref() {
     .text(txt_filDispos)
     .attr("x", menus.x + menus.mx - 5)
     .attr("y", did.tly + valid.h * 1.5 + valid.margin_h);
+  dig
+    .select(".disp-info").select(".disp-comm")
+    .text(txt_comDispos)
+    .attr("x", menus.x + menus.mx - 5)
+    .attr("y", did.tly + valid.h * 1.5 + 2 * valid.margin_h);
+
 
   if (required_dispos > filled_dispos) {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "bold").attr("fill", "red");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "bold").attr("fill", "red");
     dig
       .select(".disp-info").select(".disp-required")
@@ -464,6 +493,9 @@ function go_alarm_pref() {
   } else {
     dig
       .select(".disp-info").select(".disp-filled")
+      .attr("font-weight", "normal").attr("fill", "black");
+    dig
+      .select(".disp-info").select(".disp-comm")
       .attr("font-weight", "normal").attr("fill", "black");
     dig
       .select(".disp-info").select(".disp-required")
@@ -596,11 +628,32 @@ function go_grid(quick) {
     .attr("width", grid_width());
 
 
+  if (plot_constraint_lines) {
+    let constraint_d = svg.get_dom("edt-fg").selectAll(".cst")
+      .data(
+        Object.keys(rev_constraints).map(function(c){return +c ;})
+      );
+    
+    let constraint_g = constraint_d
+      .enter()
+      .append("line")
+      .attr("class", "cst");
+    
+    constraint_g
+      .merge(constraint_d)
+      .attr("stroke", "black")
+      .attr("stroke-width", 2)
+      .attr("x1", 0)
+      .attr("y1", constraint_y)
+      .attr("x2", grid_width())
+      .attr("y2", constraint_y);
+  }
+
 
   var grid = fg.selectAll(".grids")
     .data(
       data_slot_grid.filter(function (d) {
-        return groups[d.promo][d.group].display;
+        return groups[d.promo]["structural"][d.group].display;
       }),
       function (d) { return d.day + d.start + d.group + d.promo; }
     );
@@ -713,7 +766,7 @@ function go_grid(quick) {
 // display day names, and a rectangle per half day
 // if half_day_rect is true
 // layer: fg
-// data: days, time_settings.time, side_time
+// data: days, department_settings.time, side_time
 // class: gridsckd, txt_scl, day_am,
 //        gridsckhb, gridsckhlam, gridsckhlpm
 //        gridsckh, gridsckhl
@@ -832,15 +885,15 @@ function go_gp_buttons() {
   for (var p = 0; p < set_promos.length; p++) {
     var cont = svg.get_dom("selg")
       .select(".sel-pop-g#" + popup_type_id("group"))
-      .selectAll(".gp-but-" + set_promos[p] + "P")
-      .data(Object.keys(groups[p]).map(function (k) {
-        return groups[p][k];
+      .selectAll('[train_prog="' + set_promos[p] + '"]')
+      .data(Object.keys(groups[p]["structural"]).map(function (k) {
+        return groups[p]["structural"][k];
       }));
 
     var contg = cont
       .enter()
       .append("g")
-      .attr("class", "gp-but-" + set_promos[p] + "P")
+      .attr("train_prog", set_promos[p])
       .attr("transform", function (gp) {
         return "translate(" + (root_gp[gp.promo].butx) + ","
           + (root_gp[gp.promo].buty) + ")";
@@ -971,12 +1024,19 @@ function update_selection() {
     var mod = modules.all.find(function(d) {
       return d.name == c.mod ;
     });
+    let tut_display = false ;
+    for(let it = 0 ; it < tutors.all.length && !tut_display ; it++) {
+      if (c.tutors.includes(tutors.all[it].name) &&
+         tutors.all[it].display) {
+        tut_display = true ;
+      }
+    }
     var tut = tutors.all.find(function(d) {
-      return d.name == c.prof ;
+      return c.tutors.includes(d.name) ;
     });
-    var roo = rooms_sel.all.find(function(d) {
+    var roo = rooms_sel.all.filter(function(d) {
       // visio room
-      if (c.room == '') {
+      if (c.room === null) {
         return true ;
       }
       // physical room
@@ -986,11 +1046,12 @@ function update_selection() {
         return false;
       }
     });
-    if (typeof mod === 'undefined' || typeof tut === 'undefined'
-        || typeof roo === 'undefined') {
+    const reducer = (p, c) => (p || c.display);
+    let display_room = roo.reduce(reducer, false);
+    if (typeof mod === 'undefined') {
       c.display = false ;
     } else {
-      c.display = mod.display && tut.display && roo.display ;
+      c.display = mod.display && tut_display && display_room ;
     }
   });
 }
@@ -1017,7 +1078,7 @@ function update_active() {
 
   sel_popup.active_filter = tut_av.active || mod_av.active;
 
-  if (!cosmo) {
+  if (!department_settings.mode.cosmo) {
     var room_av = sel_popup.get_available("room");
     room_av.active = rooms_sel.all.filter(function (d) {
       return d.display;
@@ -1043,7 +1104,7 @@ function go_courses(quick) {
     .selectAll(".cours")
     .data(
       cours.filter(function (d) {
-        return groups[d.promo][d.group].display;
+        return groups[d.promo]["structural"][d.group].display;
       }),
       function (d) { return d.group + d.id_course; }
     )
@@ -1056,13 +1117,13 @@ function go_courses(quick) {
     .on("contextmenu", function (d) {
       if (ckbox["edt-mod"].cked) {
         d3.event.preventDefault();
-        if (!cosmo) {
+        if (!department_settings.mode.cosmo) {
           room_tutor_change.cm_settings = entry_cm_settings;
         }
         pending.prepare_modif(d);
         compute_cm_room_tutor_direction();
         //select_room_change(d);
-        if (!cosmo) {
+        if (!department_settings.mode.cosmo) {
           select_entry_cm();
         } else {
           salarie_cm_level = 0;
@@ -1100,7 +1161,7 @@ function go_courses(quick) {
       && logged_usr.dispo_all_see) {
     d3.selectAll("rect.crect").attr("fill", function (d) {
       try {
-        lDis = get_preference(dispos[d.prof][d.day], d.duration);
+        lDis = get_preference(dispos[d.tutors[0]][d.day], d.duration);
       } catch (e) {
         lDis = par_dispos.nmax;
       }
@@ -1133,22 +1194,40 @@ function go_courses(quick) {
   //         .style("opacity", 0);
   // })
 
-  incg
-    .append("text")
-    .attr("st", "p")
-    .attr("font-weight", cours_txt_weight)
-    .attr("font-size", cours_txt_size)
-    .merge(cg.select("[st=p]"))
-    .transition(t)
-    .attr("fill", cours_txt_fill)
-    .attr("x", cours_txt_x)
-    .attr("y", cours_txt_mid_y)
-    .attr("x", cours_txt_x)
-    .attr("y", cours_txt_mid_y)
-    .text(cours_txt_mid_txt);
+  // if cosmo_mode is 2, we put only module, in the middle!
+   if (department_settings.mode.cosmo === 2) {
+     incg
+       .append("text")
+       .attr("st", "p")
+       .attr("font-weight", cours_txt_weight)
+       .attr("font-size", cours_txt_size)
+       .merge(cg.select("[st=p]"))
+       .transition(t)
+       .attr("fill", cours_txt_fill)
+       .attr("x", cours_txt_x)
+       .attr("y", cours_txt_mid_y)
+       .attr("x", cours_txt_x)
+       .attr("y", cours_txt_mid_y)
+       .text(cours_txt_top_txt);
+   }
+   else {
+     incg
+       .append("text")
+       .attr("st", "p")
+       .attr("font-weight", cours_txt_weight)
+       .attr("font-size", cours_txt_size)
+       .merge(cg.select("[st=p]"))
+       .transition(t)
+       .attr("fill", cours_txt_fill)
+       .attr("x", cours_txt_x)
+       .attr("y", cours_txt_mid_y)
+       .attr("x", cours_txt_x)
+       .attr("y", cours_txt_mid_y)
+       .text(cours_txt_mid_txt);
+   }
 
 
-  if (!cosmo) {
+  if (!department_settings.mode.cosmo) {
     incg
       .append("text")
       .attr("st", "m")
@@ -1242,30 +1321,30 @@ function go_regen(s) {
   if (s != null) {
     total_regen = false;
     var txt = "";
-    var elements = s.split(/,| /);
-    if (elements.length % 2 != 0 && elements.length > 1) {
-      txt = "";
-    } else if (elements[0] == 'N') {
-      txt = "Pas de (re)génération prévue";
+    var elements = s.split(/,/);
+    var regen_id = elements[elements.length - 1];
+    if (elements[0] == 'N') {
+      txt = gettext('No planned re-generation');
     } else if (elements[0] == 'C') {
-      total_regen = true;
+      var total_regen = true;
       if (elements.length > 2 && elements[2] == 'S') {
-        txt = "Regénération totale (mineure) le " + elements[1] +
+        txt = gettext("Full (minor) generation planned on ") + elements[1] +
           "(" + elements[3] + ")";
       } else {
-        txt = "Regénération totale prévue (probablement le " + elements[1] + ")";
+        txt = gettext("Full generation planned (probably on ") + elements[1] + ")";
       }
     } else if (elements[0] == 'S') {
-      txt = "Regénération mineure prévue (probablement le " + elements[1] + ")";
+      txt = gettext("Minor generation planned (probably on ") + elements[1] + ")";
     }
 
     ack.regen = txt;
 
     svg.get_dom("vg").select(".ack-reg").select("text")
       .text(ack.regen);
-
+    svg.get_dom("vg").select(".ack-reg")
+        .attr('href', '/admin/base/regen/'+regen_id)
+        .attr('target', "_blank");
   }
-
   svg.get_dom("vg").select(".ack-reg").select("text")
     .transition(d3.transition())
     .attr("x", grid_width())
@@ -1379,10 +1458,10 @@ function update_relevant() {
       return d.name == c.mod;
     });
     var tut = tutors.all.find(function (d) {
-      return d.name == c.prof;
+      return c.tutors.includes(d.name);
     });
     if (!tut_act) {
-      if (c.prof == user.name) {
+      if (c.tutors.includes(user.name)) {
         mod.relevant = true;
       }
     } else if (typeof mod !== 'undefined'

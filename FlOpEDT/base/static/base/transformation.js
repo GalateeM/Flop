@@ -46,14 +46,14 @@
   ------------------------*/
 
 function bknews_top_y() {
-  var t = time_settings.time;
+  var t = department_settings.time;
   return nbRows * scale * (t.lunch_break_start_time - t.day_start_time);
 }
 function bknews_bot_y() {
   return bknews_top_y() + bknews_h();
 }
 function bknews_h() {
-  var t = time_settings.time;
+  var t = department_settings.time;
   if (t.lunch_break_finish_time == t.lunch_break_start_time
      && bknews.nb_rows == 0) {
     return 0;
@@ -130,7 +130,7 @@ function dispo_x(d) {
 // --  begin  --
 // TO BE IMPROVED for multi-line, and lunch break
 function dispo_y(d) {
-  var t = time_settings.time;
+  var t = department_settings.time;
   var ret = (d.start_time - t.day_start_time) * nbRows * scale;
   //	+ row_gp[root_gp[c.promo].row].y * rev_constraints[c.start.toString()] * scale ;
   if (d.start_time >= t.lunch_break_finish_time) {
@@ -223,7 +223,7 @@ function dispo_all_h(d) {
 }
 
 function dispo_all_y(d) {
-  var ts = time_settings.time;
+  var ts = department_settings.time;
   if (d.start_time < ts.lunch_break_start_time) {
     return dispo_more_y(d) + d.off * dispo_all_h(d);
   } else {
@@ -264,9 +264,9 @@ function cross_d_y(d) {
 function txt_reqDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    ret += "Dispos souhaitées : " + required_dispos + " créneaux.";
+    ret += gettext("You have to do  ") + min_to_hm_txt(required_dispos) + ".";
   } else if (required_dispos == 0) {
-    ret += "Vous n'intervenez pas cette semaine.";
+    ret += gettext("No course for you this week.");
   }
   return ret;
 }
@@ -274,17 +274,30 @@ function txt_reqDispos() {
 function txt_filDispos() {
   var ret = "";
   if (required_dispos > 0) {
-    if (filled_dispos < required_dispos) {
-      ret += "Vous en avez " + filled_dispos + ". Merci d'en rajouter.";
-    } else {
-      ret += "Vous en proposez " + filled_dispos + ". C'est parfait.";
-    }
+    ret += gettext("You propose   ") + min_to_hm_txt(filled_dispos) + ". "
   } else if (required_dispos == 0) {
     //ret += "Pas de problème." // pas de cours => pas de message ;-) 
   }
   return ret;
 }
 
+
+function txt_comDispos() {
+  var ret = "";
+  if (required_dispos > 0) {
+    if (filled_dispos >= required_dispos) {
+      if (filled_dispos < 2 * required_dispos) {
+        ret += gettext("Maybe you should free up more...");
+      } else {
+        ret += gettext("It's Ok.");
+      }
+    }
+    else {
+      ret += gettext("Thank you for adding some.");
+    }
+  }
+  return ret;
+}
 
 function pref_opacity(d) {
   return pref_selection.start !== null && d.selected?opac:1;
@@ -491,10 +504,8 @@ function gscg_y(datum) {
 }
 
 function gscg_txt(datum) {
-  if (datum.gp.name == "fLP1") {
-    return "LP";
-  } else if (datum.gp.name == "fLP2") {
-    return "";
+  if (datum.gp.buttxt !== null) {
+    return datum.gp.buttxt;
   } else {
     return datum.gp.name;
   }
@@ -505,7 +516,7 @@ function gscp_x(datum) {
 }
 
 function gscp_y(d) {
-  var t = time_settings.time;
+  var t = department_settings.time;
   var ret = (d.start - t.day_start_time) * nbRows * scale
     + row_gp[d.row].y * rev_constraints[d.start.toString()] * scale;
   if (d.start >= t.lunch_break_finish_time) {
@@ -525,7 +536,7 @@ function grid_height() {
 }
 
 function nb_minutes_in_grid() {
-  var t = time_settings.time;
+  var t = department_settings.time;
   var minutes = bknews.nb_rows * bknews.time_height
     + nbRows * (t.lunch_break_start_time - t.day_start_time
       + t.day_finish_time - t.lunch_break_finish_time);
@@ -694,11 +705,11 @@ function but_open_sel_txt(d) {
 function cours_x(c) {
   return week_days.day_by_ref(c.day).num * (rootgp_width * labgp.width +
     dim_dispo.plot * (dim_dispo.width + dim_dispo.right)) +
-    groups[c.promo][c.group].x * labgp.width;
+    groups[c.promo]["structural"][c.group].x * labgp.width;
 }
 
 function cours_y(c) {
-  var t = time_settings.time;
+  var t = department_settings.time;
   var ret = (c.start - t.day_start_time) * nbRows * scale
     + row_gp[root_gp[c.promo].row].y * c.duration * scale;
   if (c.start >= t.lunch_break_finish_time) {
@@ -708,7 +719,7 @@ function cours_y(c) {
 }
 
 function cours_reverse_y(y) {
-  let t = time_settings.time;
+  let t = department_settings.time;
   let break_start = (t.lunch_break_start_time - t.day_start_time)
     * (nbRows * scale) ;
   let i = 0 ;
@@ -769,7 +780,7 @@ function cours_reverse_y(y) {
 }
 
 function cours_width(c) {
-  var gp = groups[c.promo][c.group];
+  var gp = groups[c.promo]["structural"][c.group];
   return (gp.maxx - gp.x) * labgp.width;
 }
 
@@ -781,9 +792,13 @@ function cours_txt_x(c) {
   return cours_x(c) + .5 * cours_width(c);
 }
 function get_color(c){
-//  console.log(c);
-  let key = cosmo?c.prof:c.mod;
-  return colors[key];
+  let col = 'white' ;
+  if (department_settings.mode.cosmo===1 && c.tutors.length) {
+    col = colors[c.tutors[0]] ;
+  } else {
+    col = colors[c.mod] ;
+  }
+  return col ;
 }
 function cours_txt_fill(c) {
   let coco = get_color(c) ;
@@ -814,14 +829,15 @@ function cours_txt_mid_y(c) {
   return cours_y(c) + .5 * cours_height(c);
 }
 function cours_txt_mid_txt(c) {
-  return c.prof;
+  return c.tutors.join(',');
 }
 function cours_txt_bot_y(c) {
   return cours_y(c) + .75 * cours_height(c);
 }
 function cours_txt_bot_txt(c) {
-  if (c.room != '' && c.id_visio != -1) {
-    console.log(c, 'Both on site and remote?');
+  if (c.room !== null && c.id_visio != -1) {
+    //console.log(c, 'Both on site and remote?');
+    1;
   } else {
     if (c.id_visio > -1) {
       return 'Visio' ;
@@ -998,8 +1014,18 @@ function cm_chg_but_fill(d) {
     ret = "steelblue";
   } else if (['tutor_module', 'tutor', 'room'].includes(room_tutor_change.cm_settings.type)) {
     ret = smi_fill(cm_chg_but_pref(d));
+  } else if (room_tutor_change.cm_settings.type == "preferred_links") {
+    ret = visio_btn_fill(d);
   }
   return ret;
+}
+
+function visio_btn_fill(d) {
+  let ret = "steelblue";
+  if (d.type == "users") {
+    ret = "green";
+  }
+  return ret ;
 }
 
 function cm_chg_but_txt_fill(d) {
@@ -1091,7 +1117,7 @@ function dispot_x(d) {
 }
 
 function dispot_y(d) {
-  var ts = time_settings.time;
+  var ts = department_settings.time;
   var ret = 1.25 * valid.h
     + (d.start_time - ts.day_start_time) * did.scale;
   if (d.start_time >= ts.lunch_break_finish_time) {
@@ -1142,7 +1168,7 @@ function dispot_all_w(d) {
 function gsclbt_y() {
   return dispot_y({
     start_time:
-      time_settings.time.lunch_break_start_time
+      department_settings.time.lunch_break_start_time
   });
 }
 
@@ -1400,4 +1426,15 @@ function pref_mode_but_cls(d) {
   } else {
     return "select-standard";
   }
+}
+
+
+function constraint_y(d) {
+  return cours_y({
+    'start': d,
+    'promo': root_gp.findIndex(function(g) {
+      return g.row == 0 ;
+    }),
+    'duration': 0
+  });
 }

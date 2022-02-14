@@ -58,7 +58,7 @@ class ScheduledCourseTestCase(TestCase):
         cls.tp1 = models.TrainingProgramme.objects.create(name="TrainingProgramme1", abbrev="tp1", department=cls.department1)
         cls.tp2 = models.TrainingProgramme.objects.create(name="TrainingProgramme2", abbrev="tp2", department=cls.department2)
         cls.gt1 = models.GroupType.objects.create(name="group_type_1", department=cls.department1)
-        cls.g1 = models.Group.objects.create(name="gp1", train_prog=cls.tp1, type=cls.gt1, size=0)
+        cls.g1 = models.StructuralGroup.objects.create(name="gp1", train_prog=cls.tp1, type=cls.gt1, size=0)
         cls.ct1 = models.CourseType.objects.create(name="CourseType1")
         cls.p1 = models.Period.objects.create(name="annee_complete", starting_week=0, ending_week=53)
         cls.m1 = models.Module.objects.create(name="module1", abbrev="m1", train_prog=cls.tp1, period=cls.p1)
@@ -68,8 +68,9 @@ class ScheduledCourseTestCase(TestCase):
         cls.s1 = models.Slot.objects.create(day=cls.day1, hour=cls.t1)
         cls.sc1 = models.ScheduledCourse.objects.create(course=cls.c1, slot=cls.s1)
 
-    def test_get_scheduled_courses_with_department(self):   
-        count = queries.get_scheduled_courses(self.department1, 39, 2018, 0).count()
+    def test_get_scheduled_courses_with_department(self):
+        week = models.Week.objects.get(nb=39, year=2018)
+        count = queries.get_scheduled_courses(self.department1, week, 0).count()
         self.assertEqual(count, 1)
-        count = queries.get_scheduled_courses(self.department2, 39, 2018, 0).count()
+        count = queries.get_scheduled_courses(self.department2, week, 0).count()
         self.assertEqual(count, 0)        
