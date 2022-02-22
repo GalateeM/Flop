@@ -69,6 +69,7 @@ class NoCourseOnDay(TTConstraint):
 
 
 class NoGroupCourseOnDay(NoCourseOnDay):
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     course_types = models.ManyToManyField('base.CourseType', blank=True, related_name='no_course_on_days')
 
@@ -124,8 +125,6 @@ class NoTutorCourseOnDay(NoCourseOnDay):
             text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         if self.tutor_status is not None:
             text += f" (ne concerne que les {self.tutor_status} "
-        if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         return text
 
     def get_slot_constraint(self, week, forbidden = False):

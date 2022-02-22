@@ -74,9 +74,6 @@ class MinTutorsHalfDays(TTConstraint):
         else:
             text += " de tous les profs"
 
-        if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
-
         return text
 
 

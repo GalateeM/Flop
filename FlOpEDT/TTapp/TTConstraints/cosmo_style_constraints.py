@@ -82,8 +82,6 @@ class LimitHoles(TTConstraint):
             text += ' pour : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         else:
             text += " pour tous les profs"
-        if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         return text
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1):
@@ -178,8 +176,6 @@ class LimitTutorTimePerWeeks(TTConstraint):
             text += ' pour : ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         else:
             text += " pour tous les profs"
-        if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         if self.tolerated_margin:
             text += f" (avec une marge tolérée de {self.tolerated_margin}%)."
         return text
@@ -252,6 +248,7 @@ class ModulesByBloc(TTConstraint):
     Force that same module is affected by bloc (a same tutor is affected to each bloc of same module)
     Except for suspens courses
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 
     def get_viewmodel(self):

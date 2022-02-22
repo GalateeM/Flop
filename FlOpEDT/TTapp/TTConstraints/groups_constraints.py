@@ -78,6 +78,7 @@ class MinGroupsHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1):
@@ -96,12 +97,10 @@ class MinGroupsHalfDays(TTConstraint):
 
     def one_line_description(self):
         text = "Minimise les demie-journées"
-
         if self.groups.exists():
             text += ' des groupes ' + ', '.join([group.name for group in self.groups.all()])
         else:
             text += " de tous les groupes"
-
         if self.train_progs.exists():
             text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         else:
@@ -118,6 +117,8 @@ class MinNonPreferedTrainProgsSlot(TTConstraint):
     Minimize the use of unprefered Slots for groups.
     Make impossible the use of forbidden slots.
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
+
     def enrich_ttmodel(self, ttmodel, week, ponderation=None):
         if ponderation is None:
             ponderation = ttmodel.min_ups_c

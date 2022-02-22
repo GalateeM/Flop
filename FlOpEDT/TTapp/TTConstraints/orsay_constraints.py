@@ -46,12 +46,12 @@ class GroupsLunchBreak(TTConstraint):
     """
     Ensures time for lunch in a given interval for given groups (all if groups is Null)
     """
-
     start_time = models.PositiveSmallIntegerField()
     end_time = models.PositiveSmallIntegerField()
     # ArrayField unusable with django-import-export
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
     lunch_length = models.PositiveSmallIntegerField()
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True, related_name='lunch_breaks_constraints')
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=100):
@@ -213,6 +213,7 @@ class BreakAroundCourseType(TTConstraint):
     Ensures that the courses of a given course type and other types of courses cannot be consecutive for the given groups.
     """
     weekdays = ArrayField(models.CharField(max_length=2, choices=Day.CHOICES), blank=True, null=True)
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True, related_name='amphi_break_constraint')
     course_type = models.ForeignKey('base.CourseType', related_name='amphi_break_constraint', on_delete=models.CASCADE)
     min_break_length = models.PositiveSmallIntegerField(default=15)

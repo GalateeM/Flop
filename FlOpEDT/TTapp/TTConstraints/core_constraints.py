@@ -51,6 +51,7 @@ class NoSimultaneousGroupCourses(TTConstraint):
     """
     Only one course for each considered group on simultaneous slots
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
 
     @timer
@@ -210,6 +211,7 @@ class ScheduleAllCourses(TTConstraint):
     """
     The considered courses are scheduled, and only once
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True)
@@ -260,6 +262,7 @@ class AssignAllCourses(TTConstraint):
     The considered courses are assigned to a tutor
     If pre_assigned_only, it does assign a tutor only to courses that already have one
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True)

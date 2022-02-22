@@ -116,7 +116,7 @@ class LimitedStartTimeChoices(TTConstraint):
     """
     Limit the possible start times
     """
-
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     module = models.ForeignKey('base.Module',
                                null=True,
                                blank=True,
@@ -246,6 +246,7 @@ class ConsiderDependencies(TTConstraint):
     -include simultaneity (double dependency)
     If there is a weight, it's a preference, else it's a constraint...
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 
     @timer
@@ -260,7 +261,7 @@ class ConsiderDependencies(TTConstraint):
             
         Returns:
             JsonResponse: with status 'KO' or 'OK' and a list of messages explaining the problem"""
-        dependencies = self.considered_dependecies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
+        dependencies = self.considered_dependencies().filter(Q(course1__week=week) | Q(course1__week=None), Q(course2__week=week) | Q(course2__week=None))
         jsondict = {"status" : _("OK"), "messages" : [], "period": { "week": week.nb, "year": week.year} }  
         for dependency in dependencies:
             ok_so_far = True
@@ -336,7 +337,7 @@ class ConsiderDependencies(TTConstraint):
                                                             "type" : "ConsiderDependencies" })
         return jsondict
 
-    def considered_dependecies(self):
+    def considered_dependencies(self):
         """Returns the depencies that have to be considered"""
         result=Dependency.objects.filter(course1__type__department=self.department, course2__type__department=self.department)
         if self.train_progs.exists():
@@ -397,6 +398,7 @@ class ConsiderPivots(TTConstraint):
     -include non same-day constraint
     If there is a weight, it's a preference, else it's a constraint...
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 
     def one_line_description(self):
@@ -507,10 +509,6 @@ class AvoidBothTimes(TTConstraint):
             text += ' pour ' + str(self.tutor)
         if self.group:
             text += ' avec le groupe ' + str(self.group)
-        if self.train_progs.exists():
-            text += ' des promos ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
-        else:
-            text += " de toutes les promos."
         return text
 
 

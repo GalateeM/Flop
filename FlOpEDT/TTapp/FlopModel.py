@@ -283,7 +283,7 @@ class FlopModel(object):
             return None
 
 
-def get_ttconstraints(department, week=None, train_prog=None, is_active=None):
+def get_ttconstraints(department, week=None, is_active=None):
     #
     #  Return constraints corresponding to the specific filters
     #
@@ -292,14 +292,7 @@ def get_ttconstraints(department, week=None, train_prog=None, is_active=None):
     if is_active:
         query &= Q(is_active=is_active)
 
-    if train_prog:
-        query &= \
-            Q(train_progs__abbrev=train_prog) & Q(weeks__isnull=True) | \
-            Q(train_progs__abbrev=train_prog) & Q(weeks=week) | \
-            Q(train_progs__isnull=True) & Q(weeks=week) | \
-            Q(train_progs__isnull=True) & Q(weeks__isnull=True)
-    else:
-        query &= Q(weeks=week) | Q(weeks__isnull=True)
+    query &= Q(weeks=week) | Q(weeks__isnull=True)
 
     # Look up the TTConstraint subclasses records to update
     types = all_subclasses(TTConstraint)

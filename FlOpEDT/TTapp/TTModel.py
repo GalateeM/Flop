@@ -877,7 +877,6 @@ class TTModel(FlopModel):
             for constr in get_ttconstraints(
                     self.department,
                     week=week,
-                    # train_prog=promo,
                     is_active=True):
                 print(constr.__class__.__name__, constr.id, end=' - ')
                 timer(constr.enrich_ttmodel)(self, week)

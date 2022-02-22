@@ -96,8 +96,6 @@ class StabilizeTutorsCourses(TTConstraint):
         text = "Minimiser les changements"
         if self.tutors.exists():
             text += ' de ' + ', '.join([t.username for t in self.tutors.all()])
-        if self.train_progs.count():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
         text += ': copie ' + str(self.work_copy)
         return text
 
@@ -109,6 +107,7 @@ class StabilizeGroupsCourses(TTConstraint):
         - in a unused slot costs 1,
         - in a unused day for tutor group cost ponderation
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup', blank=True)
     work_copy = models.PositiveSmallIntegerField(default=0)
     fixed_days = ArrayField(models.CharField(max_length=2,
@@ -152,8 +151,10 @@ class StabilizeGroupsCourses(TTConstraint):
         text = "Minimiser les changements"
         if self.groups.exists():
             text += ' des groupes ' + ', '.join([g.full_name for g in self.groups.all()])
-        if self.train_progs.count():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        if self.train_progs.exists():
+            text += ' de ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+        else:
+            text += " de toutes les promos"
         text += ': copie ' + str(self.work_copy)
         return text
 

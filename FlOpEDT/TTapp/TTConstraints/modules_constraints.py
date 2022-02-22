@@ -35,14 +35,21 @@ class MinModulesHalfDays(TTConstraint):
     """
     All courses will fit in a minimum of half days
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module', blank=True)
 
-    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
-        considered_modules = set(ttmodel.wdb.modules)
+    def considered_modules(self, ttmodel):
+        train_progs = set(ttmodel.train_prog)
+        if self.train_progs.exists():
+            train_progs &= set(self.train_progs.all())
+        result = set(ttmodel.wdb.modules.filter(train_prog__in=train_progs))
         if self.modules.exists():
-            considered_modules &= set(self.modules.all())
+            result &= set(self.modules.all())
+        return result
+
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1.):
         helper = MinHalfDaysHelperModule(ttmodel, self, week, ponderation)
-        for module in considered_modules:
+        for module in self.considered_modules(ttmodel):
             helper.enrich_model(module=module)
 
     def get_viewmodel(self):

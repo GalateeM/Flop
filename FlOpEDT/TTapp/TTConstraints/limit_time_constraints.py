@@ -64,12 +64,6 @@ class LimitTimePerPeriod(TTConstraint):
 
         return period_by_day
 
-    def considered_train_progs(self, ttmodel):
-        train_progs = self.train_progs.all()
-        if not train_progs:
-            train_progs = ttmodel.train_prog
-        return train_progs
-
     def considered_courses(self, ttmodel, week, train_prog, tutor, module, group):
         return set(self.get_courses_queryset_by_parameters(ttmodel, week,
                                                            course_type=self.course_type,
@@ -111,16 +105,12 @@ class LimitGroupsTimePerPeriod(LimitTimePerPeriod):  # , pond):
     Attributes:
         groups : the groups concerned by the limitation. All the groups of self.train_progs if None.
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     groups = models.ManyToManyField('base.StructuralGroup',
                                     blank=True,
                                     related_name="Course_type_limits")
 
     def enrich_ttmodel(self, ttmodel, week, ponderation=1.):
-
-        # if self.groups.exists():
-        #     considered_groups = self.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
-        # else:
-        #     considered_groups = ttmodel.wdb.groups.filter(train_prog__in=self.considered_train_progs(ttmodel))
         for group in considered_basic_groups(self,ttmodel):
             self.enrich_model_for_one_object(ttmodel, week, ponderation, group=group)
 
@@ -177,16 +167,22 @@ class LimitModulesTimePerPeriod(LimitTimePerPeriod):
     Attributes:
         modules : the modules concerned by the limitation. All the modules of self.train_progs if None.
     """
+    train_progs = models.ManyToManyField('base.TrainingProgramme', blank=True)
     modules = models.ManyToManyField('base.Module',
                                      blank=True,
                                      related_name="Course_type_limits")
 
-    def enrich_ttmodel(self, ttmodel, week, ponderation=1.):
-
+    def considered_modules(self, ttmodel):
+        train_progs = set(ttmodel.train_prog)
+        if self.train_progs.exists():
+            train_progs &= set(self.train_progs.all())
+        result = set(ttmodel.wdb.modules.filter(train_prog__in=train_progs))
         if self.modules.exists():
-            considered_modules = self.modules.filter(train_prog__in=self.considered_train_progs(ttmodel))
-        else:
-            considered_modules = ttmodel.wdb.modules.filter(train_prog__in=self.considered_train_progs(ttmodel))
+            result &= set(self.modules.all())
+        return result
+
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1.):
+        considered_modules = self.considered_modules(ttmodel)
 
         if self.train_progs.exists():
             considered_basic_groups = set(
@@ -317,7 +313,4 @@ class LimitTutorsTimePerPeriod(LimitTimePerPeriod):
             text += ' pour ' + ', '.join([tutor.username for tutor in self.tutors.all()])
         else:
             text += " pour tous les profs "
-        if self.train_progs.exists():
-            text += ' en ' + ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
-
         return text

@@ -48,8 +48,6 @@ class TTConstraint(FlopConstraint):
                  None if the constraint is necessary
         is_active : usefull to de-activate a Constraint just before the generation
     """
-    train_progs = models.ManyToManyField('base.TrainingProgramme',
-                                         blank=True)
 
     class Meta:
         abstract = True
@@ -63,18 +61,19 @@ class TTConstraint(FlopConstraint):
         :return: a dictionnary with view-related data
         """
         result = FlopConstraint.get_viewmodel(self)
-        if self.train_progs.exists():
-            train_prog_value = ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
-        else:
-            train_prog_value = 'All'
+        if hasattr(self, "train_progs"):
+            if self.train_progs.exists():
+                train_prog_value = ', '.join([train_prog.abbrev for train_prog in self.train_progs.all()])
+            else:
+                train_prog_value = 'All'
 
-        result['train_progs'] = train_prog_value
+            result['train_progs'] = train_prog_value
 
         return result
 
     @classmethod
     def get_viewmodel_prefetch_attributes(cls):
-        return ['train_progs', 'department',]
+        return ['department',]
 
     def get_courses_queryset_by_parameters(self, ttmodel, week,
                                            train_progs=None,
@@ -101,6 +100,7 @@ class TTConstraint(FlopConstraint):
         """
         Filter courses depending constraint attributes
         """
-        if self.train_progs.exists() and 'train_progs' not in kwargs:
-            kwargs['train_progs'] = self.train_progs.all()
+        if hasattr(self, "train_progs"):
+            if self.train_progs.exists() and 'train_progs' not in kwargs:
+                kwargs['train_progs'] = self.train_progs.all()
         return FlopConstraint.get_courses_queryset_by_parameters(self, ttmodel, week, **kwargs)

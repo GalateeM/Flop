@@ -123,10 +123,6 @@ def get_context(department, year, week, train_prog=None):
     week_object = Week.objects.get(nb=week, year=year)
     params = {'week': week_object}
 
-    # Get constraints
-    if train_prog and not train_prog == text_all:
-        params.update({'train_prog':train_prog})
-
     constraints = get_constraints_viewmodel(department, **params)
 
     # Get working copy list
