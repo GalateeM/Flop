@@ -30,7 +30,8 @@ from TTapp.helpers.minhalfdays import MinHalfDaysHelperTutor
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.slots import days_filter, slots_filter
-from TTapp.TTConstraint import TTConstraint, max_weight
+from TTapp.TTConstraints.TTConstraint import TTConstraint
+from TTapp.FlopConstraint import max_weight
 
 
 def considered_tutors(tutors_ttconstraint, ttmodel):
@@ -50,7 +51,7 @@ class MinTutorsHalfDays(TTConstraint):
         verbose_name='If a tutor has 2 or 4 courses only, join it?',
         default=False)
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
 
         helper = MinHalfDaysHelperTutor(ttmodel, self, week, ponderation)
         for tutor in considered_tutors(self, ttmodel):
@@ -92,7 +93,7 @@ class MinNonPreferedTutorsSlot(TTConstraint):
         attributes.extend(['tutors'])
         return attributes
 
-    def enrich_model(self, ttmodel, week, ponderation=None):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=None):
         if ponderation is None:
             ponderation = ttmodel.min_ups_i
         tutors = considered_tutors(self, ttmodel)
@@ -125,7 +126,7 @@ class MinimizeBusyDays(TTConstraint):
     """
     tutors = models.ManyToManyField('people.Tutor', blank=True)
 
-    def enrich_model(self, ttmodel, week, ponderation=None):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=None):
         """
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
@@ -190,7 +191,7 @@ class RespectBoundPerDay(TTConstraint):
     """
     tutors = models.ManyToManyField('people.Tutor', blank=True)
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         """
         Minimize the number of busy days for tutor with cost
         (if it does not overcome the bound expressed in pref_hours_per_day)
@@ -244,7 +245,7 @@ class LowerBoundBusyDays(TTConstraint):
     min_days_nb = models.PositiveSmallIntegerField()
     lower_bound_hours = models.PositiveSmallIntegerField()
 
-    def enrich_model(self, ttmodel, week, ponderation=1):
+    def enrich_ttmodel(self, ttmodel, week, ponderation=1):
         relevant_courses = self.get_courses_queryset_by_attributes(ttmodel, week)
 
         if sum(c.type.duration for c in relevant_courses) > self.lower_bound_hours:
