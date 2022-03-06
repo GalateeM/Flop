@@ -62,8 +62,6 @@ from FlOpEDT.decorators import timer
 from TTapp.FlopModel import FlopModel, GUROBI_NAME, get_ttconstraints, get_room_constraints
 from TTapp.RoomModel import RoomModel
 
-from misc.manage_rooms_ponderations import register_ponderations_in_database
-
 from django.utils.translation import gettext_lazy as _
 
 
@@ -102,7 +100,6 @@ class TTModel(FlopModel):
         self.min_visio = min_visio
         self.pre_assign_rooms = pre_assign_rooms
         self.post_assign_rooms = post_assign_rooms
-
         print(_(f"\nLet's start weeks #{self.weeks}"))
         assignment_text = ""
         if self.pre_assign_rooms:
@@ -518,9 +515,6 @@ class TTModel(FlopModel):
         if self.department.mode.visio:
             considered_courses -= set(self.wdb.visio_courses)
 
-        if not self.wdb.rooms_ponderations:
-            register_ponderations_in_database(self.department)
-
         for rooms_ponderation in self.wdb.rooms_ponderations:
             room_types_id_list = rooms_ponderation.room_types
             room_types_list = [RoomType.objects.get(id=id) for id in room_types_id_list]
@@ -529,7 +523,7 @@ class TTModel(FlopModel):
             corresponding_basic_rooms = rooms_ponderation.basic_rooms.all()
             for sl in self.wdb.availability_slots:
                 considered_basic_rooms = set(b for b in corresponding_basic_rooms
-                                             if self.avail_room[b] != 0)
+                                             if self.avail_room[b][sl] != 0)
                 bound = len(considered_basic_rooms)
                 expr = self.lin_expr()
                 for i in range(n):
@@ -771,12 +765,13 @@ class TTModel(FlopModel):
                         for cv in courses_avail:
                             cv.week = week
                     if not courses_avail:
+                        print("Course availability problem for %s - %s !" % (
+                            course_type, promo))
                         for availability_slot in week_availability_slots:
                             avail_course[(course_type, promo)][availability_slot] = 1
                             non_preferred_cost_course[(course_type,
                                                            promo)][availability_slot] = 0
-                            print("Course availability problem for %s - %s on availability_slot %s" % (
-                                course_type, promo, availability_slot))
+
 
                     else:
                         for availability_slot in week_availability_slots:
@@ -798,12 +793,6 @@ class TTModel(FlopModel):
                             else:
                                 avail_course[(course_type, promo)][availability_slot] = 1
                                 non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
-
-                            # except:
-                            #     avail_course[(course_type, promo)][availability_slot] = 1
-                            #     non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
-                            #     print("Course availability problem for %s - %s on availability_slot %s" % (
-                            #         course_type, promo, availability_slot))
 
         return non_preferred_cost_course, avail_course
 

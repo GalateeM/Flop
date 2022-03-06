@@ -451,6 +451,9 @@ class RoomPonderation(models.Model):
             for basic_room in rt.basic_rooms():
                 self.basic_rooms.add(basic_room)
 
+    def get_room_types_set(self):
+        return set(RoomType.objects.filter(id__in=self.room_types))
+
 # </editor-fold>
 
 # <editor-fold desc="COURSES">
