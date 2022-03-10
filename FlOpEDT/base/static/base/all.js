@@ -85,6 +85,9 @@ dsp_svg.cadastre = [
   // valider
   ["svg", "vg"],
 
+  // pdf
+  ["svg", "pdf"],
+
   // background, middleground, foreground, dragground
   ["svg", "edtg"],
   ["edtg", "edt-bg"],
@@ -222,6 +225,8 @@ def_cm_change();
 create_menus();
 
 create_selections();
+
+create_pdf();
 
 fetch_dispos_type();
 

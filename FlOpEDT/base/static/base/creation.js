@@ -2312,7 +2312,6 @@ function def_cm_change() {
 
 }
 
-
 // buttons to open selection view
 function create_selections() {
 
@@ -2367,6 +2366,35 @@ function create_selections() {
     .attr("x", .25 * sel_popup.selw)
     .attr("y", .5 * sel_popup.selh);
 
+}
+
+//8521
+function create_pdf() {
+  var pdf = svg.get_dom("pdf")
+    .append("g")
+    .attr("cursor", "pointer")
+    .on("click", null);
+
+  pdf
+    .append("rect")
+    .attr("width", 25)
+    .attr("height", 15)
+    .attr("fill", "red")
+    .attr("stroke", "black")
+    .attr("x", -30)
+    .attr("y", -30);
+
+  pdf
+    .append("text")
+    .text("PDF")
+    .attr("dx", "1.25em")
+    .attr("dy", ".85em")
+    .attr("x", -30)
+    .attr("y", -30)
+    .attr("fill", "white")
+    .attr("font-size", 10)
+    .attr("font-weight", 1000)
+    //.attr("font-family", "Serif Bold");
 }
 
 // add data related to a new filter panel if not
