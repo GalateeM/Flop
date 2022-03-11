@@ -86,7 +86,7 @@ dsp_svg.cadastre = [
   ["svg", "vg"],
 
   // pdf
-  ["svg", "pdf"],
+  ["svg", "pdfg"],
 
   // background, middleground, foreground, dragground
   ["svg", "edtg"],

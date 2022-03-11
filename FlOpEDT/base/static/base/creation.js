@@ -2368,33 +2368,49 @@ function create_selections() {
 
 }
 
-//8521
 function create_pdf() {
-  var pdf = svg.get_dom("pdf")
+  var pdf = svg.get_dom("pdfg")
     .append("g")
     .attr("cursor", "pointer")
-    .on("click", null);
+    .on("click", export_pdf);
 
   pdf
     .append("rect")
-    .attr("width", 25)
+    .attr("width", 30)
     .attr("height", 15)
+    .attr("rx", 5)
+    .attr("ry", 10)
     .attr("fill", "red")
     .attr("stroke", "black")
     .attr("x", -30)
-    .attr("y", -30);
+    .attr("y", -60);
 
   pdf
     .append("text")
     .text("PDF")
-    .attr("dx", "1.25em")
-    .attr("dy", ".85em")
+    .attr("dx", "1.5em")
+    .attr("dy", ".83em")
     .attr("x", -30)
-    .attr("y", -30)
+    .attr("y", -60)
     .attr("fill", "white")
     .attr("font-size", 10)
-    .attr("font-weight", 1000)
-    //.attr("font-family", "Serif Bold");
+    .attr("font-weight", 1000);
+}
+
+function export_pdf() {
+  let canvas = document.createElement("canvas");
+  let context = canvas.getContext('2d');
+
+  let svgtxt = "<g>"+document.getElementById("layout-edtg").innerHTML+"</g>";
+  
+  
+
+  canvg(canvas, svgtxt);
+
+  let imgData = canvas.toDataURL("image/png");
+  var doc = new jsPDF("l", "pt", [1920, 2160]);
+  doc.addImage(imgData, "PNG", 0, 0, 1920, 2160);
+  doc.save("edt.pdf");
 }
 
 // add data related to a new filter panel if not
