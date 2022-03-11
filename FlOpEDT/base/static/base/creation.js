@@ -2400,16 +2400,15 @@ function create_pdf() {
 function export_pdf() {
   let canvas = document.createElement("canvas");
   let context = canvas.getContext('2d');
-
-  let svgtxt = "<g>"+document.getElementById("layout-edtg").innerHTML+"</g>";
+  let svgtxt = "<svg width='1000' height='900'>"
+  +'<style type="text/css" >  <![CDATA[     .day_am{        stroke:black;       stroke-width: 2;        fill: none;   }   .day_pm{        stroke:black;       stroke-width: 2;        fill: none;   }   .gridsckhl, .gridsckhlam, .gridsckhlpm  {       stroke:black;       stroke-width: 2;    }   .gridsckhft {       font-size:12px;   }   .txt_scl {        font-size:20px;       font-weight:bold;   } ]]></style>'
+  +"<g>"+document.getElementById("layout-edtg").innerHTML+"</g>"+"</svg>";
   
-  
-
   canvg(canvas, svgtxt);
 
   let imgData = canvas.toDataURL("image/png");
-  var doc = new jsPDF("l", "pt", [1920, 2160]);
-  doc.addImage(imgData, "PNG", 0, 0, 1920, 2160);
+  var doc = new jsPDF("l", "pt", [1100, 1000]);
+  doc.addImage(imgData, "PNG", 50, 50, 1080, 1080);
   doc.save("edt.pdf");
 }
 
