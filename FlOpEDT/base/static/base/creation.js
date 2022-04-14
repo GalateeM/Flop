@@ -2312,7 +2312,6 @@ function def_cm_change() {
 
 }
 
-
 // buttons to open selection view
 function create_selections() {
 
@@ -2367,6 +2366,50 @@ function create_selections() {
     .attr("x", .25 * sel_popup.selw)
     .attr("y", .5 * sel_popup.selh);
 
+}
+
+function create_pdf() {
+  var pdf = svg.get_dom("pdfg")
+    .append("g")
+    .attr("cursor", "pointer")
+    .on("click", export_pdf);
+
+  pdf
+    .append("rect")
+    .attr("width", 30)
+    .attr("height", 15)
+    .attr("rx", 5)
+    .attr("ry", 10)
+    .attr("fill", "red")
+    .attr("stroke", "black")
+    .attr("x", -30)
+    .attr("y", -60);
+
+  pdf
+    .append("text")
+    .text("PDF")
+    .attr("dx", "1.5em")
+    .attr("dy", ".83em")
+    .attr("x", -30)
+    .attr("y", -60)
+    .attr("fill", "white")
+    .attr("font-size", 10)
+    .attr("font-weight", 1000);
+}
+
+function export_pdf() {
+  let canvas = document.createElement("canvas");
+  let context = canvas.getContext('2d');
+  let svgtxt = "<svg width='1000' height='900'>"
+  +'<style type="text/css" >  <![CDATA[     .day_am{        stroke:black;       stroke-width: 2;        fill: none;   }   .day_pm{        stroke:black;       stroke-width: 2;        fill: none;   }   .gridsckhl, .gridsckhlam, .gridsckhlpm  {       stroke:black;       stroke-width: 2;    }   .gridsckhft {       font-size:12px;   }   .txt_scl {        font-size:20px;       font-weight:bold;   } ]]></style>'
+  +"<g>"+document.getElementById("layout-edtg").innerHTML+"</g>"+"</svg>";
+  
+  canvg(canvas, svgtxt);
+
+  let imgData = canvas.toDataURL("image/png");
+  var doc = new jsPDF("l", "pt", [1100, 1000]);
+  doc.addImage(imgData, "PNG", 50, 50, 1080, 1080);
+  doc.save("edt.pdf");
 }
 
 // add data related to a new filter panel if not
