@@ -24,7 +24,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import RoomPreference, ScheduledCourse, Department, TimeGeneralSettings, RoomSort, Room, Course
+from base.models import RoomPreference, ScheduledCourse, TimeGeneralSettings, RoomSort, Room, Course
 
 from base.timing import Day
 import base.queries as queries
@@ -36,12 +36,13 @@ from django.db.models import F, Q
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 
-from FlOpEDT.decorators import timer
+from core.decorators import timer
 
 from TTapp.FlopModel import FlopModel, GUROBI_NAME, get_room_constraints
-from TTapp.RoomConstraints.RoomConstraint import RoomConstraint, LocateAllCourses, \
+from TTapp.RoomConstraints.RoomConstraint import LocateAllCourses, \
     LimitGroupMoves, LimitTutorMoves, ConsiderRoomSorts
-from TTapp.FlopConstraint import max_weight, all_subclasses
+from TTapp.FlopConstraint import max_weight
+
 
 class RoomModel(FlopModel):
     @timer
@@ -55,7 +56,7 @@ class RoomModel(FlopModel):
             self.courses_for_week = self.courses_init()
         self.days, self.slots = self.slots_init()
         self.other_departments_located_scheduled_courses, \
-            self.other_departments_located_scheduled_courses_for_slot = self.located_scheduled_courses_init()
+            self.other_departments_located_scheduled_courses_for_slot = self.other_departments_located_scheduled_courses_init()
         self.room_types, self.rooms, self.basic_rooms, self.rooms_for_type, \
             self.room_course_compat, self.course_room_compat, self.other_departments_located_scheduled_courses_for_room, \
             self.courses_for_room_type = self.rooms_init()
@@ -74,6 +75,21 @@ class RoomModel(FlopModel):
 
     def solution_files_prefix(self):
         return f"room_model_{self.department.abbrev}_{'_'.join(str(w) for w in self.weeks)}"
+
+    @timer
+    def courses_init(self):
+        scheduled_courses = ScheduledCourse.objects.filter(course__week__in=self.weeks,
+                                                           work_copy=self.work_copy,
+                                                           course__type__department=self.department)\
+            .select_related('course')
+        courses = Course.objects.filter(scheduledcourse__in=scheduled_courses).select_related('room_type')
+        corresponding_scheduled_course = {}
+        for scheduled_course in scheduled_courses:
+            corresponding_scheduled_course[scheduled_course.course] = scheduled_course
+        courses_for_week={}
+        for week in self.weeks:
+            courses_for_week[week] = set(courses.filter(week=week))
+        return scheduled_courses, courses, corresponding_scheduled_course, courses_for_week
 
     @timer
     def slots_init(self):
@@ -97,27 +113,12 @@ class RoomModel(FlopModel):
         return days, slots
 
     @timer
-    def courses_init(self):
-        scheduled_courses = ScheduledCourse.objects.filter(course__week__in=self.weeks,
-                                                           work_copy=self.work_copy,
-                                                           course__type__department=self.department)\
-            .select_related('course')
-        courses = Course.objects.filter(scheduledcourse__in=scheduled_courses).select_related('room_type')
-        corresponding_scheduled_course = {}
-        for scheduled_course in scheduled_courses:
-            corresponding_scheduled_course[scheduled_course.course]=scheduled_course
-        courses_for_week={}
-        for week in self.weeks:
-            courses_for_week[week] = set(courses.filter(week=week))
-        return scheduled_courses, courses, corresponding_scheduled_course, courses_for_week
-
-    @timer
-    def located_scheduled_courses_init(self):
-        all_scheduled_courses = ScheduledCourse.objects.filter(course__week__in=self.weeks,
-                                                               work_copy=self.work_copy)\
-            .exclude(course__type__department=self.department)
-        all_located_scheduled_courses = all_scheduled_courses.exclude(room=None)
-        other_departments_located_scheduled_courses = all_located_scheduled_courses
+    def other_departments_located_scheduled_courses_init(self):
+        other_departments_located_scheduled_courses = \
+            ScheduledCourse.objects.filter(course__week__in=self.weeks,
+                                           work_copy=0)\
+                .exclude(course__type__department=self.department)\
+                .exclude(room=None)
         other_departments_located_scheduled_courses_for_slot = {}
         for sl in self.slots:
             other_departments_located_scheduled_courses_for_slot[sl] = \

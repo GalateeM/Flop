@@ -37,9 +37,9 @@ from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
 from base.models import Department, ScheduledCourse
 
-from FlOpEDT.decorators import timer
+from core.decorators import timer
 from django.db import close_old_connections
-from django.db.models import Q, Max, F
+from django.db.models import Q, Max
 
 from TTapp.TTConstraints.TTConstraint import TTConstraint
 from TTapp.RoomConstraints.RoomConstraint import RoomConstraint
@@ -155,9 +155,9 @@ class FlopModel(object):
         """
         l_floor = self.add_var()
         self.add_constraint(expr - l_floor * floor, '>=', 0,
-                            Constraint(constraint_type=ConstraintType.SEUIL))
+                            Constraint(constraint_type=ConstraintType.FLOOR_BOUND))
         self.add_constraint(l_floor * bound - expr, '>=', 1 - floor,
-                            Constraint(constraint_type=ConstraintType.SEUIL))
+                            Constraint(constraint_type=ConstraintType.CEILING_BOUND))
         return l_floor
 
     def add_if_var_a_then_not_vars_b_constraint(self, var_a, vars_b_list):
@@ -221,17 +221,26 @@ class FlopModel(object):
 
         return local_max_wc + 1
 
-    def write_infaisability(self, write_iis=True, write_analysis=True):
+    def write_infaisability(self, write_iis=True, write_analysis=True, presolve=False):
         close_old_connections()
         file_path = "misc/logs/iis"
         filename_suffixe = "_%s_%s" % (self.department.abbrev, self.weeks)
         iis_filename = "%s/IIS%s.ilp" % (file_path, filename_suffixe)
         if write_iis:
-            from gurobipy import read
+            from gurobipy import read, GurobiError
             lp = f"{self.solution_files_prefix()}-pulp.lp"
             m = read(lp)
-            m.computeIIS()
-            m.write(iis_filename)
+            if presolve:
+                try:
+                    mp = m.presolve()
+                    mp.computeIIS()
+                    mp.write(iis_filename)
+                except GurobiError:
+                    m.computeIIS()
+                    m.write(iis_filename)
+            else:
+                m.computeIIS()
+                m.write(iis_filename)
         if write_analysis:
             self.constraintManager.handle_reduced_result(iis_filename, file_path, filename_suffixe)
 
@@ -279,7 +288,7 @@ class FlopModel(object):
             return self.get_obj_coeffs()
 
         else:
-            print(f'lpfile has been saved in {self.solution_files_prefix()}-pulp.lp')
+            # print(f'lpfile has been saved in {self.solution_files_prefix()}-pulp.lp')
             return None
 
 

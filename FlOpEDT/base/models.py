@@ -39,7 +39,25 @@ import base.weeks
 
 from django.utils.translation import gettext_lazy as _
 
+from enum import Enum
+
 slot_pause = 30
+
+###
+#
+# Theme
+# Allows to define a theme for a user,
+# The value will be the one showed in the user preferrences (in the menu)
+# It will also be used by the "base.html" file in the "if" conditions
+#
+###
+class Theme(Enum):
+    WHITE = 'White'
+    DARK = 'Dark'
+    SYNTH_WAVE = 'SynthWave'
+    BRUME = 'Brume'
+    PRESTIGE = 'Prestige Edition'
+    PINK = 'Pink'
 
 # <editor-fold desc="GROUPS">
 # ------------
@@ -117,6 +135,7 @@ class GenericGroup(models.Model):
         except:
             return False
 
+
 class StructuralGroup(GenericGroup):
     basic = models.BooleanField(verbose_name=_('Basic group?'), default=False)
     parent_groups = models.ManyToManyField('self', symmetrical=False,
@@ -142,7 +161,6 @@ class StructuralGroup(GenericGroup):
         :return: the set of all StructuralGroup containing self (self included)
         """
         return {self} | self.ancestor_groups()
-
 
     def descendants_groups(self):
         """
@@ -171,7 +189,7 @@ class StructuralGroup(GenericGroup):
         """
         :return: the set of all TransversalGroup containing self
         """
-        return TransversalGroup.objects.filter(conflicting_groups__in = self.connected_groups())
+        return TransversalGroup.objects.filter(conflicting_groups__in=self.connected_groups())
 
 
 class TransversalGroup(GenericGroup):
@@ -182,13 +200,14 @@ class TransversalGroup(GenericGroup):
     generic = models.OneToOneField('GenericGroup', on_delete=models.CASCADE, parent_link=True)
 
     def nb_of_courses(self, week):
-        return len(Course.objects.filter(week = week, groups = self))
+        return len(Course.objects.filter(week=week, groups=self))
 
     def time_of_courses(self, week):
         t = 0
-        for c in Course.objects.filter(week=week, groups = self):
+        for c in Course.objects.filter(week=week, groups=self):
             t += c.type.duration
         return t
+
 
 # </editor-fold desc="GROUPS">
 
@@ -255,6 +274,7 @@ class Week(models.Model):
     def __ge__(self, other):
         return self == other or self > other
 
+
 class TimeGeneralSettings(models.Model):
     department = models.OneToOneField(Department, on_delete=models.CASCADE)
     day_start_time = models.PositiveSmallIntegerField()
@@ -267,10 +287,10 @@ class TimeGeneralSettings(models.Model):
 
     def __str__(self):
         return f"Dept {self.department.abbrev}: " + \
-            f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
-            f" | {hhmm(self.lunch_break_finish_time)} - " + \
-            f"{hhmm(self.day_finish_time)};" + \
-            f" Days: {self.days}"
+               f"{hhmm(self.day_start_time)} - {hhmm(self.lunch_break_start_time)}" + \
+               f" | {hhmm(self.lunch_break_finish_time)} - " + \
+               f"{hhmm(self.day_finish_time)};" + \
+               f" Days: {self.days}"
 
 
 class Mode(models.Model):
@@ -315,13 +335,14 @@ def create_department_related(sender, instance, created, raw, **kwargs):
     Mode.objects.create(department=instance)
     TimeGeneralSettings.objects.create(
         department=instance,
-        day_start_time=6*60,
-        day_finish_time=20*60,
-        lunch_break_start_time=13*60,
-        lunch_break_finish_time=13*60, 
-        days=days_list 
+        day_start_time=6 * 60,
+        day_finish_time=20 * 60,
+        lunch_break_start_time=13 * 60,
+        lunch_break_finish_time=13 * 60,
+        days=days_list
     )
-    
+
+
 # </editor-fold>
 
 # <editor-fold desc="ROOMS">
@@ -379,9 +400,9 @@ class Room(models.Model):
 
     def str_extended(self):
         return f'{self.name}, ' \
-            + f'Types: {[t.name for t in self.types.all()]}, '\
-            + f'Depts: {self.departments.all()}, '\
-            + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
+               + f'Types: {[t.name for t in self.types.all()]}, ' \
+               + f'Depts: {self.departments.all()}, ' \
+               + f'Is in: {[rg.name for rg in self.subroom_of.all()]}'
 
 
 class RoomSort(models.Model):
@@ -416,6 +437,10 @@ class RoomPonderation(models.Model):
         for rt in RT:
             for basic_room in rt.basic_rooms():
                 self.basic_rooms.add(basic_room)
+
+    def get_room_types_set(self):
+        return set(RoomType.objects.filter(id__in=self.room_types))
+
 
 # </editor-fold>
 
@@ -512,7 +537,8 @@ class Course(models.Model):
         return self.__class__ == other.__class__ \
                and self.type == other.type \
                and self.tutor == other.tutor \
-               and self.groups == other.groups \
+               and self.room_type == other.room_type \
+               and list(self.groups.all()) == list(other.groups.all()) \
                and self.module == other.module
 
     def get_week(self):
@@ -614,7 +640,7 @@ class EnrichedLink(models.Model):
 
     def __str__(self):
         return (self.description if self.description is not None else '') \
-            + ' -> ' + self.url 
+               + ' -> ' + self.url
 
 
 class GroupPreferredLinks(models.Model):
@@ -626,7 +652,8 @@ class GroupPreferredLinks(models.Model):
 
     def __str__(self):
         return self.group.full_name + ' : ' + \
-            ' ; '.join([str(l) for l in self.links.all()])
+               ' ; '.join([str(l) for l in self.links.all()])
+
 
 # </editor-fold desc="COURSES">
 
@@ -636,7 +663,6 @@ class GroupPreferredLinks(models.Model):
 # -----------------
 
 class Preference(models.Model):
-
     class Meta:
         abstract = True
 
@@ -674,11 +700,11 @@ class UserPreference(Preference):
                     else:
                         return other.start_time > self.start_time + self.duration
             else:
-                return index_day_self < index_day_other  
+                return index_day_self < index_day_other
         else:
             raise NotImplementedError
 
-    def __gt__(self,other):
+    def __gt__(self, other):
         if isinstance(other, UserPreference):
             index_day_self = days_index[self.day]
             index_day_other = days_index[other.day]
@@ -691,17 +717,17 @@ class UserPreference(Preference):
                     else:
                         return other.start_time > self.start_time + self.duration
             else:
-                return index_day_self > index_day_other  
+                return index_day_self > index_day_other
         else:
             raise NotImplementedError
 
     def is_same(self, other):
         if isinstance(other, UserPreference):
             return ((((self.week and other.week) and self.week == other.week) or not self.week or not other.week)
-                and days_index[self.day] == days_index[other.day] and self.start_time == other.start_time)
+                    and days_index[self.day] == days_index[other.day] and self.start_time == other.start_time)
         else:
             raise NotImplementedError
-    
+
     def same_day(self, other):
         if isinstance(other, UserPreference):
             return days_index[self.day] == days_index[other.day]
@@ -710,7 +736,7 @@ class UserPreference(Preference):
 
     def is_successor_of(self, other):
         if isinstance(other, UserPreference):
-            return self.same_day(other) and other.end_time <= self.start_time <= other.end_time + 30 #slot_pause
+            return self.same_day(other) and other.end_time <= self.start_time <= other.end_time + 30  # slot_pause
         else:
             raise ValueError
 
@@ -810,14 +836,13 @@ class CourseModification(models.Model):
             changed += al + f'Prof : {tutor_old_name} -> {cur_tutor_name}'
 
         if sched_course.room is None:
-           if ScheduledCourseAdditional.objects.filter(scheduled_course=sched_course).exists():
-               cur_room_name = "en visio"
-           else:
-               cur_room_name = "nulle part"
+            if ScheduledCourseAdditional.objects.filter(scheduled_course=sched_course).exists():
+                cur_room_name = "en visio"
+            else:
+                cur_room_name = "nulle part"
         else:
             cur_room_name = sched_course.room.name
 
-        
         if sched_course.room == self.room_old:
             same += f', {cur_room_name}'
         else:
@@ -827,7 +852,7 @@ class CourseModification(models.Model):
         day_list = base.weeks.num_all_days(
             course.week.year, course.week.nb, department)
         if sched_course.day == self.day_old \
-           and sched_course.start_time == self.start_time_old:
+                and sched_course.start_time == self.start_time_old:
             for d in day_list:
                 if d['ref'] == sched_course.day:
                     day = d
@@ -854,7 +879,7 @@ class CourseModification(models.Model):
         if self.version_old is not None:
             same += f' ; (NumV {self.version_old})'
         ret = same + changed + \
-            f"\n  by {self.initiator.username}, at {self.updated_at}"
+              f"\n  by {self.initiator.username}, at {self.updated_at}"
         return ret
 
 
@@ -947,7 +972,7 @@ class Regen(models.Model):
     fdate = models.DateField(verbose_name=_('Full generation date'), null=True, blank=True)
     stabilize = models.BooleanField(verbose_name=_('Stabilized'),
                                     default=False)
-    sdate = models.DateField(verbose_name=_('Partial generation date' ), null=True, blank=True)
+    sdate = models.DateField(verbose_name=_('Partial generation date'), null=True, blank=True)
 
     def __str__(self):
         pre = ''

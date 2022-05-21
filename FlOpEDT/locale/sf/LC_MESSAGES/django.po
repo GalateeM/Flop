@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-19 10:37+0000\n"
+"POT-Creation-Date: 2022-05-18 15:08+0000\n"
 "PO-Revision-Date: 2021-03-14 13:02+0000\n"
 "Last-Translator: b'prenom_de_QTF nom_de_QTF <QTF@mail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,89 +18,89 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Translated-Using: django-rosetta 0.9.5\n"
 
-#: FlOpEDT/settings/base.py:157
+#: FlOpEDT/settings/base.py:159
 msgid "French"
 msgstr "Français"
 
-#: FlOpEDT/settings/base.py:158
+#: FlOpEDT/settings/base.py:160
 msgid "English"
 msgstr "Anglais"
 
-#: FlOpEDT/settings/base.py:159
+#: FlOpEDT/settings/base.py:161
 msgid "Spanish"
 msgstr "Espagnol"
 
-#: FlOpEDT/settings/base.py:160
+#: FlOpEDT/settings/base.py:162
 msgid "Arabic"
 msgstr "Arabe"
 
-#: FlOpEDT/settings/base.py:161
+#: FlOpEDT/settings/base.py:163
 msgid "Basque"
 msgstr "Basque"
 
-#: FlOpEDT/settings/base.py:162
+#: FlOpEDT/settings/base.py:164
 msgid "Breton"
 msgstr "Breton"
 
-#: FlOpEDT/settings/base.py:163
+#: FlOpEDT/settings/base.py:165
 msgid "Catalan"
 msgstr "Catalan"
 
-#: FlOpEDT/settings/base.py:164
+#: FlOpEDT/settings/base.py:166
 msgid "Corsican"
 msgstr "Corse"
 
-#: FlOpEDT/settings/base.py:165
+#: FlOpEDT/settings/base.py:167
 msgid "Danish"
 msgstr "Espagnol"
 
-#: FlOpEDT/settings/base.py:166
+#: FlOpEDT/settings/base.py:168
 msgid "German"
 msgstr "Allemand"
 
-#: FlOpEDT/settings/base.py:167
+#: FlOpEDT/settings/base.py:169
 msgid "Dutch"
 msgstr "Néerlandais"
 
-#: FlOpEDT/settings/base.py:168
+#: FlOpEDT/settings/base.py:170
 msgid "Greek"
 msgstr "Grec"
 
-#: FlOpEDT/settings/base.py:169
+#: FlOpEDT/settings/base.py:171
 msgid "Italian"
 msgstr "Italien"
 
-#: FlOpEDT/settings/base.py:170
+#: FlOpEDT/settings/base.py:172
 msgid "Latin"
 msgstr "Latin"
 
-#: FlOpEDT/settings/base.py:171
+#: FlOpEDT/settings/base.py:173
 msgid "Norwegian"
 msgstr "Norvégien"
 
-#: FlOpEDT/settings/base.py:172
+#: FlOpEDT/settings/base.py:174
 #, fuzzy
 #| msgid "English"
 msgid "Polish"
 msgstr "Anglais"
 
-#: FlOpEDT/settings/base.py:173
+#: FlOpEDT/settings/base.py:175
 msgid "Portuguese"
 msgstr "Portugais"
 
-#: FlOpEDT/settings/base.py:174
+#: FlOpEDT/settings/base.py:176
 msgid "Swedish"
 msgstr "Suédois"
 
-#: FlOpEDT/settings/base.py:175
+#: FlOpEDT/settings/base.py:177
 msgid "Chinese"
 msgstr "Chinois"
 
-#: FlOpEDT/settings/base.py:176
+#: FlOpEDT/settings/base.py:178
 msgid "Smurf"
 msgstr "Schtroumpf"
 
-#: TTapp/FlopConstraint.py:61
+#: TTapp/FlopConstraint.py:59
 msgid "Is active?"
 msgstr "Est active?"
 
@@ -252,6 +252,11 @@ msgstr "Minimise les demis-schtroumpfs pour les groupes"
 msgid "Minimize groups non-preferred slots"
 msgstr "Minimize les créneaux non-schtroumpfés pour les groupes"
 
+#: TTapp/TTConstraints/orsay_constraints.py:184
+#, python-brace-format
+msgid "Not able to eat in other departments on {day}-{week}"
+msgstr ""
+
 #: TTapp/TTConstraints/slots_constraints.py:290
 #: TTapp/TTConstraints/slots_constraints.py:297
 #, python-brace-format
@@ -291,23 +296,23 @@ msgstr ""
 msgid "One of the courses has no eligible tutor to lecture it. {dependency}"
 msgstr "Un des cours ne schtroumpf pas de professeur schtroumpfé. {dependency}"
 
-#: TTapp/TTModel.py:106
+#: TTapp/TTModel.py:100
 #, python-brace-format
 msgid ""
 "\n"
 "Let's start weeks #{self.weeks}"
 msgstr ""
 
-#: TTapp/TTModel.py:116
+#: TTapp/TTModel.py:110
 msgid "Rooms assignment :"
 msgstr ""
 
-#: TTapp/TTModel.py:127
+#: TTapp/TTModel.py:121
 #, python-brace-format
 msgid "Will modify only courses of training programme(s) {train_prog}"
 msgstr ""
 
-#: TTapp/TTModel.py:160
+#: TTapp/TTModel.py:155
 msgid "Relevant warnings :"
 msgstr ""
 
@@ -315,11 +320,21 @@ msgstr ""
 msgid "Reload..."
 msgstr ""
 
-#: TTapp/TTUtils.py:52
+#: TTapp/TTUtils.py:48
+#, python-brace-format
+msgid "Saved in copy {result_work_copy}"
+msgstr ""
+
+#: TTapp/TTUtils.py:55
 #, fuzzy
 #| msgid "Reassign rooms"
 msgid "Impossible to assign rooms"
 msgstr "Réassigner les salles"
+
+#: TTapp/TTUtils.py:413
+#, python-format
+msgid "%s, "
+msgstr ""
 
 #: base/admin.py:614 base/admin.py:640 base/admin.py:653
 msgid "Week"
@@ -357,75 +372,75 @@ msgstr "Ce schtroumpf n'existe pas."
 msgid "Ideally"
 msgstr "Idéalement"
 
-#: base/forms.py:64 base/templates/base/show-stype.html:134
+#: base/forms.py:64 base/templates/base/show-stype.html:131
 msgid "Maximum"
 msgstr "Maximum"
 
-#: base/models.py:121
+#: base/models.py:140
 msgid "Basic group?"
 msgstr "Groupe basique?"
 
-#: base/models.py:210
+#: base/models.py:229
 msgid "Half day"
 msgstr "Demie-journée"
 
-#: base/models.py:234
+#: base/models.py:253 notifications/models.py:41
 msgid "Week number"
 msgstr "Numéro de semaine"
 
-#: base/models.py:287
+#: base/models.py:307
 msgid "Educative"
 msgstr "Mode éducatif"
 
-#: base/models.py:288
+#: base/models.py:308
 msgid "Coop. (workplace)"
 msgstr "Mode coopératif (poste)"
 
-#: base/models.py:289
+#: base/models.py:309
 msgid "Coop. (worker)"
 msgstr "Mode coopératif (salarié⋅e⋅s)"
 
-#: base/models.py:430
+#: base/models.py:455 notifications/models.py:47
 msgid "Abbreviation"
 msgstr "Abbréviation"
 
-#: base/models.py:473
+#: base/models.py:498
 msgid "graded?"
 msgstr "Noté ?"
 
-#: base/models.py:499
+#: base/models.py:524
 msgid "Suspens?"
 msgstr "En suspens?"
 
-#: base/models.py:531
+#: base/models.py:557
 msgid "Graded?"
 msgstr "Noté ?"
 
-#: base/models.py:915
+#: base/models.py:940
 msgid "Successives?"
 msgstr "Successifs ?"
 
-#: base/models.py:916 base/models.py:927
+#: base/models.py:941 base/models.py:952
 msgid "On different days"
 msgstr "Des jours différents"
 
-#: base/models.py:917
+#: base/models.py:942
 msgid "Minimal day gap between courses"
 msgstr "Délai minimal (en schtroumpfs) entre deux cours"
 
-#: base/models.py:945
+#: base/models.py:970
 msgid "Full"
 msgstr "Totale"
 
-#: base/models.py:947
+#: base/models.py:972
 msgid "Full generation date"
 msgstr "Date de regénération"
 
-#: base/models.py:948
+#: base/models.py:973
 msgid "Stabilized"
 msgstr "Stabilisée"
 
-#: base/models.py:950
+#: base/models.py:975
 msgid "Partial generation date"
 msgstr "Date de regénération partielle"
 
@@ -546,7 +561,7 @@ msgstr "prochaines semaines."
 msgid "(0 if no notification, 1 for the next 7 days, etc.)"
 msgstr "(0 si aucune schtroumpf, 1 pour les 7 prochains jours, etc.)"
 
-#: base/templates/base/notification.html:36
+#: base/templates/base/notification.html:36 base/templates/base/themes.html:42
 msgid "Save"
 msgstr "Enregistrer"
 
@@ -615,6 +630,10 @@ msgstr "Supprimer toutes les schtroumpfs sauf la 0"
 msgid "Reassign rooms"
 msgstr "Réassigner les salles"
 
+#: base/templates/base/show-edt.html:73
+msgid "Duplicate (what can be) in other weeks"
+msgstr ""
+
 #: base/templates/base/show-stype.html:95
 msgid "Weeks"
 msgstr "Semaines particulières"
@@ -629,13 +648,13 @@ msgstr "de la semaine"
 
 #: base/templates/base/show-stype.html:98
 #: base/templates/base/show-stype.html:101
-#: configuration/templates/configuration/configuration.html:89
-#: configuration/templates/configuration/configuration.html:94
+#: configuration/templates/configuration/configuration.html:111
+#: configuration/templates/configuration/configuration.html:116
 msgid "year"
 msgstr "année"
 
 #: base/templates/base/show-stype.html:100
-#: configuration/templates/configuration/configuration.html:92
+#: configuration/templates/configuration/configuration.html:114
 msgid "until week"
 msgstr "à la semaine"
 
@@ -652,7 +671,7 @@ msgid "Update my default week"
 msgstr "Redéfinir ma schtroumpf type"
 
 #: base/templates/base/show-stype.html:112
-#: base/templates/base/show-stype.html:137
+#: base/templates/base/show-stype.html:140
 msgid "button_save"
 msgstr "Sauvegarder"
 
@@ -665,7 +684,7 @@ msgid "Create a link"
 msgstr "Créer un lien visio"
 
 #: base/templates/base/show-stype.html:124
-#: base/templates/base/show-stype.html:147
+#: base/templates/base/show-stype.html:152
 msgid "button_change"
 msgstr "Modifier"
 
@@ -674,8 +693,12 @@ msgid "My ideal day"
 msgstr "Ma journée idéale"
 
 #: base/templates/base/show-stype.html:130
+#, fuzzy
+#| msgid ""
+#| "This is the total number of teaching hours I would like to give every day:"
 msgid ""
-"This is the total number of teaching hours I would like to give every day:"
+"This is the total number of teaching hours I would like to give every "
+"teaching day:"
 msgstr ""
 "Chaque jour, voici le nombre d'heures de schtroumpf que je souhaite donner :"
 
@@ -683,29 +706,29 @@ msgstr ""
 msgid "Preferred"
 msgstr "Idéalement"
 
-#: base/templates/base/show-stype.html:144
+#: base/templates/base/show-stype.html:149
 msgid "My favorite rooms"
 msgstr "Mes préférences de salles"
 
-#: base/templates/base/show-stype.html:145
+#: base/templates/base/show-stype.html:150
 msgid "Select my favorite rooms"
 msgstr "Choisir mes salles préférées"
 
-#: base/templates/base/show-stype.html:170
+#: base/templates/base/show-stype.html:175
 msgid "Teachers"
 msgstr "Enseignant·e⋅s permanent·e⋅s"
 
-#: base/templates/base/show-stype.html:171
-#: base/templates/base/show-stype.html:191
+#: base/templates/base/show-stype.html:176
+#: base/templates/base/show-stype.html:196
 msgid "Transformation in : "
 msgstr "Tranformation en : "
 
-#: base/templates/base/show-stype.html:177
-#: base/templates/base/show-stype.html:183
+#: base/templates/base/show-stype.html:182
+#: base/templates/base/show-stype.html:188
 msgid "Types of classes"
 msgstr "Type de cours"
 
-#: base/templates/base/show-stype.html:190 ics/templates/ics/index.html:82
+#: base/templates/base/show-stype.html:195 ics/templates/ics/index.html:82
 msgid "Rooms"
 msgstr "Salles"
 
@@ -717,27 +740,31 @@ msgstr "Nombre de jours d'innocupation par salle"
 msgid "Number of classes given per teacher"
 msgstr "Nombre de cours donnés par professeur"
 
+#: base/templates/base/themes.html:30
+msgid "Your themes is"
+msgstr ""
+
 #: base/templates/base/visio.html:31
 msgid "Create or modify a link"
 msgstr "Créer ou schtroumpfer un lien"
 
-#: base/views.py:1526
+#: base/views.py:1555
 msgid "Not authorized. New link then."
 msgstr "Non autorisé. Création d'un nouveau schtroumpf."
 
-#: base/views.py:1529
+#: base/views.py:1558
 msgid "Unknown link. New link then."
 msgstr "Lien inconnu. Création d'un nouveau schtroumpf."
 
-#: base/views.py:1541
+#: base/views.py:1570 notifications/notifications.py:129
 msgid "Created"
 msgstr "Créé"
 
-#: base/views.py:1541
+#: base/views.py:1570
 msgid "Modified"
 msgstr "Modifié"
 
-#: base/views.py:1544
+#: base/views.py:1573
 msgid "Tutor does not exist"
 msgstr "L'utilisateur n'existe pas."
 
@@ -785,7 +812,6 @@ msgid "Configuration file canvas"
 msgstr "Canevas du fichier de configuration"
 
 #: configuration/templates/configuration/configuration.html:19
-#: configuration/templates/configuration/configuration.html:54
 msgid "Download and then complete the file below."
 msgstr "Téléchargez puis remplissez le fichier ci-dessous."
 
@@ -794,7 +820,7 @@ msgid "Click to download the configuration file"
 msgstr "Cliquez pour télécharger le fichier de configuration"
 
 #: configuration/templates/configuration/configuration.html:21
-#: configuration/templates/configuration/configuration.html:62
+#: configuration/templates/configuration/configuration.html:61
 msgid "Download"
 msgstr "Télécharger"
 
@@ -807,7 +833,7 @@ msgid "Upload the completed configuration file."
 msgstr "Téléversez le fichier de configuration rempli."
 
 #: configuration/templates/configuration/configuration.html:27
-#: configuration/templates/configuration/configuration.html:70
+#: configuration/templates/configuration/configuration.html:92
 msgid "Only xlsx format is accepted."
 msgstr "Seul le format xlsx est accepté."
 
@@ -826,13 +852,13 @@ msgid "Edit"
 msgstr "Modifier"
 
 #: configuration/templates/configuration/configuration.html:36
-#: configuration/templates/configuration/configuration.html:116
-#: templates/base.html:95
+#: configuration/templates/configuration/configuration.html:138
+#: templates/base.html:115
 msgid "Import"
 msgstr "Importer"
 
 #: configuration/templates/configuration/configuration.html:41
-#: configuration/templates/configuration/configuration.html:120
+#: configuration/templates/configuration/configuration.html:142
 msgid "Verdict :"
 msgstr "Verdict :"
 
@@ -871,29 +897,53 @@ msgid "Template for the planning file from the configuration file"
 msgstr ""
 "Canevas du fichier de planification à partir du fichier de configuration"
 
-#: configuration/templates/configuration/configuration.html:55
-msgid "Click to download the planning file outline"
+#: configuration/templates/configuration/configuration.html:54
+#, fuzzy
+#| msgid "Click to download the planning file outline"
+msgid "Click to download the current planning file outline"
 msgstr "Cliquez pour schtroumpfer le canevas du fichier de planification"
 
-#: configuration/templates/configuration/configuration.html:69
+#: configuration/templates/configuration/configuration.html:64
+#, fuzzy
+#| msgid "Click to download the planning file outline"
+msgid "Click to make and download a new blank planning file outline"
+msgstr "Cliquez pour schtroumpfer le canevas du fichier de planification"
+
+#: configuration/templates/configuration/configuration.html:65
+#: configuration/templates/configuration/configuration.html:76
+msgid " (it may last several minuts)."
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:72
+#: configuration/templates/configuration/configuration.html:83
+msgid "Make_and_download"
+msgstr ""
+
+#: configuration/templates/configuration/configuration.html:75
+#, fuzzy
+#| msgid "Click to download the planning file outline"
+msgid "Click to make and download a new fullfilled planning file outline"
+msgstr "Cliquez pour schtroumpfer le canevas du fichier de planification"
+
+#: configuration/templates/configuration/configuration.html:91
 msgid "Completed planning file"
 msgstr "Fichier de planification des cours complété"
 
-#: configuration/templates/configuration/configuration.html:70
+#: configuration/templates/configuration/configuration.html:92
 msgid "Upload the completed planning file."
 msgstr "Téléversez le schtroumpf de planification rempli."
 
-#: configuration/templates/configuration/configuration.html:87
+#: configuration/templates/configuration/configuration.html:109
 #, fuzzy
 #| msgid "from week"
 msgid "From week"
 msgstr "de la semaine"
 
-#: configuration/templates/configuration/configuration.html:101
+#: configuration/templates/configuration/configuration.html:123
 msgid "Only for periods "
 msgstr ""
 
-#: configuration/templates/configuration/configuration.html:107
+#: configuration/templates/configuration/configuration.html:129
 msgid "Stabilization ?"
 msgstr "Stabilisation ?"
 
@@ -970,11 +1020,92 @@ msgstr "Nom"
 msgid "Planned generations"
 msgstr "Générations prévues"
 
+#: notifications/notifications.py:125
+msgid "Deleted"
+msgstr ""
+
+#: notifications/notifications.py:147 notifications/notifications.py:161
+msgid "Mode"
+msgstr ""
+
+#: notifications/notifications.py:148 notifications/notifications.py:162
+#: notifications/notifications.py:184 notifications/notifications.py:232
+#: notifications/notifications.py:267
+#, fuzzy
+#| msgid "Date "
+msgid "Date"
+msgstr "Date "
+
+#: notifications/notifications.py:149 notifications/notifications.py:163
+#: notifications/notifications.py:232 notifications/notifications.py:267
+msgid "Start time"
+msgstr ""
+
+#: notifications/notifications.py:150 notifications/notifications.py:164
+msgid "Course Type"
+msgstr ""
+
+#: notifications/notifications.py:151 notifications/notifications.py:165
+#, fuzzy
+#| msgid "Modules"
+msgid "Module"
+msgstr "Modules"
+
+#: notifications/notifications.py:152
+#, fuzzy
+#| msgid "Tutors"
+msgid "Tutor"
+msgstr "Enseignant⋅e⋅s"
+
+#: notifications/notifications.py:153 notifications/notifications.py:168
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room"
+msgstr "Salles"
+
+#: notifications/notifications.py:166
+#, fuzzy
+#| msgid "Training program"
+msgid "Train_prog"
+msgstr "Promotion"
+
+#: notifications/notifications.py:167
+#, fuzzy
+#| msgid "Groups"
+msgid "Group"
+msgstr "Groupes"
+
+#: notifications/notifications.py:200
+msgid "[flop!Scheduler] Changes on your planning"
+msgstr ""
+
+#: notifications/notifications.py:203
+#, python-format
+msgid ""
+"This email is automatically generated by flop!Scheduler. To manage your "
+"notifications settings, please <a href='%(url)s/edt/%(dept)s/semaine-type'> "
+"click here <a/>."
+msgstr ""
+
+#: notifications/notifications.py:224 notifications/notifications.py:254
+msgid "Hi "
+msgstr ""
+
+#: notifications/notifications.py:225 notifications/notifications.py:255
+#, python-format
+msgid "Here are the changes of your planning for the %g following days :"
+msgstr ""
+
+#: notifications/notifications.py:233
+#, python-format
+msgid "For the department %s :"
+msgstr ""
+
 #: people/templates/people/login.html:55
 msgid "Forgot password?"
 msgstr "Mot de passe perdu ?"
 
-#: people/templates/people/login.html:58 templates/base.html:109
+#: people/templates/people/login.html:58 templates/base.html:129
 msgid "Sign in"
 msgstr "Se connecter"
 
@@ -1028,11 +1159,11 @@ msgstr "Et les trous ?"
 msgid "Eat early or late?"
 msgstr "Schtroumpfer tôt ou tard ?"
 
-#: people/views.py:237
+#: people/views.py:242
 msgid "Not allowed"
 msgstr "Non autorisé"
 
-#: people/views.py:243
+#: people/views.py:248
 #, python-brace-format
 msgid "No such user as {user}"
 msgstr "Aucun utilisateur {user}"
@@ -1069,17 +1200,17 @@ msgstr "En-tête "
 msgid "Category "
 msgstr "Catégorie "
 
-#: solve_board/templates/solve_board/main-board.html:32
+#: solve_board/templates/solve_board/main-board.html:36
 #, fuzzy
 #| msgid "Schedule_banner"
 msgid "Schedule Generation"
 msgstr "Consulter"
 
-#: solve_board/templates/solve_board/main-board.html:64
+#: solve_board/templates/solve_board/main-board.html:66
 msgid "Constraints"
 msgstr "Contraintes"
 
-#: solve_board/templates/solve_board/main-board.html:65
+#: solve_board/templates/solve_board/main-board.html:67
 msgid ""
 "All constraints appearing in bolded - with no weight - will be considered "
 "mandatory, the other ones will considered as preferences."
@@ -1087,45 +1218,45 @@ msgstr ""
 "Toutes les schtroumpfs qui apparaissent en gras - sans poids - vont être "
 "considéréesobligatoires, les autres comme des préférences."
 
-#: solve_board/templates/solve_board/main-board.html:70
+#: solve_board/templates/solve_board/main-board.html:72
 #, fuzzy
 #| msgid "Configuration file canvas"
 msgid "Configuration"
 msgstr "Canevas du fichier de configuration"
 
-#: solve_board/templates/solve_board/main-board.html:75
+#: solve_board/templates/solve_board/main-board.html:77
 msgid "Week⋅s"
 msgstr "Semaine(s)"
 
-#: solve_board/templates/solve_board/main-board.html:79
+#: solve_board/templates/solve_board/main-board.html:81
 msgid "Training Program"
 msgstr "Promotion"
 
-#: solve_board/templates/solve_board/main-board.html:83
+#: solve_board/templates/solve_board/main-board.html:85
 msgid "Stabilization"
 msgstr "Stabilisation"
 
-#: solve_board/templates/solve_board/main-board.html:88
+#: solve_board/templates/solve_board/main-board.html:90
 msgid "Solver"
 msgstr "Schtroumpf"
 
-#: solve_board/templates/solve_board/main-board.html:100
+#: solve_board/templates/solve_board/main-board.html:102
 #, fuzzy
 #| msgid "Reassign rooms"
 msgid "Pre-assign rooms"
 msgstr "Réassigner les salles"
 
-#: solve_board/templates/solve_board/main-board.html:102
+#: solve_board/templates/solve_board/main-board.html:104
 #, fuzzy
 #| msgid "Reassign rooms"
 msgid "Post-assign rooms"
 msgstr "Réassigner les salles"
 
-#: solve_board/templates/solve_board/main-board.html:105
+#: solve_board/templates/solve_board/main-board.html:107
 msgid "Time limit (minuts)"
 msgstr ""
 
-#: solve_board/templates/solve_board/main-board.html:111
+#: solve_board/templates/solve_board/main-board.html:113
 msgid "Unlimited"
 msgstr "Illimité"
 
@@ -1133,57 +1264,72 @@ msgstr "Illimité"
 msgid "Schedule_title"
 msgstr "Schtroumpf du temps"
 
-#: templates/base.html:66
+#: templates/base.html:86
 msgid "<span id=flopGreen >flop</span>!<span id=EDTRed >Scheduler</span>"
 msgstr "<span id=flopGreen >flop</span>!<span id=EDTRed >Schtroumpf</span>"
 
-#: templates/base.html:82
+#: templates/base.html:102
 msgid "Schedule_banner"
 msgstr "Consulter"
 
-#: templates/base.html:84
+#: templates/base.html:104
 msgid "Move/Cancel"
 msgstr "Schtroumpfer/Annuler"
 
-#: templates/base.html:86
+#: templates/base.html:106
 msgid "Preferences"
 msgstr "Préférences"
 
-#: templates/base.html:87
+#: templates/base.html:107
 msgid "iCal"
 msgstr "iCal"
 
-#: templates/base.html:88
+#: templates/base.html:108
 msgid "Help"
 msgstr "Aide"
 
-#: templates/base.html:89
+#: templates/base.html:109
 msgid "Messages"
 msgstr "Contact"
 
-#: templates/base.html:90
+#: templates/base.html:110
 msgid "Modules"
 msgstr "Modules"
 
-#: templates/base.html:92
+#: templates/base.html:112
 msgid "Generate"
 msgstr "Générer"
 
-#: templates/base.html:93
+#: templates/base.html:113
 msgid "flop!EDITOR"
 msgstr ""
 
-#: templates/base.html:96
+#: templates/base.html:116
 msgid "Admin"
 msgstr "Admin"
 
-#: templates/base.html:102 templates/base.html:104 templates/base.html:106
+#: templates/base.html:122 templates/base.html:124 templates/base.html:126
 msgid "Sign out"
 msgstr "Déconnexion"
 
-#: templates/base.html:113
+#: templates/base.html:133
 msgid "Signed in as "
 msgstr "Connecté·e sous "
+
+#, fuzzy
+#~| msgid "Modules"
+#~ msgid "module"
+#~ msgstr "Modules"
+
+#, fuzzy
+#~| msgid "Tutors"
+#~ msgid "tutor"
+#~ msgstr "Enseignant⋅e⋅s"
+
+#, fuzzy
+#~| msgid "Groups"
+#~ msgid "group"
+#~ msgstr "Groupes"
 
 #~ msgid "There is no tutor assigned to {self.course1.full_name()}"
 #~ msgstr "Il n'y a pas de prof schtroumpfé à {self.course1.full_name()}"

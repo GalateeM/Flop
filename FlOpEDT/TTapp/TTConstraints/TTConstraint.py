@@ -23,18 +23,12 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from base.models import TimeGeneralSettings
-from django.core.validators import MinValueValidator, MaxValueValidator
-
-from django.utils.translation import gettext_lazy as _
-
 from django.db import models
 
-from FlOpEDT.decorators import timer
+from core.decorators import timer
 
 from TTapp.FlopConstraint import FlopConstraint
 
-from people.models import Tutor
 
 class TTConstraint(FlopConstraint):
     """
@@ -91,10 +85,13 @@ class TTConstraint(FlopConstraint):
                                                                        course_type=course_type,
                                                                        room_type=room_type)
 
-        if tutor in ttmodel.wdb.instructors:
-            return courses_qs.filter(id__in = [c.id for c in ttmodel.wdb.possible_courses[tutor]])
-        else:
-            return courses_qs.filter(id__in = [])
+        #if tutor is not None, we have to reduce to the courses that are in possible_course[tutor]
+        if tutor is not None:
+            if tutor in ttmodel.wdb.instructors:
+                return courses_qs.filter(id__in = [c.id for c in ttmodel.wdb.possible_courses[tutor]])
+            else:
+                return courses_qs.filter(id__in = [])
+        return courses_qs
 
     def get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs):
         """
@@ -103,4 +100,4 @@ class TTConstraint(FlopConstraint):
         if hasattr(self, "train_progs"):
             if self.train_progs.exists() and 'train_progs' not in kwargs:
                 kwargs['train_progs'] = self.train_progs.all()
-        return self.get_courses_queryset_by_parameters(ttmodel, week, **kwargs)
+        return FlopConstraint.get_courses_queryset_by_attributes(self, ttmodel, week, **kwargs)

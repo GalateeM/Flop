@@ -25,47 +25,44 @@
 
 from django.db.models import Q
 import json
-from collections import namedtuple
-from itertools import chain
-from random import randint
 import logging
 
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage
 from django.db import transaction
 from django.db.models import Sum
-from django.http import HttpResponse, Http404, JsonResponse, HttpRequest
+from django.http import HttpResponse, JsonResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
 from django.views.generic import RedirectView
 
-from FlOpEDT.decorators import dept_admin_required, tutor_required
+from core.decorators import dept_admin_required, tutor_required
 
 from people.models import Tutor, UserDepartmentSettings, User, \
-    NotificationsPreferences, UserPreferredLinks
+    NotificationsPreferences, UserPreferredLinks, TutorPreference, ThemesPreferences
 
 from displayweb.admin import BreakingNewsResource
 from displayweb.models import BreakingNews
 
-from base.admin import CoursResource, DispoResource, VersionResource, \
-    CoursPlaceResource, UnavailableRoomsResource, TutorCoursesResource, \
+from base.admin import DispoResource, VersionResource, \
+    TutorCoursesResource, \
     CoursePreferenceResource, MultiDepartmentTutorResource, \
     SharedRoomsResource, RoomPreferenceResource, ModuleRessource, \
     TutorRessource, ModuleDescriptionResource, AllDispoResource, \
-    GroupPreferredLinksResource, CoursPlaceResourceCosmo
-from base.forms import ContactForm, PerfectDayForm, ModuleDescriptionForm, \
+    GroupPreferredLinksResource
+from base.forms import ContactForm, ModuleDescriptionForm, \
     EnrichedLinkForm
 from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
-    CourseModification, Day, Time, Room, RoomType, RoomSort, \
-    Regen, RoomPreference, Department, TimeGeneralSettings, CoursePreference, \
+    CourseModification, Room, RoomType, RoomSort, \
+    RoomPreference, Department, CoursePreference, \
     TrainingProgramme, CourseType, Module, StructuralGroup, EnrichedLink, \
-    ScheduledCourseAdditional, GroupPreferredLinks, Week
+    ScheduledCourseAdditional, GroupPreferredLinks, Week, Theme
 import base.queries as queries
 from base.weeks import *
 
@@ -222,15 +219,21 @@ def preferences(req, **kwargs):
 def stype(req, *args, **kwargs):
     err = ''
     user_notifications_pref = queries.get_notification_preference(req.user)
+    themes = []
+    for a in Theme:
+        themes.append(a.value)
     if req.method == 'GET':
         return TemplateResponse(req,
                                 'base/show-stype.html',
                                 {'date_deb': current_week(),
                                  'date_fin': current_week(),
                                  'name_usr': req.user.username,
-                                 'usr_pref_hours': req.user.tutor.pref_hours_per_day,
-                                 'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'usr_pref_hours': req.user.tutor.preferences.pref_hours_per_day,
+                                 'usr_max_hours': req.user.tutor.preferences.max_hours_per_day,
+                                 'usr_min_hours': req.user.tutor.preferences.min_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
+                                 'themes': themes,
+                                 'theme': queries.get_theme_preference(req.user),
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
@@ -265,7 +268,9 @@ def stype(req, *args, **kwargs):
                                  'name_usr': req.user.username,
                                  'usr_pref_hours': req.user.tutor.pref_hours_per_day,
                                  'usr_max_hours': req.user.tutor.max_hours_per_day,
+                                 'usr_min_hours': req.user.tutor.preferences.min_hours_per_day,
                                  'user_notifications_pref': user_notifications_pref,
+                                 'user_themes_pref': queries.get_theme_preference(req.user),
                                  'err': err,
                                  'current_year': current_year,
                                  'department_settings': queries.get_department_settings(req.department),
@@ -346,22 +351,28 @@ def room_preference(req, department, tutor=None):
 def user_perfect_day_changes(req, username=None, *args, **kwargs):
     if username is not None:
         t = Tutor.objects.get(username=username)
+        preferences, created = TutorPreference.objects.get_or_create(tutor=t)
         data = req.POST
         user_pref_hours = int(data['user_pref_hours'][0])
         user_max_hours = int(data['user_max_hours'][0])
-        t.pref_hours_per_day = user_pref_hours
-        t.max_hours_per_day = user_max_hours
-        t.save()
+        preferences.pref_hours_per_day = user_pref_hours
+        preferences.max_hours_per_day = user_max_hours
+        # not used for now --> neither in base/show-stype.html
+        # user_min_hours = int(data['user_min_hours'][0])
+        # preferences.min_hours_per_day = user_min_hours
+        preferences.save()
     return redirect('base:preferences', req.department)
 
 
 @login_required
 def fetch_perfect_day(req, username=None, *args, **kwargs):
-    perfect_day = {'pref': 4, 'max': 9}
+    perfect_day = {'pref': 4, 'max': 9, 'min': 0}
     if username is not None:
         t = Tutor.objects.get(username=username)
-        perfect_day['pref'] = t.pref_hours_per_day
-        perfect_day['max'] = t.max_hours_per_day
+        preferences, created = TutorPreference.objects.get_or_create(tutor=t)
+        perfect_day['pref'] = preferences.pref_hours_per_day
+        perfect_day['max'] = preferences.max_hours_per_day
+        perfect_day['min'] = preferences.min_hours_per_day
     return JsonResponse(perfect_day, safe=False)
 
 
@@ -387,6 +398,20 @@ def user_notifications_pref_changes(req, username=None, *args, **kwargs):
         n.save()
     return redirect('base:preferences', req.department)
 
+###
+#
+#   #Allows to save a user's theme
+#
+###
+@login_required
+def user_themes_pref_changes(req, username=None, *args, **kwargs):
+    if username is not None:
+        u = User.objects.get(username=username)
+        t, created = ThemesPreferences.objects.get_or_create(user=u)
+        user_theme_pref = req.POST['user_themes_pref']
+        t.theme = user_theme_pref
+        t.save()
+    return redirect('base:preferences', req.department)
 
 def aide(req, **kwargs):
     return TemplateResponse(req, 'base/help.html')
@@ -1357,9 +1382,13 @@ def decale_changes(req, **kwargs):
             changing_course.week = new_week
             changing_course.year = new_year
             if new_year != 0:
-                changing_course.tutor = Tutor.objects.get(
-                    username=new_assignment['np']
-                )
+                new_tutor_username = new_assignment['np']
+                if new_tutor_username:
+                    changing_course.tutor = Tutor.objects.get(
+                        username=new_tutor_username
+                    )
+                else:
+                    changing_course.tutor=None
             cache.delete(get_key_course_pp(req.department.abbrev,
                                            new_week,
                                            0))

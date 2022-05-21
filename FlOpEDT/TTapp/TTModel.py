@@ -26,7 +26,7 @@
 
 from django.core.mail import EmailMessage
 
-from base.models import RoomType, RoomPreference, ScheduledCourse, Department, TrainingProgramme, \
+from base.models import RoomType, RoomPreference, ScheduledCourse, TrainingProgramme, \
     TutorCost, GroupFreeHalfDay, GroupCost, TimeGeneralSettings, ModuleTutorRepartition, ScheduledCourseAdditional
 
 from base.timing import Time
@@ -35,11 +35,10 @@ from people.models import Tutor
 
 from TTapp.models import MinNonPreferedTutorsSlot, StabilizeTutorsCourses, MinNonPreferedTrainProgsSlot, \
     NoSimultaneousGroupCourses, ScheduleAllCourses, AssignAllCourses, ConsiderTutorsUnavailability, \
-    MinimizeBusyDays, MinGroupsHalfDays, RespectBoundPerDay, ConsiderDependencies, ConsiderPivots, \
+    MinimizeBusyDays, MinGroupsHalfDays, RespectMaxHoursPerDay, ConsiderDependencies, ConsiderPivots, \
     StabilizeGroupsCourses
 
-from TTapp.TTConstraints.TTConstraint import TTConstraint
-from TTapp.FlopConstraint import max_weight, all_subclasses
+from TTapp.FlopConstraint import max_weight
 
 from TTapp.slots import slots_filter, days_filter
 
@@ -47,9 +46,7 @@ from TTapp.WeeksDatabase import WeeksDatabase
 
 
 from django.db import close_old_connections
-from django.db.models import Q, F
-
-import datetime
+from django.db.models import F
 
 from TTapp.ilp_constraints.constraint import Constraint
 from TTapp.ilp_constraints.constraint_type import ConstraintType
@@ -57,12 +54,10 @@ from TTapp.ilp_constraints.constraints.courseConstraint import CourseConstraint
 
 from TTapp.ilp_constraints.constraints.slotInstructorConstraint import SlotInstructorConstraint
 
-from FlOpEDT.decorators import timer
+from core.decorators import timer
 
 from TTapp.FlopModel import FlopModel, GUROBI_NAME, get_ttconstraints, get_room_constraints
 from TTapp.RoomModel import RoomModel
-
-from misc.manage_rooms_ponderations import register_ponderations_in_database
 
 from django.utils.translation import gettext_lazy as _
 
@@ -102,7 +97,6 @@ class TTModel(FlopModel):
         self.min_visio = min_visio
         self.pre_assign_rooms = pre_assign_rooms
         self.post_assign_rooms = post_assign_rooms
-
         print(_(f"\nLet's start weeks #{self.weeks}"))
         assignment_text = ""
         if self.pre_assign_rooms:
@@ -412,8 +406,8 @@ class TTModel(FlopModel):
             ScheduleAllCourses.objects.create(department=self.department)
 
         # Check if RespectBound constraint is in database, and add it if not
-        if not RespectBoundPerDay.objects.filter(department=self.department).exists():
-            RespectBoundPerDay.objects.create(department=self.department)
+        if not RespectMaxHoursPerDay.objects.filter(department=self.department).exists():
+            RespectMaxHoursPerDay.objects.create(department=self.department)
 
         # Check if MinimizeBusyDays constraint is in database, and add it if not
         if not MinimizeBusyDays.objects.filter(department=self.department).exists():
@@ -437,9 +431,6 @@ class TTModel(FlopModel):
         # Each course is assigned to a unique tutor
         if not AssignAllCourses.objects.filter(department=self.department).exists():
             AssignAllCourses.objects.create(department=self.department)
-
-        if self.core_only:
-            return
 
         if not ConsiderTutorsUnavailability.objects.filter(department=self.department).exists():
             ConsiderTutorsUnavailability.objects.create(department=self.department)
@@ -470,7 +461,7 @@ class TTModel(FlopModel):
                          for sl in slots_filter(self.wdb.compatible_slots[c],
                                                 week=mtr.week)
                          ),
-                '==', mtr.courses_nb, Constraint()
+                '==', mtr.courses_nb, Constraint(constraint_type=ConstraintType.MODULETUTORREPARTITION)
             )
 
     @timer
@@ -518,9 +509,6 @@ class TTModel(FlopModel):
         if self.department.mode.visio:
             considered_courses -= set(self.wdb.visio_courses)
 
-        if not self.wdb.rooms_ponderations:
-            register_ponderations_in_database(self.department)
-
         for rooms_ponderation in self.wdb.rooms_ponderations:
             room_types_id_list = rooms_ponderation.room_types
             room_types_list = [RoomType.objects.get(id=id) for id in room_types_id_list]
@@ -529,7 +517,7 @@ class TTModel(FlopModel):
             corresponding_basic_rooms = rooms_ponderation.basic_rooms.all()
             for sl in self.wdb.availability_slots:
                 considered_basic_rooms = set(b for b in corresponding_basic_rooms
-                                             if self.avail_room[b] != 0)
+                                             if self.avail_room[b][sl] != 0)
                 bound = len(considered_basic_rooms)
                 expr = self.lin_expr()
                 for i in range(n):
@@ -542,7 +530,7 @@ class TTModel(FlopModel):
                                                    & self.wdb.compatible_courses[s_sl]
                                                    )
                 self.add_constraint(
-                    expr, '<=', bound, Constraint()
+                    expr, '<=', bound, Constraint(constraint_type=ConstraintType.ROOMTYPE_BOUND)
                 )
 
     @timer
@@ -775,8 +763,7 @@ class TTModel(FlopModel):
                             avail_course[(course_type, promo)][availability_slot] = 1
                             non_preferred_cost_course[(course_type,
                                                            promo)][availability_slot] = 0
-                            print("Course availability problem for %s - %s on availability_slot %s" % (
-                                course_type, promo, availability_slot))
+
 
                     else:
                         for availability_slot in week_availability_slots:
@@ -798,12 +785,6 @@ class TTModel(FlopModel):
                             else:
                                 avail_course[(course_type, promo)][availability_slot] = 1
                                 non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
-
-                            # except:
-                            #     avail_course[(course_type, promo)][availability_slot] = 1
-                            #     non_preferred_cost_course[(course_type, promo)][availability_slot] = 0
-                            #     print("Course availability problem for %s - %s on availability_slot %s" % (
-                            #         course_type, promo, availability_slot))
 
         return non_preferred_cost_course, avail_course
 
@@ -855,9 +836,6 @@ class TTModel(FlopModel):
                 if other_dep_sched_courses:
                     self.avail_room[r][sl] = 0
 
-        if self.core_only:
-            return
-
         for sl in self.wdb.availability_slots:
             # constraint : other_departments_sched_courses instructors are not available
             for i in self.wdb.instructors:
@@ -878,10 +856,12 @@ class TTModel(FlopModel):
                     self.department,
                     week=week,
                     is_active=True):
-                print(constr.__class__.__name__, constr.id, end=' - ')
-                timer(constr.enrich_ttmodel)(self, week)
+                if not self.core_only or constr.__class__ in [AssignAllCourses, ScheduleAllCourses,
+                                                              NoSimultaneousGroupCourses]:
+                    print(constr.__class__.__name__, constr.id, end=' - ')
+                    timer(constr.enrich_ttmodel)(self, week)
 
-        if self.pre_assign_rooms:
+        if self.pre_assign_rooms and not self.core_only:
             for week in self.weeks:
                 #Consider RoomConstraints that have enrich_ttmodel method
                 for constr in get_room_constraints(
@@ -920,8 +900,6 @@ class TTModel(FlopModel):
 
         self.add_instructors_constraints()
 
-        if self.core_only:
-            return
         if self.pre_assign_rooms:
             if self.department.mode.visio:
                 self.add_visio_room_constraints()
