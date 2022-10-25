@@ -1,0 +1,32 @@
+#+STARTUP: overview
+#+title: README GraphQL ; pour les L3
+#+options: author:nil
+
+Un =README= sur la mise en place de l'API sous GraphQL.
+
+
+
+* Configuration
+- On part désormais de la branche =graphql=
+- Installer les nouveaux modules python
+  #+begin_src shell
+    cd FlOpEDT
+    pip install -r ../requirements.txt
+  #+end_src
+- Autoriser l'utilisateur =flop_user= à créer une base de données. Pendant la
+  phase de tests, =pytest= va en effet utiliser ce =user= pour créer une base de
+  données :
+  #+begin_src sql
+    ALTER USER flop_user CREATEDB ;
+  #+end_src
+
+* Remarques
+- Attention, les erreurs ne sont pas toujours très explicites. Plutôt que de
+  laisser tourner le =runserver=, vous pouvez lancer un shell django
+  #+begin_src python
+    ./manage.py shell
+  #+end_src
+  et faire des import à la main pour voir si rien d'évident n'est à corriger
+  #+begin_src python
+    from api_graphql.dummy import types, query, resolvers
+  #+end_src
