@@ -55,3 +55,13 @@ données :
   structure peut ressembler à =dummy=.
   - Un sous-répertoire =types.py=
 
+* Remarques
+- Attention, les erreurs ne sont pas toujours très explicites. Plutôt que de
+  laisser tourner le =runserver=, vous pouvez lancer un shell django
+  #+begin_src python
+    ./manage.py shell
+  #+end_src
+  et faire des import à la main pour voir si rien d'évident n'est à corriger
+  #+begin_src python
+    from api_graphql.dummy import types, query, resolvers
+  #+end_src
