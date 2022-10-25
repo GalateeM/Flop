@@ -23,3 +23,13 @@ Actuellement sur la branche =graphql= du git général.
 - Cette exécution-ci ne doit conduire à aucune erreur. Lors de la phase d'ajout
   de tests, une autre exécution conduira sûrement à une erreur.
 
+* Nodes (/Serializers)
+- Un exemple dans =dummy/types.py=
+- Une classe qui implémente l'interface =relay.Node=, un autre non.
+- 
+
+* Organisation
+- Sous le répertoire =api_graphql=, on split en sous-répertoires, dont la
+  structure peut ressembler à =dummy=.
+  - Un sous-répertoire =types.py=
+
