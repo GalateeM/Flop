@@ -39,10 +39,16 @@ données :
 * Nodes (/Serializers)
 - Un exemple dans =dummy/types.py=
 - Une classe qui implémente l'interface =relay.Node=, un autre non.
--
+- Sans =relay.Node=, la =Query= peut avoir un champ de type liste avec =List=
+- Avec =relay.Node=, la =Query= peut avoir un champ de type liste avec =DjangoFilterConnectionField=
 
 * Resolvers
+- Un exemple dans =dummy/resolvers.py=
 - Pour résoudre des champs (calculer leurs valeurs)
+
+* Query
+- Un exemple dans =dummy.query.py=
+- La =Query= qui servira ce sous-répertoire.
 
 * Organisation
 - Sous le répertoire =api_graphql=, on split en sous-répertoires, dont la
