@@ -252,3 +252,7 @@ TEMPLATE_DIRS = (
 SHELL_PLUS_MODEL_IMPORTS_RESOLVER = 'django_extensions.collision_resolvers.AppLabelSuffixCR'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+GRAPHENE = {
+    "SCHEMA": "api_graphql.schema.schema",
+}
