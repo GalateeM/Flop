@@ -20,4 +20,6 @@ Actuellement sur la branche =graphql= du git général.
   #+begin_src shell
     pytest api_graphql
   #+end_src
+- Cette exécution-ci ne doit conduire à aucune erreur. Lors de la phase d'ajout
+  de tests, une autre exécution conduira sûrement à une erreur.
 
