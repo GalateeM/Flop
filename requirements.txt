@@ -32,4 +32,6 @@ drf-yasg
 django-cors-headers
 pyprof2calltree
 django-crontab
+pytest
+pytest-django
 graphene-django

@@ -14,3 +14,10 @@ Actuellement sur la branche =graphql= du git général.
 - Possibilité de faire des requêtes interactives pour tester ou découvrir
 - Il y a de l'autocomplétion, c'est pratique
 
+* Tests
+- On utilise [[https://realpython.com/pytest-python-testing/][pytest]]
+- Pour l'instant, il reste des tests obsolètes, donc le lancer avec
+  #+begin_src shell
+    pytest api_graphql
+  #+end_src
+
