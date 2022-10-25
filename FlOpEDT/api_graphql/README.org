@@ -8,3 +8,9 @@ Actuellement sur la branche =graphql= du git général.
 
 * Configuration
 - On utilise le module python [[https://docs.graphene-python.org/projects/django/en/latest/][graphene-django]] dans =Django=.
+
+* Requêtes interactives
+- =graphiql= est disponible à =localhost:8000/graphql=
+- Possibilité de faire des requêtes interactives pour tester ou découvrir
+- Il y a de l'autocomplétion, c'est pratique
+

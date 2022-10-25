@@ -46,6 +46,7 @@ from django.views.i18n import JavaScriptCatalog
 from django.conf.urls.i18n import i18n_patterns
 from django.utils.translation import gettext_lazy as _
 
+from graphene_django.views import GraphQLView
 
 from base import views
 
@@ -62,7 +63,8 @@ urlpatterns = [
     url(views.fav_regexp,
         views.favicon,
         name="favicon"),
-    re_path(r'^$', views.index, name='index')
+    re_path(r'^$', views.index, name='index'),
+    path("graphql", GraphQLView.as_view(graphiql=True))
 ]
 
 if 'rosetta' in settings.INSTALLED_APPS:
