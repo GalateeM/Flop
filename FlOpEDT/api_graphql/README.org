@@ -26,7 +26,10 @@ Actuellement sur la branche =graphql= du git général.
 * Nodes (/Serializers)
 - Un exemple dans =dummy/types.py=
 - Une classe qui implémente l'interface =relay.Node=, un autre non.
-- 
+-
+
+* Resolvers
+- Pour résoudre des champs (calculer leurs valeurs)
 
 * Organisation
 - Sous le répertoire =api_graphql=, on split en sous-répertoires, dont la
