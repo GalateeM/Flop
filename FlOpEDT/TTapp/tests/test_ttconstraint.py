@@ -1,21 +1,21 @@
-
+import os
 from django.test import TestCase
 from unittest.mock import patch, Mock, MagicMock, call
 
 from base.models import Department, TrainingProgramme, Course, CourseType, Time
 from people.models import Tutor
-from TTapp.models import LimitTimePerPeriod, MinHalfDays, CustomConstraint
+from TTapp.models import LimitTimePerPeriod, CustomConstraint
 from TTapp.TTModel import TTModel
 
 
 class TTConstraintTestCase(TestCase):
 
-    fixtures = ['dump.json']
+    fixtures = [os.path.join('..','dump.json.bz2')]
 
 
     def setUp(self):
 
-        self.info = Department.objects.get(abbrev="info")
+        self.info = Department.objects.get(abbrev="INFO")
 
         self.dut1 = TrainingProgramme.objects.get(abbrev='INFO1')
         self.dut2 = TrainingProgramme.objects.get(abbrev='INFO2')
@@ -95,7 +95,7 @@ class TTConstraintTestCase(TestCase):
         pass
 
     @patch('TTapp.helpers.minhalfdays.MinHalfDaysHelperTutor.enrich_model')
-    def test_minhalfdayshelpertutor(self, enrich_model):
+    def deprecated_test_minhalfdayshelpertutor(self, enrich_model):
 
         ttmodel = Mock()
 

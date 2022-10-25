@@ -1,9 +1,10 @@
+import os
+
 from django.test import TestCase
 from django.core.management import call_command
 
 import base.models as models
 from base.core.statistics import    get_room_activity_by_day, \
-                                    get_holidays_weeks, \
                                     get_holiday_list
 
 from base.core.period_weeks import PeriodWeeks
@@ -11,7 +12,7 @@ from base.core.period_weeks import PeriodWeeks
 
 class StatisticsRoomTestCase(TestCase):
 
-    fixtures = ['dump.json']
+    fixtures = [os.path.join('..','dump.json.bz2')]
 
     @classmethod
     def setUpTestData(cls):
@@ -22,7 +23,7 @@ class StatisticsRoomTestCase(TestCase):
         get_room_activity_by_day(department, 2018)
         self.assertTrue(True)
 
-    def test_get_holidays_weeks(self):
+    def deprecated_test_get_holidays_weeks(self):
         period = PeriodWeeks(2018)
         holidays = list(get_holidays_weeks(period))
         self.assertIn(44, holidays)

@@ -1,4 +1,4 @@
-import datetime
+import datetime, os
 from django.test import TestCase
 from unittest.mock import patch, Mock
 from base.core.period_weeks import PeriodWeeks
@@ -6,11 +6,11 @@ from base.models import Department
 
 class PeriodWeeksTestCase(TestCase):   
    
-    fixtures = ['dump.json']
+    fixtures = [os.path.join('..','dump.json.bz2')]
 
     @classmethod
     def setUpTestData(cls):
-        cls.department = Department.objects.get(abbrev='info')
+        cls.department = Department.objects.get(abbrev='INFO')
         cls.period_2018 = (
             (2018, {35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52}),
             (2019, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26}))

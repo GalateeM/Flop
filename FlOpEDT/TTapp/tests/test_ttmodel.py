@@ -1,3 +1,4 @@
+import os
 
 from django.test import TestCase
 from unittest.mock import patch
@@ -16,7 +17,7 @@ def mock_add_tt_to_db(target_work_copy):
 
 class TTModelTestCase(TestCase):
 
-    fixtures = ['dump.json']
+    fixtures = [os.path.join('..','dump.json.bz2')]
 
     @property
     def week(self):

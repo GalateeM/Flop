@@ -1,3 +1,4 @@
+import os
 
 import base.models as models
 
@@ -6,7 +7,7 @@ from TTapp.TTModel import WeeksDatabase
 
 class WeekDBTestCase(TestCase):
 
-    fixtures = ['dump.json']
+    fixtures = [os.path.join('..','dump.json.bz2')]
 
     def test_attributes(self):   
         tp1 = models.TrainingProgramme.objects.get(abbrev="INFO1")
