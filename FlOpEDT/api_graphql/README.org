@@ -41,7 +41,11 @@ données :
 - Une classe qui implémente l'interface =relay.Node=, un autre non.
 - Sans =relay.Node=, la =Query= peut avoir un champ de type liste avec =List=
 - Avec =relay.Node=, la =Query= peut avoir un champ de type liste avec =DjangoFilterConnectionField=
-
+- Avec =relay.Node=, on peut faire des filtres plus facilement (/cf./ le champ
+  =filter_fields= de la classe =Meta= de =DepartmentNode= -- dans
+  =api_graphql/dummy/types.py=). Pour un exemple de requête, voir
+  =api_graphql/dummy/test=
+  
 * Resolvers
 - Un exemple dans =dummy/resolvers.py=
 - Pour résoudre des champs (calculer leurs valeurs)
@@ -53,7 +57,19 @@ données :
 * Organisation
 - Sous le répertoire =api_graphql=, on split en sous-répertoires, dont la
   structure peut ressembler à =dummy=.
-  - Un sous-répertoire =types.py=
+  - Un sous-répertoire =types.py= pour définir les types de données manipulées
+    (qui font le lien entre les objets en base (ou plutôt des objets vus via
+    l'ORM (Object Relational Mapping)) et la machine cliente)
+  - Un sous-répertoire =resolvers.py= pour définir
+- Pour l'organisation du travail, une proposition :
+  - composition de binômes
+    - un rôle de conception de tests
+    - un rôle de conception des requêtes
+  - au sein d'un binôme, échange des rôles tous les jours ou tous les deux jours
+  - commencer la journée par se mettre d'accord sur
+    - quelles requêtes seront traitées dans la journée
+    - une spécification précise des requêtes
+  - lorsque les deux personnes ont fini une requête donnée, tester et corriger
 
 * Remarques
 - Attention, les erreurs ne sont pas toujours très explicites. Plutôt que de
