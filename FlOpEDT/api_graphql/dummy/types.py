@@ -3,11 +3,8 @@ from graphene_django import DjangoObjectType
 
 from . import resolvers as resolve
 
-from base.models import Module
+from base.models import Department, TrainingProgramme
 
-class Module(DjangoObjectType):
-    class Meta:
-        
 
 class DepartmentNode(DjangoObjectType):
     class Meta:
