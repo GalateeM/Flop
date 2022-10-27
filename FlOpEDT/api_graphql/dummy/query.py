@@ -1,6 +1,7 @@
 from graphene import List
 from graphene_django.filter import DjangoFilterConnectionField
 
+#from ..base import BaseQuery
 from api_graphql.base import BaseQuery
 from . import resolvers as resolve
 
