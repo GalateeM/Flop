@@ -12,7 +12,7 @@ class Query(BaseQuery):
         description = "A list of tutors",
         resolver = resolve.all_tutors
     )
-    tutor= DjangoFilterConnectionField(
+    tutorUser= DjangoFilterConnectionField(
         TutorUsername,
         desciption = "A list of username of tutors",
         resolver = resolve.all_username
