@@ -5,18 +5,17 @@ from . import resolvers as resolve
 
 from base.models import Module
 
-
 class ModuleNode(DjangoObjectType):
     class Meta:
         model = Module
         filter_fields = {
-            'id': ['exact'],
             'name': ['icontains', 'istartswith'],
             'abbrev': ['exact'],
             'head': ['exact'],
+            'ppn' : ['icontains'],
             'train_prog': ['exact'],
             'period': ['exact'],
-            'url': ['exact'],
-            'description': ['exact']
+            'url' : ['exact'],
+            'description': ['icontains', 'exact']
         }
         interfaces = (relay.Node, )
