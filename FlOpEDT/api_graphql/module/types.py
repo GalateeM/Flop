@@ -5,21 +5,18 @@ from . import resolvers as resolve
 
 from base.models import Module
 
-class Module(DjangoObjectType):
-    class Meta:
-        
 
-class DepartmentNode(DjangoObjectType):
+class ModuleNode(DjangoObjectType):
     class Meta:
-        model = Department
+        model = Module
         filter_fields = {
             'id': ['exact'],
             'name': ['icontains', 'istartswith'],
-            'abbrev': ['exact']
+            'abbrev': ['exact'],
+            'head': ['exact'],
+            'train_prog': ['exact'],
+            'period': ['exact'],
+            'url': ['exact'],
+            'description': ['exact']
         }
         interfaces = (relay.Node, )
-
-class TrainingProgrammeQL(DjangoObjectType):
-    class Meta:
-        model = TrainingProgramme
-        fields = ('id', 'name', 'abbrev', 'department')
