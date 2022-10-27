@@ -5,4 +5,4 @@ def all_tutors(root, info): # , dept, week, years  (dept n'est pas dans la class
     return Tutor.object.all()
 
 def all_username(root, info):
-    return Tuto.object.all()
+    return Tutor.object.all()
