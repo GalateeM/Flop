@@ -20,60 +20,59 @@ def client_query(client):
 
 @pytest.fixture
 def tutor_info(db) -> Tutor:
-    return Tutor.objects.create(abbrev="LN",  first_name="Laurent")
-
-
-@pytest.fixture
-def tutor_réseaux(db) -> Tutor:
-    return Tutor.objects.create(abbrev="ADES",  first_name="Arnaud")
-
-
-
-
-def departement_info_factory(db, tutor_info: Tutor):
-    def create_department_info(
-            abbrev: str,
-            name:str)  -> department:
-        return Department.objects.create(
-            abbrev=abbrev, name=name,
-            Tutor=tutor_info)
-    return create_department_info
-@pytest.fixture
-def department_info(db, department_info_factory):
-    return department_info_factory(abbrev="INFo", name="informatique")
+    return Tutor.objects.create(username="LN",  first_name="Laurent")
 
 @pytest.fixture
-def department_réseaux(db, department_info_factory):
-    return department_info_factory(abbrev="RT", name="réseaux et telecommunication")
-
-# (Avec une List dans le type TrainingProgrammeQL)
-def test_all_Tutors(client_query,
-                                 tutor_info: Tutor,
-                                 tutor_réseaux: Tutor):
+def tutor_reseaux(db) -> Tutor:
+    return Tutor.objects.create(username="ADES",  first_name="Arnaud")
     
-    response = client_query(
+@pytest.fixture
+def department_info(db) -> Department:
+    return Department.objects.create(abbrev="INFO", name="informatique")
+
+@pytest.fixture
+def department_reseaux(db) -> Department:
+    return Department.objects.create(abbrev="RT", name="reseaux et telecommunication")
+
+def test_all_tutors(client_query,
+                                 tutor_info: Tutor,
+                                 tutor_reseaux: Tutor):
+    response_all_data = client_query(
         '''
         query {
-          tutor(first_name_Istartswith: "La") {
+          tutors {
+            edges{
+                node{
+                    username
+                }
+            }
+            }
+        }
+        '''
+    )
+    content_all_data = json.loads(response_all_data.content)
+    assert 'errors' not in content_all_data
+    all_tutors = content_all_data["data"]["tutors"]["edges"]
+    assert len(all_tutors) == 2
+    assert (set([tu["node"]["username"] for tu in all_tutors])
+            == set([tut.username for tut in [tutor_info, tutor_reseaux]]))
+
+def test_tutors_filt(client_query,
+                                tutor_info: Tutor):
+    response_filtered = client_query(
+        '''
+        query {
+          tutors(firstName_Istartswith: "La") {
             edges {
-              node {
-              first_name
-              last_name
-              username
-              email
-               
-              }
+                node {
+                    email
+                }
             }
           }
         }
         '''
     )
-    content = json.loads(response.content)
-    assert 'errors' not in content
-    # pas très nécessaire
-    # assert "Tutors" in content["data"]
-    Tutors = content["data"]["Tutors"]
-    assert len(Tutors) == 1
-    assert (set([tp["abbrev"] for tp in Tutors])
-            == set([tp.abbrev for tp in [tutor_info, tutor_réseaux]]))
-
+    content_filt = json.loads(response_filtered.content)
+    assert 'errors' not in content_filt
+    node = content_filt["data"]["tutors"]["edges"][0]["node"]["email"]
+    assert node == tutor_info.email

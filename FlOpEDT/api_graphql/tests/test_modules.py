@@ -52,11 +52,11 @@ def period_2(db, department_miashs: Department)-> Period:
 # Des fixtures pour des tutors
 @pytest.fixture
 def tutor_conception(db) -> Tutor:
-    return Tutor.objects.create(abbrev="JD", fullname="John Doe")
+    return Tutor.objects.create(username="JD", first_name="John")
 
 @pytest.fixture
 def tutor_algo_prog(db) -> Tutor:
-    return Tutor.objects.create(abbrev="EM", fullname="Elon Musk")
+    return Tutor.objects.create(username="EM", first_name="Elon")
 
 # Des fixtures pour des modules
 @pytest.fixture
@@ -76,7 +76,7 @@ training_l2_miashs : TrainingProgramme, tutor_algo_prog : Tutor, period_2 : Peri
     train_prog=training_l2_miashs, period=period_2,
     url="https://algoprog.com",
     description="Est itaque obcaecati id aperiam optio cum praesentium vitae id doloribus aliquid? Et amet culpa ut esse harum aut quisquam aliquam et nemo aperiam et illo internos est Quis eaque non expedita dolor. Ut libero dolor est quasi ipsa At voluptatem alias qui distinctio voluptate sit cupiditate itaque ab vero possimus non quidem quis.")
-  
+
 def test_all_modules(client_query,
                                  module_conception_log: Module,
                                  module_algo_prog: Module):
@@ -84,23 +84,29 @@ def test_all_modules(client_query,
         '''
         query {
           modules {
-                abbrev
+            edges{
+                node{
+                    abbrev
+                }
+            }
             }
         }
         '''
     )
     content_all_data = json.loads(response_all_data.content)
     assert 'errors' not in content_all_data
-    all_modules = content_all_data["data"]["modules"]
+    all_modules = content_all_data["data"]["modules"]["edges"]
     assert len(all_modules) == 2
-    assert (set([md["abbrev"] for all_md in all_modules])
-            == set([tp.abbrev for tp in [module_algo_prog, module_conception_log]]))
+    assert (set([md["node"]["abbrev"] for md in all_modules])
+            == set([mdl.abbrev for mdl in [module_algo_prog, module_conception_log]]))
 
+def test_modules_filt(client_query,
+                                module_algo_prog: Module):
     response_filtered = client_query(
         '''
         query {
-          modules (name_Istartswith: "Al") {
-            egdes {
+          modules(name_Istartswith: "Al") {
+            edges {
                 node {
                     description
                 }
@@ -111,7 +117,5 @@ def test_all_modules(client_query,
     )
     content_filt = json.loads(response_filtered.content)
     assert 'errors' not in content_filt
-    nodes = content_filt["data"]["modules"]["edges"]
-    assert len(nodes) == 1
-    node = nodes[0]["node"]
-    assert node["description"] == module_algo_prog.abbrev
+    node = content_filt["data"]["modules"]["edges"][0]["node"]["description"] 
+    assert node == module_algo_prog.description

@@ -16,11 +16,4 @@ class TutorType(DjangoObjectType):
             'email' : ['icontains', 'istartswith'],
         }
         interfaces = (relay.Node, )
-        #fields = ('username',)
-
-class TutorUsername(DjangoObjectType):
-    class Meta:
-        model = Tutor
-        filter_fields = {
-            'username' : ['icontains', 'istartswith'],
-        }
+        
