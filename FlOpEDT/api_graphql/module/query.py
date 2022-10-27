@@ -7,7 +7,7 @@ from . import resolvers as resolve
 from .types import ModuleNode
 
 class Query(BaseQuery):
-    departments = DjangoFilterConnectionField(
+    modules = DjangoFilterConnectionField(
         ModuleNode,
         description="A list of modules.",
         resolver=resolve.all_modules
