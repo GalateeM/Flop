@@ -5,6 +5,7 @@ import pytest
 from graphene_django.utils.testing import graphql_query
 from people.models import Tutor
 from base.models import Department
+import lib
 
 
 
@@ -35,44 +36,12 @@ def department_reseaux(db) -> Department:
     return Department.objects.create(abbrev="RT", name="reseaux et telecommunication")
 
 def test_all_tutors(client_query,
-                                 tutor_info: Tutor,
-                                 tutor_reseaux: Tutor):
-    response_all_data = client_query(
-        '''
-        query {
-          tutors {
-            edges{
-                node{
-                    username
-                }
-            }
-            }
-        }
-        '''
-    )
-    content_all_data = json.loads(response_all_data.content)
-    assert 'errors' not in content_all_data
-    all_tutors = content_all_data["data"]["tutors"]["edges"]
-    assert len(all_tutors) == 2
-    assert (set([tu["node"]["username"] for tu in all_tutors])
-            == set([tut.username for tut in [tutor_info, tutor_reseaux]]))
+                    tutor_info : Tutor, 
+                    tutor_reseaux : Tutor):
+    lib.test_all (client_query, "tutors", "username", None, None, "username", 
+    t1 = tutor_info,
+    t2 = tutor_reseaux)
 
-def test_tutors_filt(client_query,
+def test_tutors_filtered(client_query,
                                 tutor_info: Tutor):
-    response_filtered = client_query(
-        '''
-        query {
-          tutors(firstName_Istartswith: "La") {
-            edges {
-                node {
-                    email
-                }
-            }
-          }
-        }
-        '''
-    )
-    content_filt = json.loads(response_filtered.content)
-    assert 'errors' not in content_filt
-    node = content_filt["data"]["tutors"]["edges"][0]["node"]["email"]
-    assert node == tutor_info.email
+    lib.test_all (client_query, "tutors", "email", "firstName_Istartswith", '"La"', "email", t1 = tutor_info)

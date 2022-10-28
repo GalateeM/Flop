@@ -2,13 +2,11 @@ import json
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+import lib
 
 from base.models import Module, TrainingProgramme, Department, Period
 from people.models import Tutor
 
-# Pour pouvoir faire des requêtes sur graphQL pendant les tests
-# Insatisfaisant car graphql_url devrait venir de la configuration globale
-# mais on s'en contentera
 @pytest.fixture
 def client_query(client):
     def func(*args, **kwargs):
@@ -78,44 +76,12 @@ training_l2_miashs : TrainingProgramme, tutor_algo_prog : Tutor, period_2 : Peri
     description="Est itaque obcaecati id aperiam optio cum praesentium vitae id doloribus aliquid? Et amet culpa ut esse harum aut quisquam aliquam et nemo aperiam et illo internos est Quis eaque non expedita dolor. Ut libero dolor est quasi ipsa At voluptatem alias qui distinctio voluptate sit cupiditate itaque ab vero possimus non quidem quis.")
 
 def test_all_modules(client_query,
-                                 module_conception_log: Module,
-                                 module_algo_prog: Module):
-    response_all_data = client_query(
-        '''
-        query {
-          modules {
-            edges{
-                node{
-                    abbrev
-                }
-            }
-            }
-        }
-        '''
-    )
-    content_all_data = json.loads(response_all_data.content)
-    assert 'errors' not in content_all_data
-    all_modules = content_all_data["data"]["modules"]["edges"]
-    assert len(all_modules) == 2
-    assert (set([md["node"]["abbrev"] for md in all_modules])
-            == set([mdl.abbrev for mdl in [module_algo_prog, module_conception_log]]))
+                    module_conception_log : Module, 
+                    module_algo_prog : Module):
+    lib.test_all (client_query, "modules", "abbrev", None, None, "abbrev", 
+    m1 = module_conception_log,
+    m2 = module_algo_prog)
 
-def test_modules_filt(client_query,
+def test_modules_filtered(client_query,
                                 module_algo_prog: Module):
-    response_filtered = client_query(
-        '''
-        query {
-          modules(name_Istartswith: "Al") {
-            edges {
-                node {
-                    description
-                }
-            }
-          }
-        }
-        '''
-    )
-    content_filt = json.loads(response_filtered.content)
-    assert 'errors' not in content_filt
-    node = content_filt["data"]["modules"]["edges"][0]["node"]["description"] 
-    assert node == module_algo_prog.description
+    lib.test_all (client_query, "modules", "description", "name_Istartswith", '"Al"', "description", m1 = module_algo_prog)
