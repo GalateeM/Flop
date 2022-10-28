@@ -78,10 +78,10 @@ training_l2_miashs : TrainingProgramme, tutor_algo_prog : Tutor, period_2 : Peri
 def test_all_modules(client_query,
                     module_conception_log : Module, 
                     module_algo_prog : Module):
-    lib.test_all (client_query, "modules", "abbrev", None, None, "abbrev", 
+    lib.test_all (client_query, "modules", None, None, "abbrev", 
     m1 = module_conception_log,
     m2 = module_algo_prog)
 
 def test_modules_filtered(client_query,
                                 module_algo_prog: Module):
-    lib.test_all (client_query, "modules", "description", "name_Istartswith", '"Al"', "description", m1 = module_algo_prog)
+    lib.test_all (client_query, "modules", "name_Istartswith", '"Al"', "description", m1 = module_algo_prog)

@@ -38,10 +38,10 @@ def department_reseaux(db) -> Department:
 def test_all_tutors(client_query,
                     tutor_info : Tutor, 
                     tutor_reseaux : Tutor):
-    lib.test_all (client_query, "tutors", "username", None, None, "username", 
+    lib.test_all (client_query, "tutors", None, None, "username", 
     t1 = tutor_info,
     t2 = tutor_reseaux)
 
 def test_tutors_filtered(client_query,
                                 tutor_info: Tutor):
-    lib.test_all (client_query, "tutors", "email", "firstName_Istartswith", '"La"', "email", t1 = tutor_info)
+    lib.test_all (client_query, "tutors", "firstName_Istartswith", '"La"', "email", t1 = tutor_info)

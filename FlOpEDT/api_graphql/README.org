@@ -1,4 +1,3 @@
-#+STARTUP: overview
 #+title: README GraphQL ; pour les L3
 #+options: author:nil
 
