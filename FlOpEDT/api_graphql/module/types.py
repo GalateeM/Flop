@@ -13,9 +13,10 @@ class ModuleNode(DjangoObjectType):
             'abbrev': ['exact'],
             'head': ['exact'],
             'ppn' : ['icontains'],
-            'train_prog': ['exact'],
-            'period': ['exact'],
-            'url' : ['exact'],
+            'train_prog__abbrev': ['exact'],
+            'train_prog__name': ['icontains'],
+            'period__name': ['exact'],
+            'url' : ['exact', 'icontains'],
             'description': ['icontains', 'exact']
         }
         interfaces = (relay.Node, )
