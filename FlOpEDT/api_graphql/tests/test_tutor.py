@@ -38,10 +38,23 @@ def department_reseaux(db) -> Department:
 def test_all_tutors(client_query,
                     tutor_info : Tutor, 
                     tutor_reseaux : Tutor):
-    lib.test_all (client_query, "tutors", None, None, "username", 
+    lib.test_all (client_query, "tutors", None, "username", 
     t1 = tutor_info,
     t2 = tutor_reseaux)
 
-def test_tutors_filtered(client_query,
+one_filter = {
+    "firstName_Istartswith" : '"La"'
+}
+
+multiple_filters = {
+    "firstName_Icontains" : '"a"',
+    "username_Istartswith" : '"A"'
+}
+
+def test_tutors_one_filter(client_query,
                                 tutor_info: Tutor):
-    lib.test_all (client_query, "tutors", "firstName_Istartswith", '"La"', "email", t1 = tutor_info)
+    lib.test_all (client_query, "tutors", one_filter, "first_name", "username", t1 = tutor_info)
+
+def test_tutors_multiple_filters(client_query,
+                                tutor_reseaux: Tutor):
+    lib.test_all (client_query, "tutors", multiple_filters, "first_name", "username", t1 = tutor_reseaux)    
