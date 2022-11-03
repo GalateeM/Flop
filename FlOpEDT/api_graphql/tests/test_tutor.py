@@ -18,15 +18,6 @@ def client_query(client):
 
     return func
 
-
-@pytest.fixture
-def tutor_info(db) -> Tutor:
-    return Tutor.objects.create(username="LN",  first_name="Laurent")
-
-@pytest.fixture
-def tutor_reseaux(db) -> Tutor:
-    return Tutor.objects.create(username="ADES",  first_name="Arnaud")
-    
 @pytest.fixture
 def department_info(db) -> Department:
     return Department.objects.create(abbrev="INFO", name="informatique")
@@ -34,6 +25,18 @@ def department_info(db) -> Department:
 @pytest.fixture
 def department_reseaux(db) -> Department:
     return Department.objects.create(abbrev="RT", name="reseaux et telecommunication")
+
+@pytest.fixture
+def tutor_info(db, department_info : Department) -> Tutor:
+    res = Tutor.objects.create(username="LN",  first_name="Laurent")
+    res.departments.add(department_info)
+    return res
+
+@pytest.fixture
+def tutor_reseaux(db, department_reseaux : Department) -> Tutor:
+    res = Tutor.objects.create(username="ADES",  first_name="Arnaud")
+    res.departments.add(department_reseaux)
+    return res
 
 def test_all_tutors(client_query,
                     tutor_info : Tutor, 
@@ -48,7 +51,7 @@ one_filter = {
 
 multiple_filters = {
     "firstName_Icontains" : '"a"',
-    "username_Istartswith" : '"A"'
+    "departments_Abbrev" : '"RT"'
 }
 
 def test_tutors_one_filter(client_query,

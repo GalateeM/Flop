@@ -10,6 +10,7 @@ class TutorType(DjangoObjectType):
     class Meta:
         model = Tutor
         filter_fields = {
+            'departments__abbrev' : ['exact'],
             'username' : ['icontains', 'istartswith'],
             'last_name' : ['icontains', 'istartswith'],
             'first_name' : ['icontains', 'istartswith'],
