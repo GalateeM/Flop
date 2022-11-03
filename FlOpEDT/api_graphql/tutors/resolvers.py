@@ -1,5 +1,4 @@
-from people.models import Tutor
-#from base.models import Department, Week
+from base.models import ModuleTutorRepartition
 
-def all_tutors(root, info): # , dept, week, years  (dept n'est pas dans la class Department)
-    return Tutor.objects.all()
+def all_tutors(root, info):
+    return ModuleTutorRepartition.objects.all()

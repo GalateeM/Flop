@@ -1,4 +1,5 @@
 import json
+from people.models import Tutor 
 
 def normalize_field_name(f):
     if "_" in f:
@@ -30,27 +31,34 @@ def test_all(client_query, obj_type, filters, *fields, **fixtures):
                 edges{
                     node{
         '''
+    
+    if type (fields[0]) != dict :
+        for f in normalized_field_name:
+            query += f + ' '
 
-    for f in normalized_field_name:
-        query += f + ' '
-
-    query += '''
-                    }
-                }
-            }
-        }        
-    '''
+        query += ' }   }   }   } '
+    else:
+        for f in normalized_field_name:
+            for k, v in f.items():
+                query += k + ' { '
+                for vals in v:
+                    query += vals + ' '
+            query += ' } '
+        query += ' }    }   } '
 
     response = client_query(query)
     content = json.loads(response.content)
+    print(content["data"])
+    assert False
+    """
     assert 'errors' not in content
     all_elt = content["data"][obj_type]["edges"]
     assert len(all_elt) == len(fixtures)
     res = []
     for f in normalized_field_name:
         res.extend([elt["node"][f] for elt in all_elt])
-
     fixt = []
     for f in fields:
         fixt.extend([getattr(e, f) for e in fixtures.values()])
     assert set(res) == set(fixt)
+"""
