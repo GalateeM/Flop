@@ -94,34 +94,39 @@ def test_all_modules(client_query,
     assert module_algo_prog.abbrev in data["abbrev"]
     assert module_conception_log.head.username in data["username"]
     assert module_algo_prog.head.username in data["username"]
-"""
-def test_modules_one_filter(client_query,
+
+def test_modules_with_filters_1(client_query,
                                 module_algo_prog: Module):
     query = '''
         query {
-            modules (name_Istartswith : \"Al\") {
+            modules (name_Icontains : \"l\",
+            head_FirstName_Icontains : \"on\") {
                 edges {
                     node {
-                        description
-                        head {
-                            username
-                        }
+                        url
                     }
                 }
             }
         }
     '''
-    content = lib.execute_query (client_query, query)
-    lib.verify_results(content, "modules", [module_algo_prog])
+    res = lib.execute_query (client_query, query, "modules")
+    data = lib.get_data(res)
+    assert module_algo_prog.url in data["url"]
 
-
-
-multiple_filters = {
-    "name_Icontains" : "Conc",
-    "period_Name" : '"P1"'
-}
-
-def test_modules_multiple_filters(client_query,
-                                module_conception_log: Module):
-    lib.test_all (client_query, "modules", multiple_filters, "description", m1 = module_conception_log)
-"""
+def test_modules_with_filters_2(client_query,
+                                module_algo_prog: Module):
+    query = '''
+        query {
+            modules (name_Icontains : \"l\",
+            train_prog_Abbrev : \"L2M\") {
+                edges {
+                    node {
+                        url
+                    }
+                }
+            }
+        }
+    '''
+    res = lib.execute_query (client_query, query, "modules")
+    data = lib.get_data(res)
+    assert module_algo_prog.url in data["url"]

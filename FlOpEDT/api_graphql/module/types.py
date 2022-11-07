@@ -11,12 +11,12 @@ class ModuleNode(DjangoObjectType):
         filter_fields = {
             'name': ['icontains', 'istartswith'],
             'abbrev': ['exact'],
-            'head': ['exact'],
             'ppn' : ['icontains'],
+            'head__username' : ['exact'],
+            'head__first_name' : ['icontains'],
             'train_prog__abbrev': ['exact'],
-            'train_prog__name': ['icontains'],
             'period__name': ['exact'],
             'url' : ['exact', 'icontains'],
-            'description': ['icontains', 'exact']
         }
+        exclude = ('description',)
         interfaces = (relay.Node, )

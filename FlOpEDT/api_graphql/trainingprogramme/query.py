@@ -7,8 +7,8 @@ from . import resolvers as resolve
 from .types import TrainingProgramme
 
 class Query(BaseQuery):
-    modules = DjangoFilterConnectionField(
-        TrainingProgramme,
+    trainingprogrammes = DjangoFilterConnectionField(
+        TrainingProgrammeType,
         description="A list of trainingprogrammes.",
         resolver=resolve.all_trainingprogramme
     )
