@@ -70,26 +70,58 @@ training_l2_miashs : TrainingProgramme, tutor_algo_prog : Tutor, period_2 : Peri
     url="https://algoprog.com",
     description="Est itaque obcaecati id aperiam optio cum praesentium vitae id doloribus aliquid? Et amet culpa ut esse harum aut quisquam aliquam et nemo aperiam et illo internos est Quis eaque non expedita dolor. Ut libero dolor est quasi ipsa At voluptatem alias qui distinctio voluptate sit cupiditate itaque ab vero possimus non quidem quis.")
 
+
 def test_all_modules(client_query,
                     module_conception_log : Module, 
                     module_algo_prog : Module):
-    lib.test_all (client_query, "modules", None, "abbrev", 
-    m1 = module_conception_log,
-    m2 = module_algo_prog)
+    query = '''
+        query {
+            modules {
+                edges {
+                    node {
+                        abbrev
+                        head {
+                            username
+                        }
+                    }
+                }
+            }
+        }
+    '''
+    res = lib.execute_query (client_query, query, "modules")
+    data = lib.get_data(res)
+    assert module_conception_log.abbrev in data["abbrev"]
+    assert module_algo_prog.abbrev in data["abbrev"]
+    assert module_conception_log.head.username in data["username"]
+    assert module_algo_prog.head.username in data["username"]
+"""
+def test_modules_one_filter(client_query,
+                                module_algo_prog: Module):
+    query = '''
+        query {
+            modules (name_Istartswith : \"Al\") {
+                edges {
+                    node {
+                        description
+                        head {
+                            username
+                        }
+                    }
+                }
+            }
+        }
+    '''
+    content = lib.execute_query (client_query, query)
+    lib.verify_results(content, "modules", [module_algo_prog])
 
-one_filter = {
-    "name_Istartswith" : '"Al"'
-}
+
 
 multiple_filters = {
     "name_Icontains" : "Conc",
     "period_Name" : '"P1"'
 }
 
-def test_modules_one_filter(client_query,
-                                module_algo_prog: Module):
-    lib.test_all (client_query, "modules", one_filter, "description", m1 = module_algo_prog)
-
 def test_modules_multiple_filters(client_query,
                                 module_conception_log: Module):
     lib.test_all (client_query, "modules", multiple_filters, "description", m1 = module_conception_log)
+"""

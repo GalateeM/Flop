@@ -4,18 +4,16 @@ from graphene_django import DjangoObjectType
 
 from . import resolvers as resolve
 
-from base.models import ModuleTutorRepartition
+from people.models import Tutor
 
 class TutorType(DjangoObjectType):
     class Meta:
-        model = ModuleTutorRepartition
-        fields = ("tutor",)
+        model = Tutor
         filter_fields = {
-            'tutor__departments__abbrev' : ['exact'],
-            'tutor__username' : ['icontains', 'istartswith'],
-            'tutor__last_name' : ['icontains', 'istartswith'],
-            'tutor__first_name' : ['icontains', 'istartswith'],
-            'tutor__email' : ['icontains', 'istartswith'],
+            'username' : ['icontains', 'istartswith'],
+            'last_name' : ['icontains', 'istartswith'],
+            'first_name' : ['icontains', 'istartswith'],
+            'email' : ['icontains', 'istartswith'],
         }
         interfaces = (relay.Node, )
         

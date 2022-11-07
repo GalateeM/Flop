@@ -12,3 +12,4 @@ class Query(BaseQuery):
         description = "A list of tutors",
         resolver = resolve.all_tutors
     )
+
