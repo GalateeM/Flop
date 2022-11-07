@@ -5,7 +5,7 @@ from . import resolvers as resolve
 
 from base.models import TrainingProgramme
 
-class TrainingProgrammeModule(DjangoObjectType):
+class TrainingProgrammeType(DjangoObjectType):
     class Meta:
         model = TrainingProgramme
         filter_fields = {

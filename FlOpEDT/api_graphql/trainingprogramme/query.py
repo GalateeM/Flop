@@ -4,7 +4,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from api_graphql.base import BaseQuery
 from . import resolvers as resolve
 
-from .types import TrainingProgramme
+from .types import TrainingProgrammeType
 
 class Query(BaseQuery):
     trainingprogrammes = DjangoFilterConnectionField(
