@@ -14,7 +14,7 @@ class Query(BaseQuery):
         On a Actual ou Singular si on rajoute week ou year en plus\n
         Pour l'instant, on ne peut pas filtrer par département (à implémenter)
     """
-    user_preferences = DjangoFilterConnectionField(
+    userPreferences = DjangoFilterConnectionField(
         UserPreferenceNode,
         description="A list of user preference.",
         resolver=resolve.all_user_preference

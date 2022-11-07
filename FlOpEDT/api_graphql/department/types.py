@@ -13,6 +13,7 @@ class DepartmentType(DjangoObjectType):
         filter_fields = {
             'name' : ['icontains', 'istartswith'],
             'abbrev' : ['exact']
+        }
         fields = '__all__'
         interfaces = (relay.Node, )
         

@@ -9,10 +9,10 @@ class UserPreferenceNode(DjangoObjectType):
     class Meta:
         model = UserPreference
         filter_fields = {
-            'user__username' : ['exact'],
+            'user__username' : ['exact', 'icontains'],
             'user__first_name' : ['icontains', 'istartswith'], 
             'week__nb' : ['exact'], 
             'week__year' : ['exact']
         }
-        fields = '__all__'
+        fields = "__all__"
         interfaces = (relay.Node, )
