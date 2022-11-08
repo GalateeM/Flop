@@ -1,6 +1,3 @@
-import json
-from people.models import Tutor 
-
 def execute_query(client_query, query, type):
     response = client_query(query)
     content = json.loads(response.content)

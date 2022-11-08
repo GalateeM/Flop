@@ -1,4 +1,3 @@
-from pyexpat import model
 from graphene import ObjectType, Int, String, List, lazy_import, relay
 from graphene_django import DjangoObjectType
 
@@ -6,7 +5,7 @@ from . import resolvers as resolve
 
 from quote.models import Quote
 
-class QuoteType(DjangoObjectType):
+class QuoteNode(DjangoObjectType):
     model = Quote
     filter_fields = {
         'quote' : ['icontains', 'istartswith'],
@@ -16,7 +15,8 @@ class QuoteType(DjangoObjectType):
         'desc_author' : ['icontains', 'istartswith'],
         'date' : ['icontains', 'istartswith'],
         'header' : ['icontains', 'istartswith'],
-        'quote_type__name_abbrev' :['icontains', 'istartswith'],
+        'quote_type__name' :['icontains', 'istartswith'],
+        'quote_type__abbrev' :['icontains', 'istartswith'],
         'positive_votes' : ['exact'],
         'negative_votes' : ['exact'],
         'id_acc' : ['exact'],
