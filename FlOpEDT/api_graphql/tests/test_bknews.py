@@ -5,26 +5,10 @@ import pytest
 from graphene_django.utils.testing import graphql_query
 from displayweb.models import BreakingNews
 from base.models import Department, Week, ModuleTutorRepartition
+from api_graphql.tests.test_modules import client_query as client_query
+from api_graphql.tests.test_tutor import department_info as department_info, \
+department_reseaux as department_reseaux
 import lib
-
-
-@pytest.fixture
-def client_query(client):
-    def func(*args, **kwargs):
-        return graphql_query(*args, **kwargs,
-                             client=client,
-                             graphql_url="/graphql")
-
-    return func
-
-#parametre obligatoire
-@pytest.fixture
-def department_info(db) -> Department:
-    return Department.objects.create(abbrev="INFO", name="informatique")
-
-@pytest.fixture
-def department_reseaux(db) -> Department:
-    return Department.objects.create(abbrev="RT", name="reseaux et telecommunication")
 
 
 
@@ -38,15 +22,12 @@ def y1(db, department_info:Department) -> BreakingNews:
 def y2(db, department_reseaux:Department) -> BreakingNews:
     return BreakingNews.objects.create(department= department_reseaux,week = 15, year = 2022, y=10, txt = "In atque alias et eveniet provident eos")
 
-
-
-
 def test_bknews(client_query,
-                    department_info : Department,
-                    department_reseaux : Department):
+                    y1 : BreakingNews,
+                    y2 : BreakingNews):
     query='''
         query{
-            bknews (department_Name_Istartswith : \"inf\", week : 1, year : 2021) {
+            bknews {
                 edges {
                     node {
                         y
@@ -64,12 +45,10 @@ def test_bknews(client_query,
     assert y2.txt in data["txt"]
 
 def test_bknews_filters1(client_query,
-                    department_info : Department,
-                    department_reseaux : Department,
                     y1 : BreakingNews):
     query='''
         query{
-            bknews (department_name_Istartswith : \"inf\", week : 1, year : 2021, y : 5) {
+            bknews (department_Name_Istartswith : \"inf\", week : 1, year : 2021, y : 5) {
                 edges {
                     node {
                         txt

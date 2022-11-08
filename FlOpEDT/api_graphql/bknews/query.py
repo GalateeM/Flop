@@ -6,7 +6,7 @@ from . import resolvers as resolve
 
 from .types import BknewsType
 
-class query (BaseQuery):
+class Query (BaseQuery):
     bknews = DjangoFilterConnectionField(
         BknewsType,
         description = "A list of breanking news",

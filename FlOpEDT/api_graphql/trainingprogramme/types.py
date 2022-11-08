@@ -9,8 +9,7 @@ class TrainingProgrammeType(DjangoObjectType):
     class Meta:
         model = TrainingProgramme
         filter_fields = {
-            'abbrev': ['exact'],
-    
+            'abbrev': ['exact']
         }
         fields = ('abbrev',)
         interfaces = (relay.Node, )

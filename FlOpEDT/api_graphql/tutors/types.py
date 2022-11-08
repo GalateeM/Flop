@@ -12,10 +12,10 @@ class TutorType(DjangoObjectType):
         model = Tutor
         filter_fields = {
             'username' : ['icontains', 'istartswith'],
-            'last__name' : ['icontains', 'istartswith'],
-            'first__name' : ['icontains', 'istartswith'],
+            'last_name' : ['icontains', 'istartswith'],
+            'first_name' : ['icontains', 'istartswith'],
             'email' : ['icontains', 'istartswith'],
         }
-        fields = ('username', 'last__name', 'first__name', 'email')
+        fields = ('username', 'last_name', 'first_name', 'email')
         interfaces = (relay.Node, )
         

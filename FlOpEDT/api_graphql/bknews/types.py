@@ -14,12 +14,11 @@ class BknewsType(DjangoObjectType):
             'department__name' : ['icontains', 'istartswith'],
             'week' : ['exact'],
             'year' : ['exact'],
-            'id' : ['exact'],
-            'x__beg' : ['exact'],
-            'x__end' : ['exact'],
+            'x_beg' : ['exact'],
+            'x_end' : ['exact'],
             'y' : ['exact'],
             'txt' : ['icontains', 'istartswith'],
-            'is__linked' : ['icontains', 'istartswith'],
+            'is_linked' : ['icontains', 'istartswith']
         }
-        fields = ('id', 'x__deg', 'x__end', 'y', 'txt', 'is__linked')
+        fields = ('x_beg', 'x_end', 'y', 'txt', 'is_linked')
         interfaces = (relay.Node, )
