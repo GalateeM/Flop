@@ -15,6 +15,9 @@ NB : pas de filtre dept et teach-only
 l.49 var url_bknews = "{% url 'api:extra:bknews-list' %}";
 NB : on ne trouve pas id 
 
+l.50 var url_quote = "{% url 'api:extra:random-quote-list' %}";
+NB: on ne trouve pas id
+
 ---Requetes non faites : 
 l62. var url_unavailable_rooms = "{% url 'api:fetch:unavailablerooms-list' %}";
 NB : Pas de model associé à UnavalaibleRoom
