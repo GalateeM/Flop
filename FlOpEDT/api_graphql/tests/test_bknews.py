@@ -48,7 +48,7 @@ def test_bknews_filters1(client_query,
                     y1 : BreakingNews):
     query='''
         query{
-            bknews (department_Name_Istartswith : \"inf\", week : 1, year : 2021, y : 5) {
+            bknews (department_Name_Istartswith : \"inf\", week : 11, year : 2021, y : 5) {
                 edges {
                     node {
                         txt
