@@ -21,7 +21,7 @@ class QuoteNode(DjangoObjectType):
             'positive_votes' : ['exact'],
             'negative_votes' : ['exact'],
             'id_acc' : ['exact'],
-            'statut' : ['icontains', 'istartswith']
+            'status' : ['icontains', 'istartswith']
         }
         fields = '__all__'
         interfaces = (relay.Node, )
