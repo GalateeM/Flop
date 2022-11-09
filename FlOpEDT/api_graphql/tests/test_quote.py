@@ -56,3 +56,29 @@ def test_quote(client_query,
     assert quote2.date in data["date"]
     assert quote2.quote_type.name in data["name"]
     assert quote2.quote_type.abbrev in data["abbrev"]
+
+def test_quote_filter(client_query,
+                quote2 : Quote):
+    query='''
+        query {
+            quotes (date_Istartswith : \"16\") {
+                edges {
+                    node {
+                        id
+                        quote
+                        date
+                        quoteType {
+                            name
+                            abbrev
+                        }
+                    }
+                }
+            }
+        }
+    '''
+    res = lib.execute_query (client_query, query, "quotes")
+    data = lib.get_data(res)
+    assert quote2.quote in data["quote"]
+    assert quote2.date in data["date"]
+    assert quote2.quote_type.name in data["name"]
+    assert quote2.quote_type.abbrev in data["abbrev"]
