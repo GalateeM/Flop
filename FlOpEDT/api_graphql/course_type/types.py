@@ -13,7 +13,6 @@ class CourseTypeNode(DjangoObjectType):
             'name' : ['icontains', 'istartswith'],
             'department__name' : ['icontains', 'istartswith'],
             'department__abbrev' : ['exact'],
-            'type__name' : ['icontains', 'istartswith'],
             'duration' : ['exact'],
             'pay_duration' : ['exact'],
             'graded' : ['exact'],
