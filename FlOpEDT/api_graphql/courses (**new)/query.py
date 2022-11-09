@@ -4,12 +4,11 @@ from graphene_django.filter import DjangoFilterConnectionField
 from api_graphql.base import BaseQuery
 from . import resolvers as resolve
 
-from .types import RoomTypeNode
-
+from .types import CourseNode
 
 class Query(BaseQuery):
-    roomTypes = DjangoFilterConnectionField(
-        RoomTypeNode,
-        description="A list of room type",
-        resolver=resolve.all_room_type
+    courses = DjangoFilterConnectionField(
+        CourseNode,
+        description = "A list of courses",
+        resolver = resolve.all_courses
     )
