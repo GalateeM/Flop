@@ -29,7 +29,7 @@ def room_algo(db) -> Room:
     return Room.objects.create( name="B101")
 @pytest.fixture
 def course_algo(db) -> Course:
-    return Course.objects.create( type_name="Algo")
+    return Course.objects.create( name="Algo")
 
 @pytest.fixture
 def scheduled1(db, tutor_conception:Tutor,
@@ -38,9 +38,9 @@ def scheduled1(db, tutor_conception:Tutor,
     return ScheduledCourse.objects.create(tutor= tutor_conception, room= room_algo, course= course_algo)
 
 
+
 def test_scheduled_course(client_query,
-                                 tutor_conception: Tutor, 
-                    tutor_algo_prog : Tutor, room_algo:Room, course_algo:Course):
+                        scheduled1 : ScheduledCourse):
     query = '''
         query {
             courses {
@@ -48,10 +48,14 @@ def test_scheduled_course(client_query,
                     node {
                         tutor{
                             username
-                            firstName
+                        }   
                         room{
                             name
                         }
+                        course{
+                            type{
+                                name
+                            }
                         }
                     }
                 }
@@ -60,11 +64,9 @@ def test_scheduled_course(client_query,
     '''
     res = lib.execute_query (client_query, query, "courses")
     data = lib.get_data(res)
-    assert tutor_conception_log.first_name in data["firstName"]
-    assert tutor_algo_prog.first_name in data["firsName"]
-    assert tutor_conception_log.head.username in data["username"]
-    assert tutor_algo_prog.head.username in data["username"]
-    assert room_algo.name in data["name"]
+    assert scheduled1.tutor.username in data["username"]
+    assert scheduled1.room.name in data["name"]
+    assert scheduled1.course_types.name in data["name"]
 
 
     
