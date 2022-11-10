@@ -1,4 +1,4 @@
-from base.models import ScheduledCourses
+from base.models import ScheduledCourse
 
-def all_courses(root, info):
-    return ScheduledCourses.objects.all()
+def all_scheduled_courses(root, info):
+    return ScheduledCourse.objects.all()

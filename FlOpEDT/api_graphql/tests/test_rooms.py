@@ -8,6 +8,7 @@ from base.models import Room, Department, RoomType
 from api_graphql.tests.test_tutor import department_info as department_info, \
 department_reseaux as department_reseaux, client_query as client_query
 
+
 @pytest.fixture
 def room_type_info(db, \
     department_info : Department) -> RoomType:
@@ -48,29 +49,17 @@ def room_info(db, \
     res.types.add(room_type_info)
     return res
 
-def test_all_rooms(client_query,
-                    room_reseaux : Room, 
+def test_room(client_query, 
                     room_info : Room):
     query = '''
         query {
-            rooms {
-                edges {
-                    node {
-                        id
-                        departments{
-                            name
-                        }
-                    }
-                }
+            rooms (dept : \"INFO\") {
+            	name
             }
-        }
     '''
     res = lib.execute_query (client_query, query, "rooms")
     data = lib.get_data(res)
-    assert room_reseaux.id in data["id"]
-    assert room_reseaux.departments.name in data["name"]
-    assert room_info.id in data["id"]
-    assert room_info.departments.name in data["name"]
+    assert room_info.departments.n in data["name"]
 """
 def test_user_pref_with_filters_1(client_query,
                                 user_pref_conception : UserPreference):

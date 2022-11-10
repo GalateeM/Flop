@@ -3,8 +3,8 @@ import json
 def execute_query(client_query, query, type):
     response = client_query(query)
     content = json.loads(response.content)
-    """ print(content)
-    assert False """
+    """print(content)
+    assert False"""
     assert 'errors' not in content
     res = content["data"][type]["edges"]
     return res
@@ -23,3 +23,4 @@ def get_data(res):
         for key, val in r["node"].items():
             append_data(data, key, val)
     return data
+

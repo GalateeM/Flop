@@ -3,11 +3,11 @@ from graphene_django import DjangoObjectType
 
 from . import resolvers as resolve
 
-from base.models import ScheduledCourses
+from base.models import ScheduledCourse
 
-class CourseNode(DjangoObjectType):
+class ScheduledCourseNode(DjangoObjectType):
     class Meta:
-        model = ScheduledCourses
+        model = ScheduledCourse
         filter_fields = {
             'room__name': ['icontains', 'istartswith'],
             'day': ['exact'],
@@ -16,8 +16,7 @@ class CourseNode(DjangoObjectType):
             'start_time' : ['exact'],
             'no' : ['exact'],
             'noprec': ['exact'],
-            'work_copy': ['exact'],
-            'url' : ['exact'],
+            'work_copy': ['exact']
         }
     
         interfaces = (relay.Node, )

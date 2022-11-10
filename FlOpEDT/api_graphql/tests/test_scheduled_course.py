@@ -5,7 +5,7 @@ from graphene_django.utils.testing import graphql_query
 import lib
 from people.models import Tutor
 from base.models import Course,Room, ScheduledCourse, CourseType, Module, TrainingProgramme, Department, Period
-# from test_modules import module_algo_prog as module_algo_prog
+from test_modules import department_miashs
 
 @pytest.fixture
 def client_query(client):
@@ -75,7 +75,7 @@ module_algo_prog:Module) -> Course:
 def scheduled1(db, tutor_conception:Tutor,
                 room_algo:Room,
                 course_algo:Course) -> ScheduledCourse:
-    return ScheduledCourse.objects.create(tutor= tutor_conception, room= room_algo, course= course_algo)
+    return ScheduledCourse.objects.create(tutor= tutor_conception, room= room_algo, course= course_algo, start_time = 5)
 
 
 
@@ -83,7 +83,7 @@ def test_scheduled_course(client_query,
                         scheduled1 : ScheduledCourse):
     query = '''
         query {
-            courses {
+            scheduledCourses {
                 edges {
                     node {
                         tutor{
@@ -102,11 +102,11 @@ def test_scheduled_course(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "courses")
+    res = lib.execute_query (client_query, query, "scheduledCourses")
     data = lib.get_data(res)
     assert scheduled1.tutor.username in data["username"]
     assert scheduled1.room.name in data["name"]
-    assert scheduled1.course_types.name in data["name"]
+    assert scheduled1.course.type.name in data["name"]
 
 
     

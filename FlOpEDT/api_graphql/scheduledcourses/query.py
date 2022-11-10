@@ -4,12 +4,12 @@ from graphene_django.filter import DjangoFilterConnectionField
 from api_graphql.base import BaseQuery
 from . import resolvers as resolve
 
-from .types import CourseNode
+from .types import ScheduledCourseNode
 
 class Query(BaseQuery):
-    courses = DjangoFilterConnectionField(
-        CourseNode,
+    scheduledCourses = DjangoFilterConnectionField(
+        ScheduledCourseNode,
         description="A list of scheduled courses.",
-        resolver=resolve.all_courses
+        resolver=resolve.all_scheduled_courses
     )
     
