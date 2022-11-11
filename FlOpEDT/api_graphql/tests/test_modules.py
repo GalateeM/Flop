@@ -1,20 +1,9 @@
-import json
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-import lib
-
 from base.models import Module, TrainingProgramme, Department, Period
 from people.models import Tutor
-
-@pytest.fixture
-def client_query(client):
-    def func(*args, **kwargs):
-        return graphql_query(*args, **kwargs,
-                             client=client,
-                             graphql_url="/graphql")
-
-    return func
+from lib import *
 
 @pytest.fixture
 def department_miashs(db) -> Department:
@@ -88,8 +77,8 @@ def test_all_modules(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "modules")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "modules")
+    data = get_data(res)
     assert module_conception_log.abbrev in data["abbrev"]
     assert module_algo_prog.abbrev in data["abbrev"]
     assert module_conception_log.head.username in data["username"]
@@ -109,8 +98,8 @@ def test_modules_with_filters_1(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "modules")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "modules")
+    data = get_data(res)
     assert module_algo_prog.url in data["url"]
 
 def test_modules_with_filters_2(client_query,
@@ -127,6 +116,6 @@ def test_modules_with_filters_2(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "modules")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "modules")
+    data = get_data(res)
     assert module_algo_prog.url in data["url"]

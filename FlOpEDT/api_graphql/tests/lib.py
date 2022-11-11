@@ -1,4 +1,15 @@
 import json 
+import pytest
+from graphene_django.utils.testing import graphql_query
+
+@pytest.fixture
+def client_query(client):
+    def func(*args, **kwargs):
+        return graphql_query(*args, **kwargs,
+                             client=client,
+                             graphql_url="/graphql")
+
+    return func
 
 def execute_query(client_query, query, type):
     response = client_query(query)

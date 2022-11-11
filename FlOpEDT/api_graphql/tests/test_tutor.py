@@ -1,22 +1,9 @@
-from distutils.command.build_scripts import first_line_re
-import json
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
 from people.models import Tutor
 from base.models import Department, Week, ModuleTutorRepartition
-import lib
-
-
-
-@pytest.fixture
-def client_query(client):
-    def func(*args, **kwargs):
-        return graphql_query(*args, **kwargs,
-                             client=client,
-                             graphql_url="/graphql")
-
-    return func
+from lib import *
 
 @pytest.fixture
 def department_info(db) -> Department:
@@ -52,8 +39,8 @@ def test_all_tutors(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "tutors")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "tutors")
+    data = get_data(res)
     assert tutor_info.username in data["username"]
     assert tutor_reseaux.username in data["username"]
 
@@ -71,8 +58,8 @@ def test_tutors_one_filter(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "tutors")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "tutors")
+    data = get_data(res)
     assert tutor_info.first_name in data["firstName"]
     assert tutor_info.username in data["username"]
     

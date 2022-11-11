@@ -1,11 +1,8 @@
-from distutils.command.build_scripts import first_line_re
-import json
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from api_graphql.tests.test_modules import client_query as client_query
 from quote.models import Quote, QuoteType
-import lib
+from lib import *
 
 
 
@@ -46,8 +43,8 @@ def test_quote(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "quotes")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "quotes")
+    data = get_data(res)
     assert quote1.quote in data["quote"]
     assert quote1.date in data["date"]
     assert quote1.quote_type.name in data["name"]
@@ -76,8 +73,8 @@ def test_quote_filter(client_query,
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "quotes")
-    data = lib.get_data(res)
+    res = execute_query (client_query, query, "quotes")
+    data = get_data(res)
     assert quote2.quote in data["quote"]
     assert quote2.date in data["date"]
     assert quote2.quote_type.name in data["name"]
