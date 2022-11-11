@@ -54,47 +54,25 @@ def test_room(client_query,
     query = '''
         query {
             rooms (dept : \"INFO\") {
-            	name
-            }
-    '''
-    res = lib.execute_query (client_query, query, "rooms")
-    data = lib.get_data(res)
-    assert room_info.departments.n in data["name"]
-"""
-def test_user_pref_with_filters_1(client_query,
-                                user_pref_conception : UserPreference):
-    query = '''
-        query {
-            userPreferences (week_Year : 2022,
-            user_FirstName_Icontains : \"hn\") {
-                edges {
-                    node {
-                        value
-                    }
-                }
-            }
-        }
-    '''
-    res = lib.execute_query (client_query, query, "userPreferences")
-    data = lib.get_data(res)
-    assert user_pref_conception.value in data["value"]
-
-def test_user_pref_with_filters_2(client_query,
-                                user_pref_algo_prog : UserPreference):
-    query = '''
-        query {
-            userPreferences (user_Username : \"EM\") {
-                edges {
-                    node {
-                        user {
-                            firstName
+                edges{
+                    node{
+                	    name
+                        departments {
+                            edges {
+                                node {
+                                    name
+                                    abbrev
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     '''
-    res = lib.execute_query (client_query, query, "userPreferences")
+    res = lib.execute_query (client_query, query, "rooms")
     data = lib.get_data(res)
-    assert user_pref_algo_prog.user.first_name in data["firstName"]
-"""
+    assert room_info.name in data["name"] 
+    for d in list(room_info.departments.all()):
+        assert d.name in data["name"]
+        assert d.abbrev in data["abbrev"]

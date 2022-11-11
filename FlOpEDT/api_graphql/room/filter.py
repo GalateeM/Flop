@@ -3,7 +3,6 @@ from base.models import Room, Department
 
 class RoomFilter(FilterSet):
     dept = CharFilter(method = 'filter_room')
-    week  =C
 
     class Meta:
         model = Room
