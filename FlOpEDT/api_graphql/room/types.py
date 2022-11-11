@@ -1,10 +1,7 @@
-from graphene import ObjectType, Int, String, List, lazy_import, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
-
-from . import resolvers as resolve
-from .filter import RoomFilter
-
 from base.models import Room
+from .filter import RoomFilter
 
 class RoomNode(DjangoObjectType):
     class Meta:

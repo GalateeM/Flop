@@ -4,7 +4,8 @@ from graphene_django.utils.testing import graphql_query
 from base.models import UserPreference, Week
 from people.models import Tutor
 from base.timing import Day
-from test_modules import tutor_algo_prog, tutor_conception
+from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module, TrainingProgramme, Department, Period
+from test_modules import department_miashs, tutor_algo_prog, tutor_conception
 from lib import *
 
 @pytest.fixture
@@ -56,8 +57,7 @@ def test_user_pref_with_filters_1(client_query,
                                 user_pref_conception : UserPreference):
     query = '''
         query {
-            userPreferences (week_Year : 2022,
-            user_FirstName_Icontains : \"hn\") {
+            userPreferences (dept : \"MIASHS\", week_Year : 2022) {
                 edges {
                     node {
                         value
@@ -69,22 +69,3 @@ def test_user_pref_with_filters_1(client_query,
     res = execute_query (client_query, query, "userPreferences")
     data = get_data(res)
     assert user_pref_conception.value in data["value"]
-
-def test_user_pref_with_filters_2(client_query,
-                                user_pref_algo_prog : UserPreference):
-    query = '''
-        query {
-            userPreferences (user_Username : \"EM\") {
-                edges {
-                    node {
-                        user {
-                            firstName
-                        }
-                    }
-                }
-            }
-        }
-    '''
-    res = execute_query (client_query, query, "userPreferences")
-    data = get_data(res)
-    assert user_pref_algo_prog.user.first_name in data["firstName"]

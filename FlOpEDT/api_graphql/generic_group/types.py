@@ -1,19 +1,10 @@
-from graphene import ObjectType, Int, String, List, lazy_import, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
-
-from . import resolvers as resolve
-
 from base.models import GenericGroup
+from .filter import GenericGroupFilter
 
 class GenericGroupNode(DjangoObjectType):
-
     class Meta:
         model = GenericGroup
-        filter_fields = {
-            'name' : ['icontains', 'istartswith'],
-            'train_prog__name' : ['icontains', 'istartswith'],
-            'type__name' : ['icontains', 'istartswith'],
-            'size' : ['exact']
-        }
-        fields = '__all__'
+        filterset_class = GenericGroupFilter
         interfaces = (relay.Node, )

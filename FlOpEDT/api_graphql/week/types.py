@@ -1,17 +1,10 @@
-from graphene import ObjectType, Int, String, List, lazy_import, relay
+from graphene import relay
 from graphene_django import DjangoObjectType
-
-from . import resolvers as resolve
-
 from base.models import Week
+from .filter import WeekFilter
 
 class WeekType(DjangoObjectType):
-
     class Meta:
         model = Week
-        filter_fields = {
-            'nb' : ['exact'],
-            'year' : ['exact']
-        }
-        fields = '__all__'
+        filterset_class = WeekFilter
         interfaces = (relay.Node, )

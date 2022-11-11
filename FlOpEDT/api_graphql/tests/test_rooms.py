@@ -49,7 +49,7 @@ def test_room(client_query,
                     room_info : Room):
     query = '''
         query {
-            rooms (dept : \"INFO\") {
+            rooms (dept : \"INFO\", name_Icontains : \"INF\") {
                 edges{
                     node{
                 	    name
@@ -67,7 +67,7 @@ def test_room(client_query,
         }
     '''
     res = execute_query (client_query, query, "rooms")
-    data = get_data(res)
+    data = get_data(res) 
     assert room_info.name in data["name"] 
     for d in list(room_info.departments.all()):
         assert d.name in data["name"]
