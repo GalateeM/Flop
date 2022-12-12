@@ -34,7 +34,7 @@ def user_pref_conception(db, \
         day = Day.FRIDAY, value = 2 
     )
 
-def test_all_user_pref(client_query,
+""" def test_all_user_pref(client_query,
                     user_pref_algo_prog : UserPreference, 
                     user_pref_conception : UserPreference):
     query = '''
@@ -51,16 +51,19 @@ def test_all_user_pref(client_query,
     res = execute_query (client_query, query, "userPreferences")
     data = get_data(res)
     assert user_pref_algo_prog.day.upper() in data["day"]
-    assert user_pref_conception.day.upper() in data["day"]
+    assert user_pref_conception.day.upper() in data["day"] """
 
 def test_user_pref_with_filters_1(client_query,
                                 user_pref_conception : UserPreference):
     query = '''
         query {
-            userPreferences (dept : \"MIASHS\", week_Year : 2022) {
+            userPreferences (dept : \"MIASHS\", week : 1, year : 2022) {
                 edges {
                     node {
-                        value
+                        user {
+                            username
+                            lastName
+                        }
                     }
                 }
             }
@@ -68,4 +71,5 @@ def test_user_pref_with_filters_1(client_query,
     '''
     res = execute_query (client_query, query, "userPreferences")
     data = get_data(res)
-    assert user_pref_conception.value in data["value"]
+    assert user_pref_conception.user.username in data["username"]
+    assert user_pref_conception.user.last_name in data["lastName"]
