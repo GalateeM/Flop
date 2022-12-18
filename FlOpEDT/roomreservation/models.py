@@ -39,6 +39,16 @@ class RoomReservationType(models.Model):
         return self.name
 
 
+class RoomReservationValidationRequirement(models.Model):
+    room = models.OneToOneField('base.Room', on_delete=models.CASCADE)
+
+
+class RoomReservationValidation(models.Model):
+    reservation = models.OneToOneField('RoomReservation', models.CASCADE)
+    validated = models.BooleanField()
+    validator = models.ForeignKey('people.User', on_delete=models.CASCADE, null=True)
+
+
 class ReservationPeriodicity(models.Model):
     start = models.DateField(blank=True)
     end = models.DateField(blank=True)
