@@ -2,9 +2,13 @@ from django.db.models import Max
 from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 
+from api.people.serializers import ShortUsersSerializer
+from api.fetch.serializers import IDRoomSerializer
+
 import roomreservation.models as rm
 from roomreservation.check_periodicity import check_periodicity, check_reservation
 
+from django.core.mail import EmailMessage
 
 class PeriodicityField(serializers.Field):
     def to_representation(self, value):
@@ -106,11 +110,15 @@ def create_reservations_if_possible(periodicity, original_reservation, create_re
     # Get the corresponding periodicity model
     model = ReservationPeriodicitySerializer.get_model(periodicity)
     # Create a new periodicity instance
+    
+    
     if periodicity['id'] < 0:
         # Generate a new ID if negative
-        max_periodicity_id = rm.ReservationPeriodicity.objects.aggregate(max_id=Max('pk')).get('max_id')
-        periodicity['id'] = 1 if max_periodicity_id is None else max_periodicity_id
-    periodicity_instance = model.objects.create(**periodicity)
+        periodicity.pop('id')
+        periodicity_instance = model.objects.create(**periodicity)
+    else:
+        periodicity_instance = model.objects.get(id=periodicity['id'])
+
     # Create the future reservations
     for reservation in ok_reservations:
         # Ignore the current reservation in the list
@@ -152,7 +160,37 @@ class RoomReservationSerializer(serializers.ModelSerializer):
             periodicity_instance = create_reservations_if_possible(periodicity, validated_data, create_repetitions)
             # Store the instance to the reservation
             validated_data['periodicity'] = periodicity_instance
-        return rm.RoomReservation.objects.create(**validated_data)
+        room = validated_data['room']
+        reservation = rm.RoomReservation.objects.create(**validated_data)
+        if rm.RoomReservationValidationEmail.objects.filter(room=room).exists():
+            validators = rm.RoomReservationValidationEmail.objects.get(room=room).validators.all()
+            responsible = validated_data['responsible']
+            date = validated_data['date']
+            title = validated_data['title']
+            url = ""
+            subject = f"{room.name} : nouvelle réservation le {date}"
+            message = f"{responsible.first_name} {responsible.last_name} a réservé la {room.name}"
+            message += f" le {date} de {validated_data['start_time']} à {validated_data['end_time']} "
+            if periodicity:
+                message += f"(et plusieurs autres jours aux mêmes horaires) "
+            message += f"avec le titre {title}.\n\n"
+            # TODO : tester le lien de suppression!
+            if url:
+                message += "Vous pouvez la supprimer :\n"\
+                           "- via l'interface de réservation : "\
+                           f"{url}/fr/roomreservation/{responsible.departments.first().abbrev}/\n"\
+                           "ou en cliquant ici: " \
+                           f"{url}/fr/api/roomreservations/reservation/{reservation.id}/\n\n"
+            message += "Message envoyé automatiquement par flop!EDT."
+            for validator in validators:
+                email = EmailMessage(
+                    subject=subject,
+                    body=f"Bonjour {validator.first_name}\n \n" + message,
+                    to=[validator.email],
+                    bcc=[]
+                )
+                email.send()
+        return reservation
 
     def update(self, instance, validated_data):
         """
@@ -203,6 +241,15 @@ class RoomReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = rm.RoomReservation
         fields = '__all__'
+
+
+class ShortRoomReservationSerializer(serializers.ModelSerializer):
+    responsible = ShortUsersSerializer()
+    room = IDRoomSerializer()
+
+    class Meta:
+        model = rm.RoomReservation
+        fields = ('date', 'start_time', 'end_time', 'title', 'room', 'responsible')
 
 
 class RoomReservationTypeSerializer(serializers.ModelSerializer):

@@ -883,9 +883,12 @@ def fetch_all_modules_with_desc(req, **kwargs):
 # CHANGERS
 # ----------
 
-def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=False):
+def clean_change(week, old_version, change, work_copy=0,
+                 initiator=None, apply=False, department=None):
+    from TTapp.TTUtils import number_courses
 
     scheduled_before = True
+    renumber = False
     course = Course.objects.get(id=change['id'])
     try:
         sched_course = ScheduledCourse.objects.get(course=course,
@@ -922,6 +925,10 @@ def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=F
         raise Exception(f"Problème : salle {change['room']} inconnue")
 
     # Timing
+    if (not scheduled_before
+        or not (change['start'] == sched_course.start_time
+                and change['day'] == sched_course.day)):
+        renumber = True
     ret['sched'].start_time = change['start']
     ret['sched'].day = change['day']
 
@@ -952,6 +959,11 @@ def clean_change(week, old_version, change, work_copy=0, initiator=None, apply=F
         ret['sched'].save()
         if work_copy == 0:
             ret['log'].save()
+            if renumber:
+                # (using from_week makes it starts from 1)
+                number_courses(department,
+                               modules=sched_course.course.module,
+                               course_types=sched_course.course.type)
 
     # outside the log for now
     if change['id_visio'] > -1:
@@ -1032,8 +1044,10 @@ def edt_changes(req, **kwargs):
         with transaction.atomic():
             try:
                 for change in recv_changes:
-                    new_courses = clean_change(week, old_version, change, work_copy=work_copy,
-                                               initiator=initiator, apply=True)
+                    new_courses = clean_change(week, old_version, change,
+                                               work_copy=work_copy,
+                                               initiator=initiator, apply=True,
+                                               department=department)
                     if work_copy == 0:
                         same, changed = new_courses['log'].strs_course_changes(
                         )
@@ -1346,6 +1360,7 @@ def course_preferences_changes(req, year, week, train_prog, course_type, **kwarg
 
 @tutor_required
 def decale_changes(req, **kwargs):
+    from TTapp.TTUtils import number_courses
     bad_response = HttpResponse("KO")
     good_response = HttpResponse("OK")
     print(req)
@@ -1387,6 +1402,9 @@ def decale_changes(req, **kwargs):
                     week=old_week, department=req.department)
                 ev.version += 1
                 ev.save()
+                number_courses(req.department,
+                               modules=scheduled_course.course.module,
+                               course_types=scheduled_course.course.type)
             else:
                 cache.delete(get_key_course_pp(req.department.abbrev,
                                                old_week,
