@@ -123,7 +123,7 @@ class GroupsLunchBreak(TTConstraint):
 
 class TutorsLunchBreak(TTConstraint):
     """
-    Ensures time for lunch in a given interval for given groups (all if groups is Null)
+    Ensures time for lunch in a given interval for given tutors (all if tutors is Null)
     """
     start_lunch_time = models.PositiveSmallIntegerField(help_text=_('start lunch time'))
     end_lunch_time = models.PositiveSmallIntegerField(help_text=_('end lunch time'))

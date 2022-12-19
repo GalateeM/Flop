@@ -5,7 +5,7 @@
 - lunch_length : 
 
 ### Description
-This constraint ensures that groups {groups} have a break for lunch (or not) of at least twenty minutes between 
+This constraint ensures that groups {groups} have a break for lunch (or anything else) of at least twenty minutes between 
 {start_time} and {end_time} on {week_days}
 
 ### Example : 

@@ -7,7 +7,7 @@ A AJOUTER AUTOMATIQUEMENT:
 - lunch_length : 
 
 ### Description
-Cette contrainte garantit que les profs {tutors} aient une pause pour déjeuner (ou pas) de {lunch_length} minutes
+Cette contrainte garantit que les profs {tutors} aient une pause pour déjeuner (ou autre chose) de {lunch_length} minutes
 au moins entre {start_time} et {end_time} les {week_days}.
 
 ### Exemple : 
