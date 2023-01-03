@@ -11,7 +11,9 @@ class TrainingProgrammeFilter(FilterSet):
         }
 
     def filter_dept(self, queryset, name, value):
-        if queryset.filter(department = None).count() == 0:
+        return queryset.exclude(department = None).filter(department__abbrev = value)
+
+        """ if queryset.filter(department = None).count() == 0:
             return queryset.filter(department__abbrev = value)
         else:
-            return TrainingProgramme.objects.none()
+            return TrainingProgramme.objects.none() """

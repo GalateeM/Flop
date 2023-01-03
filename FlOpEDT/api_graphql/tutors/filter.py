@@ -20,15 +20,7 @@ class TutorFilter(FilterSet):
         return queryset.filter(departments__in = Department.objects.filter(abbrev = value))
 
     def filter_week(self, queryset, name, value):
-        if ScheduledCourse.objects.filter(course__week = None).count() == 0:
-            return queryset.filter(pk__in = ScheduledCourse.objects.filter \
-            (course__week__nb = value).values("tutor"))
-        else:
-            return ScheduledCourse.objects.none()
+        return queryset.filter(pk__in = ScheduledCourse.objects.exclude(course__week = None).filter(course__week__nb = value).values("tutor"))
 
     def filter_year(self, queryset, name, value):
-        if ScheduledCourse.objects.filter(course__week = None).count() == 0:     
-            return queryset.filter(pk__in = ScheduledCourse.objects.filter \
-            (course__week__year = value).values("tutor"))
-        else:
-            return ScheduledCourse.objects.none()
+        return queryset.filter(pk__in = ScheduledCourse.objects.exclude(course__week = None).filter(course__week__year = value).values("tutor"))
