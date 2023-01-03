@@ -26,11 +26,5 @@ class CourseFilter(FilterSet):
         exclude = ('suspens', 'show_id')
     
     def filter_dept(self, queryset, name, value):
-        if queryset.filter(type__department = None).count() == 0:
-            return queryset.filter(type__department__abbrev = value)
-        elif queryset.filter(room_type = None).count() == 0:
-            return queryset.filter(room_type__department__abbrev = value)
-        elif queryset.filter(module__train_prog__department = None) == 0:
-            return queryset.filter(module__train_prog__department__abrev = value)
-        else:
-            return Course.objects.none()
+        return queryset.exclude(type__department = None).exclude(room_type = None). \
+        filter(module__train_prog__department__abrev = value)

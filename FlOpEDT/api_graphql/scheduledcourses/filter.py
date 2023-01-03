@@ -19,14 +19,9 @@ class ScheduledCourseFilter(FilterSet):
         }
     
     def filter_week(self, queryset, name, value):
-        if queryset.filter(course__week = None).count() == 0:     
-            return queryset.filter(course__week__nb = value)
-        else:
-            return ScheduledCourse.objects.none()
+        return queryset.exclude(course__week = None).filter(course__week__nb = value)
 
     def filter_year(self, queryset, name, value):
-        if queryset.filter(course__week = None).count() == 0:     
-            return queryset.filter(course__week__year = value)
-        else:
-            return ScheduledCourse.objects.none() 
+        return queryset.exclude(course__week = None).filter(course__week__year = value)
+        
     
