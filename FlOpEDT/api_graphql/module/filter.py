@@ -21,15 +21,12 @@ class ModuleFilter(FilterSet):
         exclude = ('description',)
 
     def filter_dept(self, queryset, name, value):
-        if queryset.filter(period__department = None).count() == 0:
-            return queryset.filter(period__department__abbrev = value)
-        elif queryset.filter(train_prog__department = None) == 0:
-            return queryset.filter(train_prog__department__abrev = value)
-        else:
-            return Module.objects.none()
+        return queryset.exclude(period__department = None, train_prog__department = None).filter(period__department__abbrev = value, train_prog__department__abbrev = value)
+        """ return queryset.exclude(period__department = None).filter(period__department__abbrev = value) & queryset.exclude(train_prog__department = None).filter(train_prog__department__abbrev = value) """
 
     def filter_week(self, queryset, name, value):
         if value > 53 or value < 0:
             return Module.objects.none()
         else:
             return queryset.filter(period__starting_week__lte = value, period__ending_week__gte = value)
+        
