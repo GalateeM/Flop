@@ -6,6 +6,7 @@ from django.db import models
 
 class UpdateTutor(graphene.Mutation):
     class Arguments:
+        # id = graphene.ID()
         username = graphene.String()
         email = graphene.String()
         first_name = graphene.String()

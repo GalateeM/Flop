@@ -1,6 +1,7 @@
 from api_graphql.base import BaseMutation
 from .create import createTutor
 from .update import UpdateTutor
+from .delete import DeleteTutor
 
 class Mutation(BaseMutation):
     """
@@ -9,3 +10,4 @@ class Mutation(BaseMutation):
     """
     create_tutor = createTutor.Field()
     update_tutor = UpdateTutor.Field()
+    delete_tutor = DeleteTutor.Field()

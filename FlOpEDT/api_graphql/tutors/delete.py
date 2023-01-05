@@ -1,15 +1,17 @@
 from graphene_django import DjangoObjectType
+import graphene
 from people.models import Tutor
-from .filter import TutorFilter
+from .types import TutorType
 
 class DeleteTutor(graphene.Mutation):
         class Arguments:
-            id = graphene.ID()
+            # id = graphene.ID()
+            username = graphene.String()
 
-        Tutor = graphene.Field(TutorType)
+        tutor = graphene.Field(TutorType)
 
         @classmethod
-        def mutate(cls, root, info, id):
-            Tutor = TUTOR.objects.get(id=id)
-            Tutor.delete()
-            return DeleteTutor(Tutor)
+        def mutate(cls, root, info, username):
+            tutor = Tutor.objects.get(username=username)
+            tutor.delete()
+            return DeleteTutor(tutor)
