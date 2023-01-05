@@ -3,7 +3,7 @@ from people.models import Tutor
 from base.models import Department, ScheduledCourse
 
 class TutorFilter(FilterSet):
-    dept = CharFilter(required = True, method = 'filter_dept')
+    dept = CharFilter(method = 'filter_dept')
     week = NumberFilter(method = 'filter_week')
     year = NumberFilter(method = 'filter_year')
 
@@ -13,7 +13,7 @@ class TutorFilter(FilterSet):
             'username' : ['icontains', 'istartswith'],
             'last_name' : ['icontains', 'istartswith'],
             'first_name' : ['icontains', 'istartswith'],
-            'email' : ['icontains', 'istartswith'],
+            'email' : ['icontains', 'istartswith']
         }
     
     def filter_dept(self, queryset, name, value):
