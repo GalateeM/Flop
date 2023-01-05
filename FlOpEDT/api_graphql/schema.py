@@ -8,5 +8,11 @@ ALL_QUERIES = schema_operations_builder(
     operationBase='BaseQuery',
     clsName='Query'
 )
+ALL_MUTATION = schema_operations_builder(
+    operationName='Mutation',
+    operationModule='mutation',
+    operationBase='BaseMutation',
+    clsName='Mutation'
+)
 
-schema = Schema(query=ALL_QUERIES)
+schema = Schema(query=ALL_QUERIES, mutation=ALL_MUTATION)
