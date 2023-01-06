@@ -3,7 +3,6 @@ import graphene
 from django.db import models
 from people.models import Tutor
 from .types import TutorType
-from .query import Query
 
 class CreateTutor(graphene.Mutation):
     class Arguments:
@@ -20,7 +19,7 @@ class CreateTutor(graphene.Mutation):
             first_name=user_data.get('first_name'),
             username=user_data.get('username'),
             email=user_data.get('email'),
+            #is_tutor=True
         )
         
-        tutor.save()
         return CreateTutor(tutor=tutor)
