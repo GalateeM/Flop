@@ -5,7 +5,7 @@ from people.models import Tutor
 from .types import TutorType
 from .query import Query
 
-class createTutor(graphene.Mutation):
+class CreateTutor(graphene.Mutation):
     class Arguments:
         username = graphene.String()
         email = graphene.String() 
@@ -23,4 +23,4 @@ class createTutor(graphene.Mutation):
         )
         
         tutor.save()
-        return createTutor(tutor=tutor)
+        return CreateTutor(tutor=tutor)
