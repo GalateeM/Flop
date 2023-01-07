@@ -4,4 +4,3 @@ from .types import TutorType
 
 class Query(BaseQuery):
     tutors = DjangoFilterConnectionField(TutorType)
-

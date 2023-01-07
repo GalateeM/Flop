@@ -11,7 +11,7 @@ class UpdateBknews(graphene.Mutation):
         week = graphene.Int()
         year = graphene.Int()
         txt = graphene.String()
-        department = graphene.Fields(DepartmentType)
+        #department = graphene.Field(DepartmentType)
         x_beg = graphene.Float()
         x_end = graphene.Float()
         y = graphene.Int()

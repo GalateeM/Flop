@@ -14,8 +14,8 @@ class UpdateQuote(graphene.Mutation):
         header = graphene.String()
         quote_type__name = graphene.String()
         quote_type__abbrev = graphene.String()
-        positive_votes = graphene.Integer()
-        negative_votes = graphene.Integer()
+        positive_votes = graphene.Int()
+        negative_votes = graphene.Int()
         id_acc = graphene.String()
         status = graphene.String()
 

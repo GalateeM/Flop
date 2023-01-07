@@ -14,7 +14,8 @@ class TutorFilter(FilterSet):
             'username' : ['icontains', 'istartswith'],
             'last_name' : ['icontains', 'istartswith'],
             'first_name' : ['icontains', 'istartswith'],
-            'email' : ['icontains', 'istartswith']
+            'email' : ['icontains', 'istartswith'],
+            'id' : ['exact']
         }
     
     def filter_dept(self, queryset, name, value):

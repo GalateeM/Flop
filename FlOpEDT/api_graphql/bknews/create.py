@@ -10,11 +10,11 @@ class CreateBknews(graphene.Mutation):
         week = graphene.Int()
         year = graphene.Int()
         txt = graphene.String()
-        department = graphene.Field(DepartmentType)
+        #department = graphene.Field(DepartmentType)
         x_beg = graphene.Float()
         x_end = graphene.Float()
         y = graphene.Int()
-        is_linked = graphene.Srting()
+        is_linked = graphene.String()
         fill_color = graphene.String()
         strk_color = graphene.String()
         # argument facultatif
