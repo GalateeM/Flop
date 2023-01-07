@@ -44,7 +44,7 @@ class UpdateTutor(graphene.Mutation):
             tutor = tutor_set.first()
             if len(departments) > 0:
                 tutor.departments.set(departments)
-                tutor.save()
+            tutor.save()
 
             return UpdateTutor(tutor=tutor,departments = tutor.departments.all())
         

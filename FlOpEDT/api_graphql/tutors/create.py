@@ -4,7 +4,6 @@ from people.models import Tutor
 from base.models import Department
 from .types import TutorType
 from api_graphql.department.types import DepartmentType
-from graphql_relay import from_global_id
 
 class CreateTutor(graphene.Mutation):
     class Arguments:

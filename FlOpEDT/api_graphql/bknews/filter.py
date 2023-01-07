@@ -15,5 +15,6 @@ class BknewsFilter(FilterSet):
             'txt' : ['icontains', 'istartswith'],
             'is_linked' : ['icontains', 'istartswith'],
             'fill_color' : ['exact'],
-            'strk_color' : ['exact']
+            'strk_color' : ['exact'],
+            'id' : ["exact"]
         }
