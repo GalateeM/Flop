@@ -9,6 +9,8 @@ import roomreservation.models as rm
 from roomreservation.check_periodicity import check_periodicity, check_reservation
 
 from django.core.mail import EmailMessage
+import base.models as bm
+
 
 class PeriodicityField(serializers.Field):
     def to_representation(self, value):
@@ -165,22 +167,36 @@ class RoomReservationSerializer(serializers.ModelSerializer):
         if rm.RoomReservationValidationEmail.objects.filter(room=room).exists():
             validators = rm.RoomReservationValidationEmail.objects.get(room=room).validators.all()
             responsible = validated_data['responsible']
-            date = validated_data['date']
+            date_str = validated_data['date'].strftime('%d/%m/%Y')
+            start_time_str = validated_data['start_time'].strftime("%Hh%m")
+            end_time_str = validated_data['end_time'].strftime("%Hh%m")
             title = validated_data['title']
             url = ""
-            subject = f"{room.name} : nouvelle réservation le {date}"
+            subject = f"{room.name} réservée par {responsible.username} le {date_str}"
             message = f"{responsible.first_name} {responsible.last_name} a réservé la {room.name}"
-            message += f" le {date} de {validated_data['start_time']} à {validated_data['end_time']} "
+            message += f" le {date_str} de {start_time_str} à {end_time_str} "
             if periodicity:
                 message += f"(et plusieurs autres jours aux mêmes horaires) "
-            message += f"avec le titre {title}.\n\n"
+            message += f"en indiquant \"{title}\".\n\n"
             # TODO : tester le lien de suppression!
             if url:
-                message += "Vous pouvez la supprimer :\n"\
-                           "- via l'interface de réservation : "\
-                           f"{url}/fr/roomreservation/{responsible.departments.first().abbrev}/\n"\
-                           "ou en cliquant ici: " \
-                           f"{url}/fr/api/roomreservations/reservation/{reservation.id}/\n\n"
+                if responsible.departments.exists():
+                    department = responsible.departments.first()
+                elif room.departments.exists():
+                    department = room.departments.first()
+                else:
+                    department = bm.Department.objects.first()
+                if not periodicity:
+                    message += "Vous pouvez la supprimer en cliquant ici: " \
+                               f"{url}/fr/api/roomreservations/reservation/{reservation.id}/\n\n" \
+                               "Vous pouvez aussi la modifier/supprimer via l'interface de réservation : "\
+                               f"{url}/fr/roomreservation/{department.abbrev}/\n\n"
+                else:
+                    message += "Vous pouvez la modifier/supprimer via l'interface de réservation : "\
+                               f"{url}/fr/roomreservation/{department.abbrev}/\n\n"
+                    message += "NB : Dans la mesure où il s'agit d'une réservation sur plusieurs jours, il n'est pas " \
+                               "possible -pour l'instant- de les supprimer toutes par un lien cliquable. " \
+                               "Sur l'interface, par contre, vous pourrez les supprimez toutes d'un coup.\n\n"
             message += "Message envoyé automatiquement par flop!EDT."
             for validator in validators:
                 email = EmailMessage(
