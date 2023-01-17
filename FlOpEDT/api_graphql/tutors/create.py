@@ -1,7 +1,5 @@
 import graphene
-from django.db import models
 from people.models import Tutor
-from base.models import Department
 from .types import TutorType
 from api_graphql.department.types import DepartmentType
 

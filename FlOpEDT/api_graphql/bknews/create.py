@@ -2,7 +2,6 @@ import graphene
 from displayweb.models import BreakingNews
 from base.models import Department
 from .types import BknewsType
-from api_graphql.department.types import DepartmentType
 from graphql_relay import from_global_id
 
 class CreateBknews(graphene.Mutation):

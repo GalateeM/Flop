@@ -4,9 +4,9 @@ from base.models import CourseType
 from .types import CourseTypeNode
 
 class DeleteCourseType(graphene.Mutation):
-    class arguments:
+    class Arguments:
         name = graphene.String()
-    
+         
     courseType = graphene.Field(CourseTypeNode)
 
     @classmethod

@@ -4,13 +4,13 @@ import graphene
 from .types import CourseTypeNode
 
 class UpdateCourseType(graphene.Mutation):
-    class arguments:
+    class Arguments:
         name = graphene.String()
         duration = graphene.Int()
         pay_duration = graphene.Int()
         graded = graphene.Boolean()
     
-    CourseType = graphene.Field(CourseTypeNode)
+    courseType = graphene.Field(CourseTypeNode)
 
     @classmethod
     def mutate(cls, root, info, name, **update_data):

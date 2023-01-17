@@ -15,4 +15,7 @@ class CourseTypeFilter(FilterSet):
         }
 
     def filter_dept(self, queryset, name, value):
-        return queryset.exclude(department = None).filter(department__in = Department.objects.filter(abbrev = value))
+        if queryset.filter(department = None).count() == 0:
+            return queryset.filter(department__in = Department.objects.filter(abbrev = value))
+        else:
+            return CourseType.objects.none()

@@ -7,5 +7,6 @@ class GroupTypeFilter(FilterSet):
         fields = {
             'name' : ['icontains', 'istartswith'],
             'department__name' : ['icontains', 'istartswith'],
-            'department__abbrev' : ['exact']
+            'department__abbrev' : ['exact'],
+            'id' : ['exact']
         }
