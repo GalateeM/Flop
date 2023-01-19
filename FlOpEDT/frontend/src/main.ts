@@ -9,9 +9,13 @@ import { createApp, readonly, ref } from 'vue'
 import Popper from 'vue3-popper'
 
 import RoomReservation from '@/views/RoomReservationView.vue'
+// @ts-ignore
+import ConstraintManager from '@/views/ConstraintManager.vue'
+
 import { createPinia } from 'pinia'
 
 const roomreservation = createApp(RoomReservation).use(createPinia())
+const constraintmanager = createApp(ConstraintManager).use(createPinia())
 
 // Provide the current week and year
 const now = new Date()
@@ -24,7 +28,10 @@ const currentWeek: Ref<FlopWeek> = ref({
     year: now.getFullYear(),
 })
 
-const apps = [{ appName: 'roomreservation', app: roomreservation }]
+const apps = [
+    { appName: 'roomreservation', app: roomreservation },
+    { appName: 'constraintmanager', app: constraintmanager },
+]
 
 const pinia = createPinia()
 
