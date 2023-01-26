@@ -1,4 +1,3 @@
-/* eslint-disable */ 
 <template>
     <TriggeredTeleporter to='.popover-body' :disable="DESACTIVATE_TELEPORTS" :target="teleportTarget"
         eventName="contextmenu">
@@ -7,11 +6,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, Teleport } from 'vue';
+import { ref } from 'vue';
 import TriggeredTeleporter from '@/components/TriggeredTeleporter.vue';
 
 const DESACTIVATE_TELEPORTS = ref(false);
-let teleportTarget = document.getElementById('constraints-body')
+const teleportTarget = document.getElementById('constraints-body')
 </script>
     
 <style scoped>

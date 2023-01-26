@@ -9,7 +9,6 @@ import { createApp, readonly, ref } from 'vue'
 import Popper from 'vue3-popper'
 
 import RoomReservation from '@/views/RoomReservationView.vue'
-// @ts-ignore
 import ConstraintManager from '@/views/ConstraintManager.vue'
 
 import { createPinia } from 'pinia'
