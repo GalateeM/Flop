@@ -1,44 +1,46 @@
-/* eslint-disable */ 
 <template>
     <template v-if="anchorFound || disable">
-        <Teleport :to='to' :disabled="disable" :key="key">
+        <Teleport :to="to" :disabled="disable" :key="key">
             <slot></slot>
         </Teleport>
     </template>
 </template>
 
 <script setup lang="ts">
-import { ref, Teleport, computed } from 'vue';
+import { ref, Teleport } from 'vue';
 
 interface Props {
-    to: string, //Element ID where append the template in the slot
+    to: string; //Element ID where append the template in the slot
     /**
      * When `true`, the content will remain in its original
      * location instead of moved into the target container.
      * Can be changed dynamically.
      * Else will try to teleport. If no anchor point is found nothing is displayed
      */
-    disable?: Boolean, 
-    target: EventTarget, //From which element should we catch the event
-    eventName: string //The event name to catch
+    disable?: boolean;
+    target: EventTarget; //From which element should we catch the event
+    eventName: string; //The event name to catch
 }
-const { to, disable = false, target, eventName } = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+    disable: false,
+});
 
 //Ref to track if the anchor point is found
 const anchorFound = ref(false);
 //A mechanism to force reload
 const key = ref(0);
 //Force the component to rerender by updating a ref
-const forceRender = () => key.value++
+const forceRender = () => key.value++;
 //Attach the listener a force a teleportation when the event is catched
-if (!disable)
-    target.addEventListener(eventName, (e) => {
-        anchorFound.value = true
-        forceRender()
-    }, false);
-
+if (!props.disable)
+    props.target.addEventListener(
+        props.eventName,
+        (e) => {
+            anchorFound.value = true;
+            forceRender();
+        },
+        false
+    );
 </script>
-    
-<style scoped>
 
-</style>
+<style scoped></style>

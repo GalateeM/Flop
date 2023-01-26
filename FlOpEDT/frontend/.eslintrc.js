@@ -10,6 +10,6 @@ module.exports = {
     extends: ['plugin:vue/vue3-strongly-recommended', 'eslint:recommended', '@vue/typescript/recommended', 'prettier'],
     plugins: ['@typescript-eslint', 'prettier'],
     rules: {
-        'prettier/prettier': 'error',
+        'prettier/prettier': 'warn',
     },
 }
