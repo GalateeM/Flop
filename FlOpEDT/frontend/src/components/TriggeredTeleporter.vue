@@ -18,7 +18,7 @@ interface Props {
      * Else will try to teleport. If no anchor point is found nothing is displayed
      */
     disable?: boolean;
-    target: EventTarget; //From which element should we catch the event
+    listeningTarget: EventTarget; //From which element should we catch the event
     eventName: string; //The event name to catch
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -33,7 +33,7 @@ const key = ref(0);
 const forceRender = () => key.value++;
 //Attach the listener a force a teleportation when the event is catched
 if (!props.disable)
-    props.target.addEventListener(
+    props.listeningTarget.addEventListener(
         props.eventName,
         (e) => {
             anchorFound.value = true;
