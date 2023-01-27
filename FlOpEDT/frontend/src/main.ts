@@ -7,11 +7,10 @@ import '@vuepic/vue-datepicker/dist/main.css'
 import type { Ref } from 'vue'
 import { createApp, readonly, ref } from 'vue'
 import Popper from 'vue3-popper'
+import { VueShowdown } from 'vue-showdown'
 
 import RoomReservation from '@/views/RoomReservationView.vue'
 import ConstraintManager from '@/views/ConstraintManager.vue'
-
-import { VueShowdown } from 'vue-showdown'
 
 import { createPinia } from 'pinia'
 
