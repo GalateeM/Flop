@@ -20,6 +20,7 @@
     "multi-range-slider-vue": "^1.1.4",
     "pinia": "^2.0.23",
     "vue": "^3.2.13",
+    "vue-showdown": "^4.0.0",
     "vue3-popper": "^1.5.0"
   },
   "devDependencies": {
