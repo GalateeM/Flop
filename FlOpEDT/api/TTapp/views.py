@@ -25,6 +25,7 @@ from api.shared.params import dept_param, week_param, year_param
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
+from django.http import FileResponse,HttpResponse
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
 from base.models import Department
 import TTapp.TTConstraints.visio_constraints as ttv
@@ -32,13 +33,16 @@ from django.contrib.postgres.fields.array import ArrayField
 from base.timing import all_possible_start_times, Day
 
 from drf_yasg import openapi
-from rest_framework import viewsets
+from rest_framework import viewsets,generics
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from api.TTapp import serializers
 from api.permissions import IsAdminOrReadOnly
 from base.weeks import current_year
+import os
 
+DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
+IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
 # ---------------
 # ---- TTAPP ----
 # ---------------
@@ -487,3 +491,53 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
             field.acceptable = acceptable
         serializer = serializers.FlopConstraintFieldSerializer(fields_list, many=True)
         return Response(serializer.data)
+
+
+@method_decorator(name='list',
+            decorator=swagger_auto_schema(
+            )
+            )
+class FlopDocVisu(viewsets.ViewSet):   
+    def list(self, request, **kwargs):
+        name = kwargs['name']
+        #weird way to get lang from url, should be modified
+        url = self.request.build_absolute_uri()
+        splited_url = url.split("//")[1].split("/") #remove http from url and split with /
+        lang = splited_url[1]
+        dir_lang = os.path.join(DOC_DIR,lang)
+        file_path = os.path.join(dir_lang,name) 
+        try:
+            file_handle = open(file_path,'rb')
+        except:
+            return HttpResponse(status=404)     
+        response = FileResponse(file_handle,content_type="text/plain; charset=utf-8")
+        return response
+    def create(self, request, **kwargs):
+        return HttpResponse(status=403)
+    def update(self, request, **kwargs):
+        return HttpResponse(status=403)
+    def destroy(self, request, **kwargs):
+        return HttpResponse(status=403)
+
+
+@method_decorator(name='list',
+            decorator=swagger_auto_schema(
+            )
+            )
+class FlopImgVisu(viewsets.ViewSet):
+    def list(self, request,**kwargs):
+        name = kwargs['name']
+        file_path = os.path.join(IMG_DIR,name)
+        print(file_path)
+        try:
+            file_handle = open(file_path,'rb')
+        except:
+            return HttpResponse(status=404)     
+        response = FileResponse(file_handle)
+        return response
+    def create(self, request, **kwargs):
+        return HttpResponse(status=403)
+    def update(self, request, **kwargs):
+        return HttpResponse(status=403)
+    def destroy(self, request, **kwargs):
+        return HttpResponse(status=403)
