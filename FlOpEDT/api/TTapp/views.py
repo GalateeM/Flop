@@ -43,6 +43,7 @@ import os
 
 DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
 IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
+EN_DIR_NAME = "en"
 # ---------------
 # ---- TTAPP ----
 # ---------------
@@ -506,12 +507,26 @@ class FlopDocVisu(viewsets.ViewSet):
         lang = splited_url[1]
         dir_lang = os.path.join(DOC_DIR,lang)
         file_path = os.path.join(dir_lang,name) 
-        try:
-            file_handle = open(file_path,'rb')
-        except:
-            return HttpResponse(status=404)     
-        response = FileResponse(file_handle,content_type="text/plain; charset=utf-8")
-        return response
+
+        if (lang != EN_DIR_NAME):
+            #Test if doc does exist in lang and if not try in english
+            try:
+                file_handle = open(file_path,'rb')
+            except:
+                dir_lang = os.path.join(DOC_DIR,EN_DIR_NAME)
+                file_path = os.path.join(dir_lang,name)
+                try:
+                     file_handle = open(file_path,'rb')
+                except:
+                    return HttpResponse(status=404)
+            return FileResponse(file_handle,content_type="text/plain; charset=utf-8")
+        else:
+            try:
+                file_handle = open(file_path,'rb')
+            except:
+                return HttpResponse(status=404)     
+            return FileResponse(file_handle,content_type="text/plain; charset=utf-8")
+            
     def create(self, request, **kwargs):
         return HttpResponse(status=403)
     def update(self, request, **kwargs):
