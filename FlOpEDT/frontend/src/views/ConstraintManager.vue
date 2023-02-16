@@ -41,7 +41,7 @@ const f: Ref<File | null> = ref(null)
 function enlargePopover(){
     const popover = document.getElementsByClassName("popover").item(0)
     if(popover!==null){
-        popover.style["max-width"]="30vw"
+        popover.style["max-width"]="80vw"
     }
     const groupeOfButton = document.getElementsByClassName("btn-group").item(0)
     if(groupeOfButton!==null){
@@ -122,7 +122,7 @@ const showBtnClassDefiner = () => {
 }
 
 .scrollbar {
-  max-height: 40vh;
+  max-height: 70vh;
   overflow-y: scroll;
 }
 
