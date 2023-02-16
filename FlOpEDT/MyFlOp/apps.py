@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 import os
 import json
+import re
 from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
 
 class MyflopConfig(AppConfig):
@@ -17,7 +18,7 @@ class MyflopConfig(AppConfig):
                 for file_name in entries:
                     f = open(path+language+file_name)
                     for line in f :
-                        if (('< script' or '<script') in line) and not found:
+                        if((re.match("<[ ]*component[ ]*",line)) and not found):
                             found = True
                             corrupted.append(file_name)
                     found = False
