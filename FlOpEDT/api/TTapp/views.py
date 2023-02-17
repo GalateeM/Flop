@@ -40,9 +40,13 @@ from api.TTapp import serializers
 from api.permissions import IsAdminOrReadOnly
 from base.weeks import current_year
 import os
+import json
+import re
 
 DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
 IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
+CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'corrupted.json')
+DOMAIN_REPLACE_REGEX = "(\$domaine)"
 EN_DIR_NAME = "en"
 # ---------------
 # ---- TTAPP ----
@@ -503,29 +507,53 @@ class FlopDocVisu(viewsets.ViewSet):
         name = kwargs['name']
         #weird way to get lang from url, should be modified
         url = self.request.build_absolute_uri()
+        protocol = url.split("//")[0]
+        
         splited_url = url.split("//")[1].split("/") #remove http from url and split with /
+        
+        domain = protocol + "//" + splited_url[0]
+
+
+
         lang = splited_url[1]
         dir_lang = os.path.join(DOC_DIR,lang)
         file_path = os.path.join(dir_lang,name) 
+        try:
+            data = json.load(open(CORRUPTED_JSON_PATH))
+        except:
+            return HttpResponse(status=500)
+        forbidden_files = data["corrupted"]
+
 
         if (lang != EN_DIR_NAME):
             #Test if doc does exist in lang and if not try in english
             try:
-                file_handle = open(file_path,'rb')
+                file_handle = open(file_path,'r')
             except:
                 dir_lang = os.path.join(DOC_DIR,EN_DIR_NAME)
                 file_path = os.path.join(dir_lang,name)
                 try:
-                     file_handle = open(file_path,'rb')
+                     file_handle = open(file_path,'r')
                 except:
                     return HttpResponse(status=404)
-            return FileResponse(file_handle,content_type="text/plain; charset=utf-8")
         else:
             try:
-                file_handle = open(file_path,'rb')
+                file_handle = open(file_path,'r')
             except:
-                return HttpResponse(status=404)     
-            return FileResponse(file_handle,content_type="text/plain; charset=utf-8")
+                
+                return HttpResponse(status=404) 
+        
+        a = domain_replace(file_handle,domain)
+
+        #check if file is not fordidden
+        if(name in forbidden_files):
+            print("Attempt to access forbidden file")
+            return HttpResponse(status=404) 
+        else:
+
+            return HttpResponse(a,content_type="text/plain; charset=utf-8")
+            #return FileResponse(b,content_type="text/plain; charset=utf-8")    
+
             
     def create(self, request, **kwargs):
         return HttpResponse(status=403)
@@ -556,3 +584,10 @@ class FlopImgVisu(viewsets.ViewSet):
         return HttpResponse(status=403)
     def destroy(self, request, **kwargs):
         return HttpResponse(status=403)
+
+
+def domain_replace(file,domain):
+    text = file.read()
+    replaced = re.sub(DOMAIN_REPLACE_REGEX,domain,text)
+    print(replaced )
+    return replaced
