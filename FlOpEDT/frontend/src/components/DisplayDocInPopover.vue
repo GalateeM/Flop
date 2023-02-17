@@ -1,6 +1,10 @@
 <template>
-    <TriggeredTeleporter to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :listeningTarget="listeningTarget"
-        eventName="contextmenu">
+    <TriggeredTeleporter
+        to=".popover-body"
+        :disable="DESACTIVATE_TELEPORTS"
+        :listeningTarget="listeningTarget"
+        eventName="contextmenu"
+    >
         <hr />
         <div>
             <div class="buttonContainer">
@@ -10,34 +14,37 @@
             </div>
             <template v-if="showDoc">
                 <div class="scrollbar scrollbar-primary">
-                    <DocumentationControler :constraint="selectedConstraint" />
+                    <Suspense>
+                        <DocumentationControler :constraint="selectedConstraint" />
+                        <template #fallback>
+                            <p>Chargement</p>
+                        </template>
+                    </Suspense>
                 </div>
             </template>
         </div>
-</TriggeredTeleporter>
+    </TriggeredTeleporter>
 </template>
 
 <script setup lang="ts">
-import TriggeredTeleporter from  '@/components/TriggeredTeleporter.vue'
-import DocumentationControler from  '@/components/DocumentationControler.vue'
+import TriggeredTeleporter from '@/components/controler/TriggeredTeleporter.vue'
+import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 
-import type { Constraint } from '@/models/Constraint';
+import type { Constraint } from '@/models/Constraint'
 import { ref } from 'vue'
-
 
 const DESACTIVATE_TELEPORTS = ref(false)
 
 interface Props {
-    listeningTarget: EventTarget,
+    listeningTarget: EventTarget
     selectedConstraint: Constraint
 }
 const props = withDefaults(defineProps<Props>(), {})
 
-
 /**
  * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
  */
- function enlargePopover() {
+function enlargePopover() {
     const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
     if (popover !== null) {
         popover.style['max-width'] = '80vw'
@@ -50,11 +57,10 @@ const props = withDefaults(defineProps<Props>(), {})
     }
 }
 
-
 /**
  * Reference to know if the documentation is shown
  */
- const showDoc = ref(false)
+const showDoc = ref(false)
 
 /**
  * Swap showDoc value
@@ -71,7 +77,6 @@ const showBtnClassDefiner = () => {
     enlargePopover()
     return showDoc.value ? ' minusButton ' : ' plusButton '
 }
-
 </script>
 
 <style scoped>
