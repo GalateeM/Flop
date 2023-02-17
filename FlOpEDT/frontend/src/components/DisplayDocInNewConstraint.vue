@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import TriggeredTeleporter from '@/components/TriggeredTeleporter.vue'
+import TriggeredTeleporter from '@/components/controler/TriggeredTeleporter.vue'
 
 
 
