@@ -1,77 +1,21 @@
 <template>
     <template v-if="selectedConstraint">
-        <TriggeredTeleporter
-            to=".popover-body"
-            :disable="DESACTIVATE_TELEPORTS"
-            :listeningTarget="listeningTarget"
-            eventName="contextmenu"
-        >
-            <hr />
-            <div>
-                <div class="buttonContainer">
-                    <button id="doc-show-btn" :class="showBtnClassDefiner()" @click="swap()">
-                        {{ showDoc ? '⬆' : '⬇' }}
-                    </button>
-                </div>
-                <template v-if="showDoc">
-                    <div class="scrollbar scrollbar-primary">
-                        <DocumentationControler :constraint="selectedConstraint" />
-                    </div>
-                </template>
-            </div>
-        </TriggeredTeleporter>
+        <DisplayDocInPopover :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget"></DisplayDocInPopover>
     </template>
+    <DisplayDocInNewConstraint></DisplayDocInNewConstraint>
 </template>
 
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
-import TriggeredTeleporter from '@/components/TriggeredTeleporter.vue'
 
+import DisplayDocInPopover from  '@/components/DisplayDocInPopover.vue'
+import DisplayDocInNewConstraint from  '@/components/DisplayDocInNewConstraint.vue'
 import { useConstraintStore } from '@/stores/constraint'
 import type { Constraint } from '@/models/Constraint'
-import DocumentationControler from '@/components/DocumentationControler.vue'
 
 const constraintStore = useConstraintStore()
 
-/**
- * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
- */
-function enlargePopover() {
-    const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
-    if (popover !== null) {
-        popover.style['max-width'] = '80vw'
-    }
-    const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
-    if (groupeOfButton !== null) {
-        groupeOfButton.style['align-items'] = 'center'
-        groupeOfButton.style['justify-content'] = 'center'
-        groupeOfButton.style['display'] = 'flex'
-    }
-}
-
-const DESACTIVATE_TELEPORTS = ref(false)
 const selectedConstraint: Ref<Constraint | null> = ref(null)
-
-/**
- * Reference to know if the documentation is shown
- */
-const showDoc = ref(false)
-
-/**
- * Swap showDoc value
- */
-function swap() {
-    showDoc.value = !showDoc.value
-}
-
-/**
- * doc-show-btn class definer
- * permit to setup the display parameters
- */
-const showBtnClassDefiner = () => {
-    enlargePopover()
-    return showDoc.value ? ' minusButton ' : ' plusButton '
-}
 
 /*
 ================================ ADAPTATER ================================ 
@@ -107,58 +51,3 @@ document.addEventListener('click', (e) => {
     if (!currentPopover) selectedConstraint.value = null
 })
 </script>
-
-<style scoped>
-.buttonContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: larger;
-}
-
-.plusButton {
-    width: 100%;
-    height: 30px;
-    border-radius: 20px;
-    border: none;
-    background-color: green;
-}
-
-.plusButton:hover {
-    background-color: darkgreen;
-}
-
-.minusButton {
-    width: 100%;
-    height: 30px;
-    border-radius: 20px;
-    border: none;
-    background-color: firebrick;
-}
-
-.minusButton:hover {
-    background-color: darkred;
-}
-
-.scrollbar {
-    max-height: 70vh;
-    overflow-y: scroll;
-}
-
-.scrollbar-primary::-webkit-scrollbar {
-    width: 12px;
-}
-
-.scrollbar-primary::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background-color: dodgerblue;
-}
-.scrollbar-primary::-webkit-scrollbar-thumb:hover {
-    border-radius: 4px;
-    background-color: royalblue;
-}
-
-.scrollbar-primary {
-    scrollbar-color: #aaaaaa #f5f5f5;
-}
-</style>
