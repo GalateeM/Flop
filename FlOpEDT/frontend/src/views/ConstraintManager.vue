@@ -1,71 +1,56 @@
 <template>
-    <TriggeredTeleporter
-        to=".popover-body"
-        :disable="DESACTIVATE_TELEPORTS"
-        :listeningTarget="listeningTarget"
-        eventName="contextmenu"
-    >
-        <hr />
-        <div>
-            <div class="buttonContainer">
-                <button id="doc-show-btn" :class="showBtnClassDefiner()" @click="swap()">{{ showDoc ? '⬆' : '⬇' }}</button>
-            </div>
-            <template v-if="showDoc">
-                <input type="file" @change="handleFileUpload" />
-                <template v-if="doc">
+    <template v-if="selectedConstraint">
+        <TriggeredTeleporter
+            to=".popover-body"
+            :disable="DESACTIVATE_TELEPORTS"
+            :listeningTarget="listeningTarget"
+            eventName="contextmenu"
+        >
+            <hr />
+            <div>
+                <div class="buttonContainer">
+                    <button id="doc-show-btn" :class="showBtnClassDefiner()" @click="swap()">
+                        {{ showDoc ? '⬆' : '⬇' }}
+                    </button>
+                </div>
+                <template v-if="showDoc">
                     <div class="scrollbar scrollbar-primary">
-                        <MarkdownDisplayer :doc="doc" />
+                        <DocumentationControler :constraint="selectedConstraint" />
                     </div>
                 </template>
-            </template>
-        </div>
-    </TriggeredTeleporter>
+            </div>
+        </TriggeredTeleporter>
+    </template>
 </template>
 
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 import TriggeredTeleporter from '@/components/TriggeredTeleporter.vue'
-import MarkdownDisplayer from '@/components/MarkdownDisplayer.vue'
 
-import { MarkdownParser } from '@/models/MardownParser'
-import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
+import { useConstraintStore } from '@/stores/constraint'
+import type { Constraint } from '@/models/Constraint'
+import DocumentationControler from '@/components/DocumentationControler.vue'
 
-const p = new MarkdownParser()
-const doc: Ref<MarkdownDocumentation | null> = ref(null)
-const f: Ref<File | null> = ref(null)
-
+const constraintStore = useConstraintStore()
 
 /**
  * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
  */
-function enlargePopover(){
-    const popover = document.getElementsByClassName("popover").item(0)
-    if(popover!==null){
-        popover.style["max-width"]="80vw"
+function enlargePopover() {
+    const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
+    if (popover !== null) {
+        popover.style['max-width'] = '80vw'
     }
-    const groupeOfButton = document.getElementsByClassName("btn-group").item(0)
-    if(groupeOfButton!==null){
-        groupeOfButton.style["align-items"]="center";
-        groupeOfButton.style["justify-content"]="center";
-        groupeOfButton.style["display"]="flex";
-    }
-    
-}
-
-// MOCKER
-async function handleFileUpload(event: Event) {
-    const inputElem = event.target as HTMLInputElement
-    if (inputElem.files) {
-        f.value = inputElem.files.item(0) as File
-        await p.parse(f.value).then((response) => (doc.value = response))
+    const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
+    if (groupeOfButton !== null) {
+        groupeOfButton.style['align-items'] = 'center'
+        groupeOfButton.style['justify-content'] = 'center'
+        groupeOfButton.style['display'] = 'flex'
     }
 }
 
 const DESACTIVATE_TELEPORTS = ref(false)
-const listeningTarget = document.getElementById('constraints-body') as EventTarget
-const constraintsBodyFound = listeningTarget != null
-
-if (!constraintsBodyFound) throw new Error('constraints-body element not found')
+const selectedConstraint: Ref<Constraint | null> = ref(null)
 
 /**
  * Reference to know if the documentation is shown
@@ -87,6 +72,40 @@ const showBtnClassDefiner = () => {
     enlargePopover()
     return showDoc.value ? ' minusButton ' : ' plusButton '
 }
+
+/*
+================================ ADAPTATER ================================ 
+*/
+const listeningTarget = document.getElementById('constraints-body') as EventTarget
+const POPOVER_EVENT_NAME = 'contextmenu'
+const constraintsBodyFound = listeningTarget != null
+if (!constraintsBodyFound) throw new Error('constraints-body element not found')
+
+listeningTarget.addEventListener(
+    POPOVER_EVENT_NAME,
+    (e) => {
+        const currentPopover = window.eval('currentPopover')
+        if (currentPopover) {
+            const cst = currentPopover._element.getAttribute('data-cst-id') as string
+            const cstIDRegex = new RegExp('^(?<class>\\D+)(?<id>\\d+)$')
+            const matches = cst.match(cstIDRegex)
+            if (matches)
+                if (matches.groups) {
+                    const cClass = constraintStore.constraints.get(matches.groups.class)
+                    if (cClass) {
+                        const constraint = cClass.get(Number(matches.groups.id))
+                        if (constraint) selectedConstraint.value = constraint
+                    }
+                }
+        }
+    },
+    false
+)
+
+document.addEventListener('click', (e) => {
+    const currentPopover = window.eval('currentPopover')
+    if (!currentPopover) selectedConstraint.value = null
+})
 </script>
 
 <style scoped>
@@ -94,7 +113,7 @@ const showBtnClassDefiner = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size:larger;
+    font-size: larger;
 }
 
 .plusButton {
@@ -102,10 +121,10 @@ const showBtnClassDefiner = () => {
     height: 30px;
     border-radius: 20px;
     border: none;
-    background-color: green
+    background-color: green;
 }
 
-.plusButton:hover{
+.plusButton:hover {
     background-color: darkgreen;
 }
 
@@ -114,33 +133,32 @@ const showBtnClassDefiner = () => {
     height: 30px;
     border-radius: 20px;
     border: none;
-    background-color:firebrick;
+    background-color: firebrick;
 }
 
-.minusButton:hover{
-    background-color:darkred;
+.minusButton:hover {
+    background-color: darkred;
 }
 
 .scrollbar {
-  max-height: 70vh;
-  overflow-y: scroll;
+    max-height: 70vh;
+    overflow-y: scroll;
 }
 
 .scrollbar-primary::-webkit-scrollbar {
-  width: 12px;
+    width: 12px;
 }
 
 .scrollbar-primary::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background-color:dodgerblue;
+    border-radius: 4px;
+    background-color: dodgerblue;
 }
 .scrollbar-primary::-webkit-scrollbar-thumb:hover {
-  border-radius: 4px;
-  background-color:royalblue;
+    border-radius: 4px;
+    background-color: royalblue;
 }
 
 .scrollbar-primary {
-  scrollbar-color: #AAAAAA #F5F5F5;
+    scrollbar-color: #aaaaaa #f5f5f5;
 }
-
 </style>
