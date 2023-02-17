@@ -46,7 +46,7 @@ import re
 DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
 IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
 CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'corrupted.json')
-DOMAIN_REPLACE_REGEX = "(\$domaine)"
+DOMAIN_REPLACE_REGEX = r"(\$domaine)"
 EN_DIR_NAME = "en"
 # ---------------
 # ---- TTAPP ----
@@ -497,6 +497,14 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
         serializer = serializers.FlopConstraintFieldSerializer(fields_list, many=True)
         return Response(serializer.data)
 
+class CustomUrl():
+    def __init__(self,url):
+        self.url = url #full url
+        self.protocol = url.split("//")[0] #protocol with : at the end
+        splited_url = url.split("//")[1].split("/")
+        self.domain = splited_url[0] #domain name
+        self.full_domain = self.protocol + "//" + self.domain #full domain with protocol
+        self.lang = splited_url[1] #language
 
 @method_decorator(name='list',
             decorator=swagger_auto_schema(
@@ -506,18 +514,11 @@ class FlopDocVisu(viewsets.ViewSet):
     def list(self, request, **kwargs):
         name = kwargs['name']
         #weird way to get lang from url, should be modified
-        url = self.request.build_absolute_uri()
-        protocol = url.split("//")[0]
-        
-        splited_url = url.split("//")[1].split("/") #remove http from url and split with /
-        
-        domain = protocol + "//" + splited_url[0]
+        url = CustomUrl(self.request.build_absolute_uri())
 
-
-
-        lang = splited_url[1]
-        dir_lang = os.path.join(DOC_DIR,lang)
+        dir_lang = os.path.join(DOC_DIR,url.lang)
         file_path = os.path.join(dir_lang,name) 
+        
         try:
             data = json.load(open(CORRUPTED_JSON_PATH))
         except:
@@ -525,7 +526,7 @@ class FlopDocVisu(viewsets.ViewSet):
         forbidden_files = data["corrupted"]
 
 
-        if (lang != EN_DIR_NAME):
+        if (url.lang != EN_DIR_NAME):
             #Test if doc does exist in lang and if not try in english
             try:
                 file_handle = open(file_path,'r')
@@ -540,18 +541,16 @@ class FlopDocVisu(viewsets.ViewSet):
             try:
                 file_handle = open(file_path,'r')
             except:
-                
                 return HttpResponse(status=404) 
         
-        a = domain_replace(file_handle,domain)
+        text = domain_replace(file_handle,url.full_domain)
 
         #check if file is not fordidden
         if(name in forbidden_files):
-            print("Attempt to access forbidden file")
+            print("\033[91m"+"Attempt to access forbidden file : "+name+"\033[0m")
             return HttpResponse(status=404) 
         else:
-
-            return HttpResponse(a,content_type="text/plain; charset=utf-8")
+            return HttpResponse(text,content_type="text/plain; charset=utf-8")
             #return FileResponse(b,content_type="text/plain; charset=utf-8")    
 
             
@@ -589,5 +588,4 @@ class FlopImgVisu(viewsets.ViewSet):
 def domain_replace(file,domain):
     text = file.read()
     replaced = re.sub(DOMAIN_REPLACE_REGEX,domain,text)
-    print(replaced )
     return replaced
