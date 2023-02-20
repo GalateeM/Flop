@@ -1,0 +1,91 @@
+* execute_query(client_query, query, type) :
+	- Prend en paramètres client_query, la requête en chaine de caractères et le nom du model
+	- Exécute la requête
+	- Convertit la réponse sous le format JSON
+	- Format des résultats : 
+	+ Cas 1 : Il y a des erreurs
+		renvoie un dictionnaire de la forme : { "errors" : ... }
+		on fait un assert
+	+ Cas 2 : Pas d'erreurs
+	ex : requête : 
+	query {
+	  modules (dept : "INFO") {
+	    edges {
+	      node {
+		name
+		head {
+		  firstName
+		}
+		trainProg {
+		  name
+		}
+	      }
+	    }
+	  }
+	}
+	
+	-> réponse :
+	{
+	  "data": {
+	    "modules": {
+	      "edges": [
+		{
+		
+		  "node": {
+		    "name": "Algorithmique avancée",
+		    "head": {
+		      "firstName": "prenom_de_QTP"
+		    },
+		    "trainProg": {
+		      "name": "DUT Informatique deuxième année"
+		    }
+		  }
+		},
+		
+		{
+		  "node": {
+		    "name": "Ateliers de création d’entreprise",
+		    "head": {
+		      "firstName": "prenom_de_FQ"
+		    },
+		    "trainProg": {
+		      "name": "DUT Informatique deuxième année"
+		    }
+		  }
+		},
+		...
+
+	      }
+	   }
+       }
+       - On retourne la valeur associée à la clé edges (liste)
+
+* append_data(data, key, val) :
+	- Prend en paramètres data (un dictionnaire qui va contenir le résultat global),
+	la clé (le nom de l'attribut), la valeur de cet attribut
+	+ Cas 1 : La valeur associée à la clé est de type primitif (string, booléen, entier, réel):
+		Dans data, on ajoute la clé et on lui associe un tableau dans lequel on va rajouter la valeur de cette clé
+	+ Cas 2 : La valeur associée à la clé est une liste de dictionnaire de la forme 
+	[
+		{
+			"node" : ...
+		},
+		{
+			"node" : ...
+		}
+	] :
+		Pour chaque élément de la liste, on rappelle récursivement la fonction append_data
+	+ Cas 3 : La valeur associée à la clé est un dictionnaire :
+		Pour chaque couple clé/valeur, on appelle récursivement la fonction append_data
+
+* get_data (res) :
+	- Prend en paramètre le résultat de la fonction execute_query (liste)
+	- Pour élément de res, on regarde chaque couple clé/valeur:
+		On appelle append_data
+	- Résultat:
+	ex: data contiendra unn dictionnaire comme celui-ci :
+		{
+		    "username" : ["A3", "A2", "A1"], 
+		    "abbrev" : ["DPT1", "DPT2", "DPT3"] # pour department par exemple
+		    ...
+		}
