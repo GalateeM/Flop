@@ -30,7 +30,19 @@ class CreateCourse(graphene.Mutation):
 
     @classmethod
     def mutate(cls,root,info, **user_data):
-        courses = Course(
-            no = user_data.get('no'),
+    
+        courses = Course.objects.create(**{k: v for k, v in params.items() if params[k] and k not in ["supp_tutor","groups","module","modulesupp","pay_module"]})
+        supp_tutor = TutorType.get_supp_tutor(params["supp_tutor"])
+        groups = GenericGroupNode.get_groups(params["groups"])
+        module = ModuleNode.get_module(params["modules"])
+        modulesupp = ModuleNode.get_modulesupp(params["modulesupp"])
+        pay_module = ModuleNode.get_pay_module(params["pay_module"])
+        courses.supp_tutor.set(supp_tutor)
+        courses.groups.set(groups)
+        courses.module.set(module)
+        courses.modulesupp.set(modulesupp)
+        courses.pay_module.set(pay_module)
+        courses.save()
+        
+        return CreateCourse(courses=courses, supp_tutor = courses.supp_tutor.all(), groups= courses.groups.all(), module = courses.module.all(), modulesupp = courses.modulesupp.all(),pay_module = courses.pay_module.all())
 
-        )
