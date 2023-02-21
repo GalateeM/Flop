@@ -62,7 +62,7 @@ def test_mutations(db, client_query):
         mutation {
             createBknews ( 
                 year : 2024
-                txt : "It will be far better than 2023 has been"
+                txt : "blablablabla"
                 week : 2
                 department : "RGVwYXJ0bWVudFR5cGU6Mg=="
             ) {
@@ -91,7 +91,7 @@ def test_mutations(db, client_query):
             updateBknews ( 
                 id : """ + global_id + \
                 """year : 2023
-                txt : "2022 was awful"
+                txt : "blibliblibli"
                 week : 7
             ) {
                 bknews {
