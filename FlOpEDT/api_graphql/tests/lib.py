@@ -23,6 +23,8 @@ def execute_query(client_query, query, type):
 def execute_mutation(client_query, query, mutationName, modelName):
     response = client_query(query)
     content = json.loads(response.content)
+    """ print(content)
+    assert False """
     assert "errors" not in content
     return content["data"][mutationName][modelName]["id"]
 

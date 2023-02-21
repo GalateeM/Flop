@@ -5,7 +5,7 @@ from displayweb.models import BreakingNews
 from base.models import Department, Week, ModuleTutorRepartition
 from test_tutor import department_info, department_reseaux
 from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id
+from graphql_relay import from_global_id, to_global_id
 
 #parametre test
 @pytest.fixture
@@ -57,24 +57,18 @@ def test_bknews_filters1(client_query,
 
 """ Tests mutations
 """
-def test_mutations(db, client_query):
+def test_mutations(db, client_query, department_info : Department):
+    dpt_info_id = to_global_id('Department', department_info.id)
     create = """
         mutation {
             createBknews ( 
                 year : 2024
                 txt : "blablablabla"
                 week : 2
-                department : "RGVwYXJ0bWVudFR5cGU6Mg=="
-            ) {
+                department : \"""" + dpt_info_id + \
+            """\" ) {
                 bknews {
                 id
-                txt
-                year
-                department {
-                    id
-                    name
-                    abbrev
-                }
                 }
             }
             }
@@ -89,8 +83,8 @@ def test_mutations(db, client_query):
         update = """
         mutation {
             updateBknews ( 
-                id : """ + global_id + \
-                """year : 2023
+                id : \"""" + global_id + \
+                """\" year : 2023
                 txt : "blibliblibli"
                 week : 7
             ) {
@@ -108,8 +102,8 @@ def test_mutations(db, client_query):
         delete = """
         mutation {
             deleteBknews ( 
-                id : """ + global_id + \
-                """ ) {
+                id : \"""" + global_id + \
+                """\" ) {
                 bknews {
                 id
                 }

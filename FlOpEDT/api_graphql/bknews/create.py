@@ -21,6 +21,7 @@ class CreateBknews(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
+        print("yo")
         department = None
         if params.get("department") != None:
             id = from_global_id(params["department"])[1]
