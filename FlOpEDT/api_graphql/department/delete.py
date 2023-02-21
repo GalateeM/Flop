@@ -14,7 +14,7 @@ class DeleteDepartment(graphene.Mutation):
         id = from_global_id(id) [1]
         try:
             departments = Department.objects.get(id=id)
-            departments.delete
+            departments.delete()
             return DeleteDepartment(departments)
         except Department.DoesNotExist:
             print('Department with given ID does not exist in the database')
