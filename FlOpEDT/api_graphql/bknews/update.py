@@ -31,7 +31,6 @@ class UpdateBknews(graphene.Mutation):
                 params["department"] = id_dept
 
             bknews_set.update(**params)
-            print("123456789")
             bknews = bknews_set.first()
             bknews.save()
 

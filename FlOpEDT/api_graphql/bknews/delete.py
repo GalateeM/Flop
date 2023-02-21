@@ -12,10 +12,9 @@ class DeleteBknews(graphene.Mutation):
         @classmethod
         def mutate(cls, root, info, id):
             id = from_global_id(id) [1]
-            bknews_set = BreakingNews.objects.filter(id=id)
-            if bknews_set:
-                bknews=bknews_set.first()
+            try:
+                bknews = BreakingNews.objects.get(id=id)
                 bknews.delete()
                 return DeleteBknews(bknews)
-            else:
+            except BreakingNews.DoesNotExist:
                 print('Breaking new with given ID does not exist in the database')
