@@ -12,10 +12,9 @@ class DeleteDepartment(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, id):
         id = from_global_id(id) [1]
-        departments_set = Department.objects.filter(id=id)
-        if departments_set:
-            departments = departments_set.first()
-            departments.delete()
+        try:
+            departments = Department.objects.get(id=id)
+            departments.delete
             return DeleteDepartment(departments)
-        else:
+        except Department.DoesNotExist:
             print('Department with given ID does not exist in the database')
