@@ -20,6 +20,12 @@ def execute_query(client_query, query, type):
     res = content["data"][type]["edges"]
     return res
     
+def execute_mutation(client_query, query, mutationName, modelName):
+    response = client_query(query)
+    content = json.loads(response.content)
+    assert "errors" not in content
+    return content["data"][mutationName][modelName]["id"]
+
 def append_data(data, key, val):
     if type(val) in (str, int, float, bool):
         data.setdefault(key, [])
