@@ -21,11 +21,13 @@ class CreateBknews(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
+        # foreign keys
         department = None
         if params.get("department") != None:
             id = from_global_id(params["department"])[1]
             department = Department.objects.get(id=id)
             del params["department"]
+        # #############
 
         bknews = BreakingNews.objects.create(**params)
         bknews.department = department

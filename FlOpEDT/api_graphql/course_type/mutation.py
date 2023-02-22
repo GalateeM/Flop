@@ -4,6 +4,6 @@ from .update import UpdateCourseType
 from .delete import DeleteCourseType
 
 class Mutation(BaseMutation):
-    create_courseType = CreateCourseType.Field()
-    update_courseType = UpdateCourseType.Field()
-    delete_courseType = DeleteCourseType.Field()
+    create_course_type = CreateCourseType.Field()
+    update_course_type = UpdateCourseType.Field()
+    delete_course_type = DeleteCourseType.Field()

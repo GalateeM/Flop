@@ -26,9 +26,10 @@ class UpdateBknews(graphene.Mutation):
         id = from_global_id(id) [1]
         bknews_set = BreakingNews.objects.filter(id=id)
         if bknews_set:
+            # foreign keys
             if params.get("department") != None:
-                id_dept = from_global_id(params["department"])[1]
-                params["department"] = id_dept
+                params["department"] = from_global_id(params["department"])[1]
+            # ##############
 
             bknews_set.update(**params)
             bknews = bknews_set.first()

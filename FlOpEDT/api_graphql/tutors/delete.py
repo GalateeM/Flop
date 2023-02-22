@@ -16,5 +16,6 @@ class DeleteTutor(graphene.Mutation):
                 tutor = Tutor.objects.get(id=id)
                 tutor.delete()
                 return DeleteTutor(tutor)
+            
             except Tutor.DoesNotExist:
                 print('Tutor with given ID does not exist in the database')

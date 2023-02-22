@@ -2,15 +2,21 @@ from graphene_django import DjangoObjectType
 import graphene
 from base.models import CourseType
 from .types import CourseTypeNode
+from graphql_relay import from_global_id
 
 class DeleteCourseType(graphene.Mutation):
     class Arguments:
-        name = graphene.String()
+        id = graphene.ID(required=True)
          
-    courseType = graphene.Field(CourseTypeNode)
+    course_type = graphene.Field(CourseTypeNode)
 
     @classmethod
-    def mutate(cls,root,info,name):
-        courseType = CourseType.objects.get(name=name)
-        courseType.delete()
-        return DeleteCourseType
+    def mutate(cls, root, info, id):
+        id = from_global_id(id) [1]
+        try:
+            course_type = CourseType.objects.get(id=id)
+            course_type.delete()
+            return DeleteCourseType(course_type)
+        
+        except CourseType.DoesNotExist:
+            print('Course Type with given ID does not exist in the database')

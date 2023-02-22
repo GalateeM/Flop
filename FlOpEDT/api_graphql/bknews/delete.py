@@ -16,5 +16,6 @@ class DeleteBknews(graphene.Mutation):
                 bknews = BreakingNews.objects.get(id=id)
                 bknews.delete()
                 return DeleteBknews(bknews)
+            
             except BreakingNews.DoesNotExist:
                 print('Breaking new with given ID does not exist in the database')

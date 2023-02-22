@@ -32,14 +32,17 @@ class CreateTutor(graphene.Mutation):
 
 
     tutor = graphene.Field(TutorType)
+    # manyToManyField
     departments = graphene.List(DepartmentType)
+    # #################
 
     @classmethod
     def mutate(cls, root, info, **params):
+        # manyToManyField
         departments_ids = [ from_global_id(id)[1] for id in params["departments"]]
-        departments = Department.objects.filter(id__in=departments_ids)
-        print(f"departments = {departments}")
         del params["departments"]
+        # #################
+        
         tutor = Tutor.objects.create(**{k: v for k, v in params.items()})
         tutor.departments.set(departments_ids)
         tutor.save()

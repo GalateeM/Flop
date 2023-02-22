@@ -19,7 +19,7 @@ class UpdateTutor(graphene.Mutation):
         username = graphene.String()
         first_name = graphene.String()
         last_name = graphene.String()
-        email = graphene.String() 
+        email = graphene.String()
         is_staff = graphene.Boolean()
         is_active = graphene.Boolean()
 
@@ -33,23 +33,26 @@ class UpdateTutor(graphene.Mutation):
         status = graphene.String()
 
     tutor = graphene.Field(TutorType)
+    # manyToManyField
     departments = graphene.List(DepartmentType)
+    # ##################
 
     @classmethod
     def mutate(cls, root, info, id, **params):
         id = from_global_id(id) [1]
         tutor_set = Tutor.objects.filter(id=id)
         if tutor_set:
-            departments = None
+            # manyToManyField
+            departments_ids = []
             if params.get("departments") != None:
                 departments_ids = [ from_global_id(id)[1] for id in params["departments"]]
-                departments = Department.objects.filter(id__in=departments_ids)
                 del params["departments"]
+            # ###################
             
             tutor_set.update(**{k: v for k, v in params.items()})
             tutor = tutor_set.first()
-            if departments != None:
-                tutor.departments.set(departments)
+            if len(departments_ids) > 0:
+                tutor.departments.set(departments_ids)
             tutor.save()
 
             return UpdateTutor(tutor=tutor,departments = tutor.departments.all())

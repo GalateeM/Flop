@@ -9,8 +9,3 @@ class GroupTypeNode(DjangoObjectType):
         model = GroupType
         filterset_class = GroupTypeFilter
         interfaces = (relay.Node, )
-    
-    @classmethod
-    def get_group_types(cls, group_types_ids):
-        group_types_ids = [ from_global_id(id)[1] for id in group_types_ids]
-        return GroupType.objects.filter(id__in=group_types_ids)
