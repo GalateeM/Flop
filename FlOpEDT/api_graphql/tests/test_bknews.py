@@ -8,58 +8,54 @@ from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
 
 # #parametre test
-# @pytest.fixture
-# def y1(db, department_info:Department) -> BreakingNews:
-#     return BreakingNews.objects.create(department= department_info , week = 11, year = 2021,y=5, txt = "Lorem ipsum dolor sit amet.")
+@pytest.fixture
+def y1(db, department_info:Department) -> BreakingNews:
+    return BreakingNews.objects.create(department= department_info , week = 11, year = 2021,y=5, txt = "Lorem ipsum dolor sit amet.")
 
-# @pytest.fixture
-# def y2(db, department_reseaux:Department) -> BreakingNews:
-#     return BreakingNews.objects.create(department= department_reseaux,week = 15, year = 2022, y=10, txt = "In atque alias et eveniet provident eos")
+@pytest.fixture
+def y2(db, department_reseaux:Department) -> BreakingNews:
+    return BreakingNews.objects.create(department= department_reseaux,week = 15, year = 2022, y=10, txt = "In atque alias et eveniet provident eos")
 
-# def test_bknews(client_query,
-#                     y1 : BreakingNews,
-#                     y2 : BreakingNews):
-#     query='''
-#         query{
-#             bknews {
-#                 edges {
-#                     node {
-#                         y
-#                         txt
-#                     }
-#                 }ef execute_mutation(client_query, query, mutationName, modelName):
-#     response = client_query(query)
-#     content = json.loads(response.content)
-#     """ print(content)
-#     assert False """
-#     assert "errors" not in content
-#     return content["data"][mutationName][modelName]["id"]
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "bknews")
-#     data = get_data(res)
-#     assert y1.y in data["y"]
-#     assert y2.y in data["y"]
-#     assert y1.txt in data["txt"]
-#     assert y2.txt in data["txt"]
+""" Tests query
+"""
+def test_bknews(client_query,
+                    y1 : BreakingNews,
+                    y2 : BreakingNews):
+    query='''
+        query{
+            bknews {
+                edges {
+                    node {
+                        y
+                        txt
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "bknews")
+    data = get_data(res)
+    assert y1.y in data["y"]
+    assert y2.y in data["y"]
+    assert y1.txt in data["txt"]
+    assert y2.txt in data["txt"]
 
-# def test_bknews_filters1(client_query,
-#                     y1 : BreakingNews):
-#     query='''
-#         query{
-#             bknews (department_Name_Istartswith : \"inf\", week : 11, year : 2021, y : 5) {
-#                 edges {
-#                     node {
-#                         txt
-#                     }
-#                 }
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "bknews")
-#     data = get_data(res)
-#     assert y1.txt in data["txt"]
+def test_bknews_filters1(client_query,
+                    y1 : BreakingNews):
+    query='''
+        query{
+            bknews (department_Name_Istartswith : \"inf\", week : 11, year : 2021, y : 5) {
+                edges {
+                    node {
+                        txt
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "bknews")
+    data = get_data(res)
+    assert y1.txt in data["txt"]
 
 """ Tests mutations
 """
