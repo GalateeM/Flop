@@ -9,8 +9,3 @@ class DepartmentType(DjangoObjectType):
         model = Department
         filterset_class = DepartmentFilter
         interfaces = (relay.Node, )
-
-    @classmethod
-    def get_departments(cls, departments_ids):
-        departments_ids = [ from_global_id(id)[1] for id in departments_ids]
-        return Department.objects.filter(id__in=departments_ids)

@@ -9,6 +9,7 @@ from api_graphql.tutors.types import TutorType
 from api_graphql.generic_group.types import GenericGroupNode
 from api_graphql.module.types import ModuleNode
 from api_graphql.week.types import WeekType
+from people.models import Tutor
 from graphql_relay import from_global_id
 
 class CreateCourse(graphene.Mutation):
@@ -36,14 +37,6 @@ class CreateCourse(graphene.Mutation):
         type = CourseType.objects.get(id=id_type)
         del params["type"]
 
-        id_supp_tutor = from_global_id(params["supp_tutor"])[1]
-        supp_tutor = TutorType.objects.get(id=id_supp_tutor)
-        del params["supp_tutor"]
-
-        id_groups = from_global_id(params["groups"])[1]
-        groups = GenericGroupNode.objects.get(id=id_groups)
-        del params["groups"]
-
         id_module = from_global_id(params["module"])[1]
         module = ModuleNode.objects.get(id=id_module)
         del params["module"]
@@ -54,7 +47,8 @@ class CreateCourse(graphene.Mutation):
         """
         
         # manyToManyField
-        supp_tutor = TutorType.get_supp_tutor(params["supp_tutor"])
+        supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
+        supp_tutor = Tutor.objects.filter(id__in=supp_tutor_ids)
         del params["supp_tutor"]
 
         groups = GenericGroupNode.get_groups(params["groups"])

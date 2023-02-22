@@ -2,6 +2,8 @@ import graphene
 from people.models import Tutor
 from .types import TutorType
 from api_graphql.department.types import DepartmentType
+from base.models import Department
+from graphql_relay import from_global_id
 
 class CreateTutor(graphene.Mutation):
     class Arguments:
@@ -34,8 +36,10 @@ class CreateTutor(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
-        tutor = Tutor.objects.create(**{k: v for k, v in params.items() if params[k] and k != "departments"})
-        departments = DepartmentType.get_departments(params["departments"])
+        departments_ids = [ from_global_id(id)[1] for id in params["departments"]]
+        departments = Department.objects.filter(id__in=departments_ids)
+        del params["departments"]
+        tutor = Tutor.objects.create(**{k: v for k, v in params.items()})
         tutor.departments.set(departments)
         tutor.save()
         
