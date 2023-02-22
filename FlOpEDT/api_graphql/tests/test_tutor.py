@@ -36,43 +36,43 @@ def tutor_reseaux(db, department_reseaux : Department) -> Tutor:
 
 """ Tests query
 """
-# def test_all_tutors_dept(client_query,
-#                     tutor_info : Tutor, 
-#                     tutor_reseaux : Tutor):
-#     query='''
-#         query {
-#             tutors (dept : \"RT\") {
-#                 edges {
-#                     node {
-#                         username
-#                     }
-#                 }
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "tutors")
-#     data = get_data(res)
-#     assert tutor_reseaux.username in data["username"]
-#     assert tutor_info.username not in data["username"]
+def test_all_tutors_dept(client_query,
+                    tutor_info : Tutor, 
+                    tutor_reseaux : Tutor):
+    query='''
+        query {
+            tutors (dept : \"RT\") {
+                edges {
+                    node {
+                        username
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "tutors")
+    data = get_data(res)
+    assert tutor_reseaux.username in data["username"]
+    assert tutor_info.username not in data["username"]
 
-# def test_tutors_algo(client_query,
-#                            tutor_algo_prog: Tutor, scheduled1 : ScheduledCourse, scheduled2 : ScheduledCourse):
-#     query='''
-#         query {
-#             tutors (dept : \"MIASHS\", week : 7, year : 2021){
-#                 edges {
-#                     node {
-#                         username
-#                         firstName
-#                     }
-#                 }
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "tutors")
-#     data = get_data(res)
-#     assert tutor_algo_prog.first_name in data["firstName"]
-#     assert tutor_algo_prog.username in data["username"]
+def test_tutors_algo(client_query,
+                           tutor_algo_prog: Tutor, scheduled1 : ScheduledCourse, scheduled2 : ScheduledCourse):
+    query='''
+        query {
+            tutors (dept : \"MIASHS\", week : 7, year : 2021){
+                edges {
+                    node {
+                        username
+                        firstName
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "tutors")
+    data = get_data(res)
+    assert tutor_algo_prog.first_name in data["firstName"]
+    assert tutor_algo_prog.username in data["username"]
     
 """ Tests mutations
 """
@@ -92,6 +92,10 @@ def test_mutations(db, client_query, department_miashs : Department, department_
                 """\"] ) {
                 tutor {
                     id
+                }
+                departments{
+                  id
+                  abbrev
                 }
             }
             }
@@ -114,24 +118,24 @@ def test_mutations(db, client_query, department_miashs : Department, department_
                 tutor {
                     id
                 }
+                departments{
+                  id
+                  abbrev
+                }
             }
             }
         """
 
         execute_mutation(client_query, update, "updateTutor", "tutor")
         obj_updated = Tutor.objects.get(id=obj_id)
-        upd = (obj.username != obj_updated.username) and (obj.is_active != obj_updated.is_active) and (obj.departments != obj_updated.departments)
-        print(f"obj.departments = {obj.departments}")
+        assert obj.username != obj_updated.username 
+        assert obj.is_active != obj_updated.is_active 
+        assert len(obj_updated.departments.all()) == 1 and obj_updated.departments.all()[0].abbrev == "MIASHS"
+        """print(f"obj.departments = {obj.departments.all()}")
         print(f"obj_updated.departments = {obj_updated.departments}")
-        print(f"(obj.departments != obj_updated.departments) = {(obj.departments != obj_updated.departments)}")
-        print(create)
-        assert upd
-        if upd:
-            with capsys.disabled():
-                print("The object was updated successfully")
-        else:
-            with capsys.disabled():
-                print("The object was not updated")
+        print(f"(obj.departments != obj_updated.departments) = {(obj.departments != obj_updated.departments)}") """
+        with capsys.disabled():
+            print("The object was updated successfully")
 
         delete = """
         mutation {

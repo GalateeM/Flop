@@ -59,8 +59,9 @@ def test_bknews_filters1(client_query,
 
 """ Tests mutations
 """
-def test_mutations(db, client_query, department_info : Department, capsys):
+def test_mutations(db, client_query, department_info : Department, department_reseaux : Department, capsys):
     dpt_info_id = to_global_id('Department', department_info.id)
+    dpt_reseaux_id = to_global_id('Department', department_reseaux.id)
     create = """
         mutation {
             createBknews ( 
@@ -89,7 +90,8 @@ def test_mutations(db, client_query, department_info : Department, capsys):
                 """\" year : 2023
                 txt : "blibliblibli"
                 week : 7
-            ) {
+                department : \"""" + dpt_reseaux_id + \
+            """\" ) {
                 bknews {
                 id
                 }
@@ -99,14 +101,12 @@ def test_mutations(db, client_query, department_info : Department, capsys):
 
         execute_mutation(client_query, update, "updateBknews", "bknews")
         obj_updated = BreakingNews.objects.get(id=obj_id)
-        upd = (obj.year != obj_updated.year) and (obj.txt != obj_updated.txt) and (obj.week != obj_updated.week)
-        assert upd
-        if upd:
-            with capsys.disabled():
-                print("The object was updated successfully")
-        else:
-            with capsys.disabled():
-                print("The object was not updated")
+        assert obj.year != obj_updated.year
+        assert obj.txt != obj_updated.txt
+        assert obj.week != obj_updated.week 
+        assert obj.department.abbrev != obj_updated.department.abbrev
+        with capsys.disabled():
+            print("The object was updated successfully")
 
         delete = """
         mutation {
