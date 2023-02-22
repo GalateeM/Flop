@@ -32,11 +32,14 @@ class CreateCourse(graphene.Mutation):
     @classmethod
     def mutate(cls,root,info, **params):
         # foreignKey
+        id_type = from_global_id(params["type"])[1]
+        type = CourseType.objects.get(id=id_type)
+        del params["type"]
+
+        """ Si required=False , rajouter ça avant
         type = None
         if params.get("type") != None:
-            id = from_global_id(params["type"])[1]
-            type = CourseType.objects.get(id=id)
-            del params["type"]
+        """
         
         # manyToManyField
         supp_tutor = TutorType.get_supp_tutor(params["supp_tutor"])
