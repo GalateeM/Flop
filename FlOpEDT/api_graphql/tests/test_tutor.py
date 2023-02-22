@@ -121,6 +121,10 @@ def test_mutations(db, client_query, department_miashs : Department, department_
         execute_mutation(client_query, update, "updateTutor", "tutor")
         obj_updated = Tutor.objects.get(id=obj_id)
         upd = (obj.username != obj_updated.username) and (obj.is_active != obj_updated.is_active) and (obj.departments != obj_updated.departments)
+        print(f"(obj.username != obj_updated.username) = {(obj.username != obj_updated.username)}")
+        print(f"obj.departments = {obj.departments}")
+        print(f"obj_updated.departments = {obj_updated.departments}")
+        print(f"(obj.departments != obj_updated.departments) = {(obj.departments != obj_updated.departments)}")
         assert upd
         if upd:
             with capsys.disabled():
