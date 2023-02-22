@@ -1,4 +1,5 @@
 from people.models import Tutor
+from base.models import Department
 import graphene
 from .types import TutorType
 from graphql_relay import from_global_id
@@ -39,10 +40,15 @@ class UpdateTutor(graphene.Mutation):
         id = from_global_id(id) [1]
         tutor_set = Tutor.objects.filter(id=id)
         if tutor_set:
-            tutor_set.update(**{k: v for k, v in params.items() if params[k] and k != "departments"})
-            departments = DepartmentType.get_departments(params.get("departments", []))
+            departments = None
+            if params.get("departments") != None:
+                departments_ids = [ from_global_id(id)[1] for id in params["departments"]]
+                departments = Department.objects.filter(id__in=departments_ids)
+                del params["departments"]
+            
+            tutor_set.update(**{k: v for k, v in params.items()})
             tutor = tutor_set.first()
-            if len(departments) > 0:
+            if departments != None:
                 tutor.departments.set(departments)
             tutor.save()
 

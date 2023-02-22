@@ -124,6 +124,7 @@ def test_mutations(db, client_query, department_miashs : Department, department_
         print(f"obj.departments = {obj.departments}")
         print(f"obj_updated.departments = {obj_updated.departments}")
         print(f"(obj.departments != obj_updated.departments) = {(obj.departments != obj_updated.departments)}")
+        print(create)
         assert upd
         if upd:
             with capsys.disabled():
