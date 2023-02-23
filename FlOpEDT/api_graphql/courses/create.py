@@ -36,6 +36,18 @@ class CreateCourse(graphene.Mutation):
         type = CourseType.objects.get(id=id_type)
         del params["type"]
 
+        id_supp_tutor = from_global_id(params["supp_tutor"])[1]
+        supp_tutor = TutorType.objects.get(id=id_supp_tutor)
+        del params["supp_tutor"]
+
+        id_groups = from_global_id(params["groups"])[1]
+        groups = GenericGroupNode.objects.get(id=id_groups)
+        del params["groups"]
+
+        id_module = from_global_id(params["module"])[1]
+        module = ModuleNode.objects.get(id=id_module)
+        del params["module"]
+
         """ Si required=False , rajouter ça avant
         type = None
         if params.get("type") != None:
@@ -45,16 +57,18 @@ class CreateCourse(graphene.Mutation):
         supp_tutor = TutorType.get_supp_tutor(params["supp_tutor"])
         del params["supp_tutor"]
 
-
         groups = GenericGroupNode.get_groups(params["groups"])
+        del params
         module = ModuleNode.get_module(params["modules"])
+        del params[""]
         modulesupp = ModuleNode.get_modulesupp(params["modulesupp"])
+        del params["modulesupp"]
         pay_module = ModuleNode.get_pay_module(params["pay_module"])
         courses.groups.set(groups)
         courses.module.set(module)
         courses.modulesupp.set(modulesupp)
         courses.pay_module.set(pay_module)
-        courses = Course.objects.create(**{k: v for k, v in params.items() if params[k] and k not in ["supp_tutor","groups","module","modulesupp","pay_module"]})
+        courses = Course.objects.create(**{k: v for k, v in params.items()})
         courses.type = type # foreignKey
         courses.supp_tutor.set(supp_tutor) # manyToManyField
         courses.save()
