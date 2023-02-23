@@ -13,18 +13,18 @@ from api_graphql.week.types import WeekType
 class CreateCourse(graphene.Mutation):
     class arguments:
         no = graphene.Int()
-        suspens = graphene.Boolean()
+        suspens = graphene.Boolean(required=True)
 
-        type = graphene.Field(CourseTypeNode)
-        room_type = graphene.Field(RoomTypeNode)
-        tutor = graphene.Field(TutorType)
-        week = graphene.Field(WeekType)
+        type = graphene.Argument(graphene.ID)
+        room_type = graphene.Argument(graphene.ID)
+        tutor = graphene.Argument(graphene.ID)
+        week = graphene.Argument(graphene.ID)
 
-        supp_tutor = graphene.List(TutorType)
-        groups = graphene.List(GenericGroupNode)
-        module = graphene.List(ModuleNode)
-        modulesupp = graphene.List(ModuleNode)
-        pay_module = graphene.List(ModuleNode)
+        supp_tutor = graphene.List(graphene.ID, required=True)
+        groups = graphene.List(graphene.ID, required=True)
+        module = graphene.Argument(graphene.ID, required=True)
+        modulesupp = graphene.Argument(graphene.ID)
+        pay_module = graphene.Argument(graphene.ID)
     
     courses = graphene.Field(CourseNode)
 
