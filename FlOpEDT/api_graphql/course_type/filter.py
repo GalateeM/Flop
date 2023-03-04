@@ -12,7 +12,8 @@ class CourseTypeFilter(FilterSet):
             'duration' : ['exact'],
             'pay_duration' : ['exact'],
             'graded' : ['exact'],
-            'group_types__name' : ['icontains', 'istartswith']
+            'group_types__name' : ['icontains', 'istartswith'],
+            'id' : ['exact']
         }
 
     def filter_dept(self, queryset, name, value):

@@ -29,13 +29,14 @@ class CreateCourseType(graphene.Mutation):
         
         # manyToManyField
         group_types_ids = [ from_global_id(id)[1] for id in params["group_types"]]
+        group_types = GroupType.objects.filter(pk__in = group_types_ids)
         del params["group_types"]
         # #################
 
         course_type = CourseType.objects.create(**{k: v for k, v in params.items()})
         course_type.department = department
         course_type.save()
-        course_type.group_types.set(group_types_ids)
+        course_type.group_types.add(*group_types)
         course_type.save()
         
         return CreateCourseType(course_type=course_type, group_types = course_type.group_types.all())
