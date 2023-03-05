@@ -7,7 +7,6 @@ from test_tutor import department_info, department_reseaux
 from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
 
-# #parametre test
 @pytest.fixture
 def y1(db, department_info:Department) -> BreakingNews:
     return BreakingNews.objects.create(department= department_info , week = 11, year = 2021,y=5, txt = "Lorem ipsum dolor sit amet.")

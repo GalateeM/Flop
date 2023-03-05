@@ -42,6 +42,7 @@ class UpdateCourseType(graphene.Mutation):
             course_type_set.update(**{k: v for k, v in params.items()})
             course_type = course_type_set.first()
             if groupe_types != None:
+                course_type.group_types.clear()
                 course_type.group_types.add(*groupe_types)
             course_type.save()
 
