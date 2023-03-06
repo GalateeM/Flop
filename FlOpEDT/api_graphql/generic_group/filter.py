@@ -14,4 +14,4 @@ class GenericGroupFilter(FilterSet):
         }
     
     def filter_dept(self, queryset, name, value):
-        return queryset.exclude(type__department = None).exclude(train_prog__department = None) .filter(train_prog__department__abrev = value)
+        return queryset.exclude(type__department = None).exclude(train_prog__department = None) .filter(train_prog__department__abbrev = value)
