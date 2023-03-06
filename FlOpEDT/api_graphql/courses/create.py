@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType
 import graphene
 from django.db import models
-from base.models import Course, CourseType, Module, Week
+from base.models import Course, CourseType, Module, Week, RoomType
 from .types import CourseNode
 from api_graphql.course_type.types import CourseTypeNode 
 from api_graphql.room_type.types import RoomTypeNode
@@ -30,6 +30,8 @@ class CreateCourse(graphene.Mutation):
 
     
     courses = graphene.Field(CourseNode)
+    supp_tutor = graphene.List(TutorType)
+    # groups non rajouté car le query de GenericGroup contient un filtre obligatoire sur dept
    
 
     @classmethod
@@ -43,44 +45,36 @@ class CreateCourse(graphene.Mutation):
         module = Module.objects.get(id=id_module)
         del params["module"]
 
-        RoomType = None
-        if params.get("RoomType")!=None:
+        room_type = None
+        if params.get("room_type")!=None:
             id_room_type = from_global_id(params["room_type"])[1]
             room_type = RoomType.objects.get(id=id_room_type)
             del params["room_type"]
 
-
-        Tutor = None
-        if params.get("Tutor")!=None:
+        tutor = None
+        if params.get("tutor")!=None:
             id_tutor= from_global_id(params["tutor"])[1]
             tutor = Tutor.objects.get(id=id_tutor)
             del params["tutor"]
 
         modulesupp = None
-        if params.get("Module")!=None:
+        if params.get("modulesupp")!=None:
             id_modulesupp= from_global_id(params["modulesupp"])[1]
             modulesupp= Module.objects.get(id=id_modulesupp)
             del params["modulesupp"]
 
 
         pay_module = None
-        if params.get("Module")!=None:
+        if params.get("pay_module")!=None:
             id_pay_module= from_global_id(params["pay_module"])[1]
             pay_module= Module.objects.get(id=id_pay_module)
             del params["pay_module"]
 
         week= None
-        if params.get("Week")!=None:
+        if params.get("week")!=None:
             id_week= from_global_id(params["week"])[1]
             week= Week.objects.get(id=id_week)
             del params["week"]
-
-        
-
-        """ Si required=False , rajouter ça avant
-        type = None
-        if params.get("type") != None:
-        """
         
         # manyToManyField
         supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
@@ -88,12 +82,15 @@ class CreateCourse(graphene.Mutation):
         del params["supp_tutor"]
 
         groups_ids = [ from_global_id(id)[1] for id in params["groups"]]
-        groups = GenericGroup.objects.filter(id_in = groups_ids)
+        groups = GenericGroup.objects.filter(id__in = groups_ids)
         del params["groups"]
         
+        courses = None
+        if len(params) > 0:
+            courses = Course.objects.create(**{k: v for k, v in params.items()})
+        else:
+            courses = Course.objects.create(module=module, type=type)
         
-
-        courses = Course.objects.create(**{k: v for k, v in params.items()})
         courses.type = type # foreignKey
         courses.room_type = room_type
         courses.tutor = tutor
@@ -104,8 +101,9 @@ class CreateCourse(graphene.Mutation):
         courses.save()
         
         courses.supp_tutor.add(*supp_tutor) # manyToManyField
+        courses.save()
         courses.groups.add(*groups)
         courses.save()
         
-        return CreateCourse(courses=courses, supp_tutor = courses.supp_tutor.all(), groups= courses.groups.all())
+        return CreateCourse(courses=courses, supp_tutor = courses.supp_tutor.all())
 

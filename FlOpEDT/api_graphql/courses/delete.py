@@ -16,7 +16,7 @@ class DeleteCourse(graphene.Mutation):
         id = from_global_id(id) [1]
         try:
 
-            courses= Course.object.get(id=id)
+            courses= Course.objects.get(id=id)
             courses.delete()
             return DeleteCourse(courses)
         

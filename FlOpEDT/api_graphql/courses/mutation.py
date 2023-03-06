@@ -9,5 +9,5 @@ class Mutation(BaseMutation):
     mutated.
     """
     create_course = CreateCourse.Field()
-    """ update_course = UpdateCourse.Field()
-    delete_course = DeleteCourse.Field() """
+    # update_course = UpdateCourse.Field()
+    delete_course = DeleteCourse.Field()

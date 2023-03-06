@@ -39,7 +39,7 @@ class UpdateCourseType(graphene.Mutation):
                 del params["group_types"]
             # ###################
         
-            course_type_set.update(**{k: v for k, v in params.items()})
+            course_type_set.update(**params)
             course_type = course_type_set.first()
             if groupe_types != None:
                 course_type.group_types.clear()

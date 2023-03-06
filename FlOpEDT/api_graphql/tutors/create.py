@@ -40,7 +40,7 @@ class CreateTutor(graphene.Mutation):
     def mutate(cls, root, info, **params):
         # manyToManyField
         departments_ids = [ from_global_id(id)[1] for id in params["departments"]]
-        departments = Department.objects.filter(pk__in = departments_ids)
+        departments = Department.objects.filter(id__in = departments_ids)
         del params["departments"]
         # #################
         

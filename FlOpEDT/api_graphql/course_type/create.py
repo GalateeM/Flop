@@ -33,7 +33,7 @@ class CreateCourseType(graphene.Mutation):
         del params["group_types"]
         # #################
 
-        course_type = CourseType.objects.create(**{k: v for k, v in params.items()})
+        course_type = CourseType.objects.create(**params)
         course_type.department = department
         course_type.save()
         course_type.group_types.add(*group_types)
