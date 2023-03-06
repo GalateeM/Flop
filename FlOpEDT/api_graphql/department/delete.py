@@ -4,17 +4,17 @@ from .types import DepartmentType
 from graphql_relay import from_global_id
 
 class DeleteDepartment(graphene.Mutation):
-    class arguments:
+    class Arguments:
         id = graphene.ID(required= True)
 
-    departments = graphene.Field(DepartmentType)
+    department = graphene.Field(DepartmentType)
 
     @classmethod
     def mutate(cls, root, info, id):
         id = from_global_id(id) [1]
         try:
-            departments = Department.objects.get(id=id)
-            departments.delete()
-            return DeleteDepartment(departments)
+            department = Department.objects.get(id=id)
+            department.delete()
+            return DeleteDepartment(department)
         except Department.DoesNotExist:
             print('Department with given ID does not exist in the database')

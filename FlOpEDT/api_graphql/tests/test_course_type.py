@@ -225,23 +225,3 @@ def test_mutations (db, client_query, department_langues : Department, departmen
         with capsys.disabled():
             print("The object was not created")
         assert False
-
-# courseType
-""" name = models.CharField(max_length=50)
-department = models.ForeignKey(
-    Department, on_delete=models.CASCADE, null=True)
-duration = models.PositiveSmallIntegerField(default=90)
-pay_duration = models.PositiveSmallIntegerField(null=True, blank=True)
-group_types = models.ManyToManyField(GroupType,
-                                        blank=True,
-                                        related_name="compatible_course_types")
-graded = models.BooleanField(verbose_name=_('graded?'), default=False) """
-
-# groupType
-""" name = models.CharField(max_length=50)
-department = models.ForeignKey(
-Department, on_delete=models.CASCADE, null=True) """
-
-# dept
-""" name = models.CharField(max_length=50)
-    abbrev = models.CharField(max_length=7) """

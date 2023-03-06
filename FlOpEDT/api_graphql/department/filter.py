@@ -5,6 +5,7 @@ class DepartmentFilter(FilterSet):
     class Meta:
         model = Department
         fields = {
+            'id' : ["exact"],
             'name' : ['icontains', 'istartswith'],
             'abbrev' : ['exact'],
             'id' : ["exact"]

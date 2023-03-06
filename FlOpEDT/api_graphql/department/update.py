@@ -4,23 +4,23 @@ from .types import DepartmentType
 from graphql_relay import from_global_id
 
 class UpdateDepartment(graphene.Mutation):
-    class arguments:
+    class Arguments:
         id = graphene.ID(required=True)
         name = graphene.String()
         abbrev = graphene.String()
 
-    departments = graphene.Field(DepartmentType)
+    department = graphene.Field(DepartmentType)
 
     @classmethod
     def mutate(cls, root, info, id, **params):
         id = from_global_id(id) [1]
-        departments_set = Department.objects.filter(id=id)
-        if departments_set:
-            departments_set.update(**params)
-            departments = departments_set.first()
-            departments.save()
+        department_set = Department.objects.filter(id=id)
+        if department_set:
+            department_set.update(**params)
+            department = department_set.first()
+            department.save()
             
-            return UpdateDepartment(departments=departments)
+            return UpdateDepartment(department=department)
 
         else:
             print('Department with given ID does not exist in the database')
