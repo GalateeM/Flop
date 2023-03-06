@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType
 import graphene
 from django.db import models
-from base.models import Course, CourseType
+from base.models import Course, CourseType, Module, Week
 from .types import CourseNode
 from api_graphql.course_type.types import CourseTypeNode 
 from api_graphql.room_type.types import RoomTypeNode
@@ -14,7 +14,7 @@ from base.models import GenericGroup
 from graphql_relay import from_global_id
 
 class CreateCourse(graphene.Mutation):
-    class arguments:
+    class Arguments:
         type = graphene.Argument(graphene.ID, required=True)
         room_type = graphene.Argument(graphene.ID)
         no = graphene.Int()
@@ -40,7 +40,7 @@ class CreateCourse(graphene.Mutation):
         del params["type"]
 
         id_module = from_global_id(params["module"])[1]
-        module = ModuleNode.objects.get(id=id_module)
+        module = Module.objects.get(id=id_module)
         del params["module"]
 
         RoomType = None
@@ -53,23 +53,23 @@ class CreateCourse(graphene.Mutation):
         Tutor = None
         if params.get("Tutor")!=None:
             id_tutor= from_global_id(params["tutor"])[1]
-            tutor = TutorType.objects.get(id=id_tutor)
+            tutor = Tutor.objects.get(id=id_tutor)
             del params["tutor"]
 
-        Module = None
+        modulesupp = None
         if params.get("Module")!=None:
             id_modulesupp= from_global_id(params["modulesupp"])[1]
-            modulesupp= ModuleNode.objects.get(id=id_modulesupp)
+            modulesupp= Module.objects.get(id=id_modulesupp)
             del params["modulesupp"]
 
 
-        Module = None
+        pay_module = None
         if params.get("Module")!=None:
             id_pay_module= from_global_id(params["pay_module"])[1]
             pay_module= Module.objects.get(id=id_pay_module)
             del params["pay_module"]
 
-        Week= None
+        week= None
         if params.get("Week")!=None:
             id_week= from_global_id(params["week"])[1]
             week= Week.objects.get(id=id_week)
