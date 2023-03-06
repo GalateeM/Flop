@@ -14,14 +14,18 @@ class DeleteCourse(graphene.Mutation):
     @classmethod
     def mutate(cls,root, info, id):
         id = from_global_id(id) [1]
-        courses_set = Course.object.get(id=id)
+        try:
 
-        if courses_set:
-            Courses=courses_set.first()
-            Courses.delete()
-            return DeleteCourse(Courses)
-        else:
-            print('Course with the given ID does not exist')
+            courses= Course.object.get(id=id)
+            courses.delete()
+            return DeleteCourse(courses)
         
+        except Course.DoesNotExist:
+            print('Course Type with given ID does not exist in the database')
+
+        
+        
+
+
 
         
