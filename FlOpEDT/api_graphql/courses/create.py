@@ -83,13 +83,15 @@ class CreateCourse(graphene.Mutation):
         lib.assign_value_to_foreign_key(params, "pay_module", Module, "create")
         lib.assign_value_to_foreign_key(params, "week", Week, "create")
         # manyToManyField
-        supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
+        """ supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
         supp_tutor = Tutor.objects.filter(id__in=supp_tutor_ids)
         del params["supp_tutor"]
 
         groups_ids = [ from_global_id(id)[1] for id in params["groups"]]
         groups = GenericGroup.objects.filter(id__in = groups_ids)
-        del params["groups"]
+        del params["groups"] """
+        supp_tutor = lib.get_manyToManyField_values(params, "supp_tutor", Tutor)
+        groups = lib.get_manyToManyField_values(params, "groups", GenericGroup)
         
         """ courses = None
         if len(params) > 0:
@@ -108,10 +110,12 @@ class CreateCourse(graphene.Mutation):
         courses = Course.objects.create(**params)
         courses.save()
 
-        courses.supp_tutor.add(*supp_tutor) # manyToManyField
+        """ courses.supp_tutor.add(*supp_tutor) # manyToManyField
         courses.save()
         courses.groups.add(*groups)
-        courses.save()
+        courses.save() """
+        lib.assign_values_to_manyToManyField(courses, "supp_tutor", supp_tutor)
+        lib.assign_values_to_manyToManyField(courses, "groups", groups)
         
         return CreateCourse(courses=courses, supp_tutor = courses.supp_tutor.all())
 
