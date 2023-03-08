@@ -44,7 +44,7 @@ class CreateTutor(graphene.Mutation):
         del params["departments"]
         # #################
         
-        tutor = Tutor.objects.create(**{k: v for k, v in params.items()})
+        tutor = Tutor.objects.create(**params)
         tutor.departments.add(*departments)
         tutor.save()
         

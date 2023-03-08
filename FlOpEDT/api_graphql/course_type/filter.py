@@ -7,12 +7,12 @@ class CourseTypeFilter(FilterSet):
     class Meta:
         model = CourseType
         fields = {
+            'id' : ['exact'],
             'name' : ['icontains', 'istartswith'],
             'duration' : ['exact'],
             'pay_duration' : ['exact'],
             'graded' : ['exact'],
-            'group_types__name' : ['icontains', 'istartswith'],
-            'id' : ['exact']
+            'group_types__name' : ['icontains', 'istartswith']
         }
 
     def filter_dept(self, queryset, name, value):

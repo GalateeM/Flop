@@ -11,11 +11,11 @@ class TutorFilter(FilterSet):
     class Meta:
         model = Tutor
         fields = {
+            'id' : ['exact'],
             'username' : ['icontains', 'istartswith'],
             'last_name' : ['icontains', 'istartswith'],
             'first_name' : ['icontains', 'istartswith'],
-            'email' : ['icontains', 'istartswith'],
-            'id' : ['exact']
+            'email' : ['icontains', 'istartswith']
         }
     
     def filter_dept(self, queryset, name, value):

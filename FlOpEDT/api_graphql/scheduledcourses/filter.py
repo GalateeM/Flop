@@ -8,6 +8,7 @@ class ScheduledCourseFilter(FilterSet):
     class Meta:
         model = ScheduledCourse
         fields = {
+            'id' : ['exact'],
             'room__name': ['icontains', 'istartswith'],
             'day': ['exact'],
             'course__module__abbrev': ['icontains', 'istartswith'],

@@ -12,6 +12,7 @@ from api_graphql.week.types import WeekType
 from people.models import Tutor
 from base.models import GenericGroup
 from graphql_relay import from_global_id
+from api_graphql import lib
 
 class CreateCourse(graphene.Mutation):
     class Arguments:
@@ -27,8 +28,6 @@ class CreateCourse(graphene.Mutation):
         week = graphene.Argument(graphene.ID)
         suspens = graphene.Boolean()
 
-
-    
     courses = graphene.Field(CourseNode)
     supp_tutor = graphene.List(TutorType)
     # groups non rajouté car le query de GenericGroup contient un filtre obligatoire sur dept
@@ -37,7 +36,7 @@ class CreateCourse(graphene.Mutation):
     @classmethod
     def mutate(cls,root,info, **params):
         # foreignKey
-        id_type = from_global_id(params["type"])[1]
+        """ id_type = from_global_id(params["type"])[1]
         type = CourseType.objects.get(id=id_type)
         del params["type"]
 
@@ -74,8 +73,15 @@ class CreateCourse(graphene.Mutation):
         if params.get("week")!=None:
             id_week= from_global_id(params["week"])[1]
             week= Week.objects.get(id=id_week)
-            del params["week"]
+            del params["week"] """
         
+        lib.assign_value_to_foreign_key(params, "type", CourseType, "create")
+        lib.assign_value_to_foreign_key(params, "module", Module, "create")
+        lib.assign_value_to_foreign_key(params, "room_type", RoomType, "create")
+        lib.assign_value_to_foreign_key(params, "tutor", Tutor, "create")
+        lib.assign_value_to_foreign_key(params, "modulesupp", Module, "create")
+        lib.assign_value_to_foreign_key(params, "pay_module", Module, "create")
+        lib.assign_value_to_foreign_key(params, "week", Week, "create")
         # manyToManyField
         supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
         supp_tutor = Tutor.objects.filter(id__in=supp_tutor_ids)
@@ -85,7 +91,7 @@ class CreateCourse(graphene.Mutation):
         groups = GenericGroup.objects.filter(id__in = groups_ids)
         del params["groups"]
         
-        courses = None
+        """ courses = None
         if len(params) > 0:
             courses = Course.objects.create(**{k: v for k, v in params.items()})
         else:
@@ -98,8 +104,10 @@ class CreateCourse(graphene.Mutation):
         courses.modulesupp = modulesupp
         courses.pay_module = pay_module
         courses.week = week
+        courses.save() """
+        courses = Course.objects.create(**params)
         courses.save()
-        
+
         courses.supp_tutor.add(*supp_tutor) # manyToManyField
         courses.save()
         courses.groups.add(*groups)

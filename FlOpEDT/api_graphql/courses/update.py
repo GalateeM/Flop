@@ -1,7 +1,8 @@
 from graphene_django import DjangoObjectType
 import graphene
 from django.db import models
-from base.models import Course, CourseType
+from base.models import Course, CourseType, Module, RoomType, Week
+from people.models import Tutor
 from .types import CourseNode
 from api_graphql.course_type.types import CourseTypeNode 
 from api_graphql.room_type.types import RoomTypeNode
@@ -12,46 +13,41 @@ from api_graphql.week.types import WeekType
 from people.models import Tutor
 from base.models import GenericGroup
 from graphql_relay import from_global_id
+from api_graphql import lib
 
 class UpdateCourse(graphene.Mutation):
     class Arguments:
-        no = graphene.Int()
-        suspens = graphene.Boolean()
-
-        type = graphene.Argument(graphene.ID, required=True)
+        id = graphene.ID(required=True)
+        type = graphene.Argument(graphene.ID)
         room_type = graphene.Argument(graphene.ID)
         no = graphene.Int()
         tutor = graphene.Argument(graphene.ID)
-        supp_tutor = graphene.List(graphene.ID, required=True)
-        groups = graphene.List(graphene.ID, required=True)
-        module = graphene.Argument(graphene.ID, required=True)
+        supp_tutor = graphene.List(graphene.ID)
+        groups = graphene.List(graphene.ID)
+        module = graphene.Argument(graphene.ID)
         modulesupp = graphene.Argument(graphene.ID)
         pay_module = graphene.Argument(graphene.ID)
         week = graphene.Argument(graphene.ID)
         suspens = graphene.Boolean()
 
     courses = graphene.Field(CourseNode)
+    supp_tutor = graphene.List(TutorType)
     
     @classmethod
     def mutate(cls, root, info,id, **params):
         id = from_global_id(id)[1]
-        courses_set = courses.objects.filter(id=id)
+        courses_set = Course.objects.filter(id=id)
         if courses_set:
             #foreign key
-            if params.get("RoomType")!=None:
-                params["room_type"]= from_global_id(params["room_type"])[1]
-            if params.get("Tutor")!=None:
-                params["tutor"]= from_global_id(params["tutor"])[1]
-            if params.get("Module")!=None:
-                params["modulesupp"]= from_global_id(params["modulesupp"])[1]
-            if params.get("Module")!=None:
-                params["pay_module"]= from_global_id(params["pay_module"])[1]
-            if params.get("Week")!=None:
-                params["week"]= from_global_id(params["week"])[1]
+            lib.assign_value_to_foreign_key(params, "type", CourseType, "update")
+            lib.assign_value_to_foreign_key(params, "module", Module, "update")
+            lib.assign_value_to_foreign_key(params, "room_type", RoomType, "update")
+            lib.assign_value_to_foreign_key(params, "tutor", Tutor, "update")
+            lib.assign_value_to_foreign_key(params, "modulesupp", Module, "update")
+            lib.assign_value_to_foreign_key(params, "pay_module", Module, "update")
+            lib.assign_value_to_foreign_key(params, "week", Week, "update")
 
             #ManyToMany
-
-
             supp_tutor_ids =[]
             supp_tutor = None
             if params.get("supp_tutor") != None:
@@ -59,27 +55,23 @@ class UpdateCourse(graphene.Mutation):
                 supp_tutor = Tutor.objects.filter(id__in = supp_tutor_ids)
                 del params["supp_tutor"]
 
-
-
-            groups_ids =[]
+            groups_ids = []
             groups = None
             if params.get("groups") != None:
                 groups_ids = [ from_global_id(id)[1] for id in params["groups"] ]
                 groups= Tutor.objects.filter(id__in = groups_ids)
                 del params["groups"]
        
-
-            
-           
-        
-            courses_set.update(**{k: v for k, v in params.items()})
+            courses_set.update(**params)
             courses= courses_set.first()
             if groups != None:
+                courses.groups.clear()
                 courses.groups.add(*groups)
             if supp_tutor != None:
+                courses.supp_tutor.clear()
                 courses.supp_tutor.add(*supp_tutor)
             courses.save()
 
-            return UpdateCourse(courses=courses, groups= courses.groups.all(), supp_tutor=courses.supp_tutor.all())
+            return UpdateCourse(courses=courses, supp_tutor=courses.supp_tutor.all())
         else:
             print('Course Type with given ID does not exist in the database')

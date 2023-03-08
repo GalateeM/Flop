@@ -7,6 +7,7 @@ class GenericGroupFilter(FilterSet):
     class Meta:
         model = GenericGroup
         fields = {
+            'id' : ["exact"],
             'name' : ['icontains', 'istartswith'],
             'train_prog__name' : ['icontains', 'istartswith'],
             'type__name' : ['icontains', 'istartswith'],

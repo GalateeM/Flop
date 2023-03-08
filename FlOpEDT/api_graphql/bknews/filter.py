@@ -5,6 +5,7 @@ class BknewsFilter(FilterSet):
     class Meta:
         model = BreakingNews
         fields = {
+            'id' : ["exact"],
             'department__name' : ['icontains', 'istartswith'],
             'department__abbrev' : ['exact'],
             'week' : ['exact'],
@@ -15,6 +16,5 @@ class BknewsFilter(FilterSet):
             'txt' : ['icontains', 'istartswith'],
             'is_linked' : ['icontains', 'istartswith'],
             'fill_color' : ['exact'],
-            'strk_color' : ['exact'],
-            'id' : ["exact"]
+            'strk_color' : ['exact']
         }

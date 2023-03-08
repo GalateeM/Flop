@@ -7,13 +7,9 @@ class TrainingProgrammeFilter(FilterSet):
     class Meta:
         model = TrainingProgramme
         fields = {
+            'id' : ['exact'],
             'abbrev': ['exact']
         }
 
     def filter_dept(self, queryset, name, value):
         return queryset.exclude(department = None).filter(department__abbrev = value)
-
-        """ if queryset.filter(department = None).count() == 0:
-            return queryset.filter(department__abbrev = value)
-        else:
-            return TrainingProgramme.objects.none() """

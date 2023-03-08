@@ -51,7 +51,7 @@ class UpdateTutor(graphene.Mutation):
                 del params["departments"]
             # ###################
             
-            tutor_set.update(**{k: v for k, v in params.items()})
+            tutor_set.update(**params)
             tutor = tutor_set.first()
             if departments != None:
                 tutor.departments.clear()

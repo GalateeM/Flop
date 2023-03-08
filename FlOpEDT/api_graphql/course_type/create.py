@@ -17,7 +17,7 @@ class CreateCourseType(graphene.Mutation):
     # manyToManyField
     group_types = graphene.List(GroupTypeNode)
     # #################
-
+    
     @classmethod
     def mutate(cls, root, info, **params):
         # foreign keys

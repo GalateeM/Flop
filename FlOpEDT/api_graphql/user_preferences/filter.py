@@ -9,6 +9,7 @@ class UserPreferenceFilter(FilterSet):
     class Meta:
         model = UserPreference
         fields = {
+            'id' : ['exact'],
             'user__username' : ['exact', 'icontains'],
             'user__first_name' : ['icontains', 'istartswith'], 
             'week__nb' : ['exact'], 

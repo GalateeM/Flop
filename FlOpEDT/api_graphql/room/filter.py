@@ -7,6 +7,7 @@ class RoomFilter(FilterSet):
     class Meta:
         model = Room
         fields = {
+            'id' : ['exact'],
             "name" : ["icontains"]
         }
 

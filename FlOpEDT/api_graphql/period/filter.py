@@ -5,6 +5,7 @@ class PeriodFilter(FilterSet):
     class Meta:
         model = Period
         fields = {
-                    'department__name' : ['icontains', 'istartswith'],
-                    'name' : ['exact']
-                }
+            'id' : ["exact"],
+            'department__name' : ['icontains', 'istartswith'],
+            'name' : ['exact']
+        }

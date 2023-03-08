@@ -9,6 +9,7 @@ class ModuleFilter(FilterSet):
     class Meta:
         model = Module
         fields = {
+            'id' : ["exact"],
             'name': ['icontains', 'istartswith'],
             'abbrev': ['exact'],
             'ppn' : ['icontains'],
@@ -16,7 +17,7 @@ class ModuleFilter(FilterSet):
             'head__first_name' : ['icontains'],
             'train_prog__abbrev': ['exact'],
             'period__name': ['exact'],
-            'url' : ['exact', 'icontains'],
+            'url' : ['exact', 'icontains']
         }
         exclude = ('description',)
 

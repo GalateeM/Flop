@@ -5,6 +5,7 @@ class QuoteTypeFilter(FilterSet):
     class Meta:
         model = QuoteType
         fields = {
+            'id' : ['exact'],
             'name' : ['exact', 'icontains', 'istartswith'],
             'abbrev' : ['exact'],
             'parent__abbrev' : ['exact'],

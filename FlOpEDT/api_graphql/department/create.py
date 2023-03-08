@@ -11,5 +11,5 @@ class CreateDepartment(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
-        department = Department.objects.create(**{k: v for k, v in params.items() if params[k]})
+        department = Department.objects.create(**params)
         return CreateDepartment(department=department)
