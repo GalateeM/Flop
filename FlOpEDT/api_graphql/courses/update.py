@@ -59,7 +59,7 @@ class UpdateCourse(graphene.Mutation):
             groups = None
             if params.get("groups") != None:
                 groups_ids = [ from_global_id(id)[1] for id in params["groups"] ]
-                groups= Tutor.objects.filter(id__in = groups_ids)
+                groups= GenericGroup.objects.filter(id__in = groups_ids)
                 del params["groups"]
        
             courses_set.update(**params)
