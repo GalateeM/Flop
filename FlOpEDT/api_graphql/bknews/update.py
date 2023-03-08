@@ -4,6 +4,7 @@ import graphene
 from .types import BknewsType
 from graphql_relay import from_global_id
 from base.models import Department
+from api_graphql import lib
 
 class UpdateBknews(graphene.Mutation):
     class Arguments:
@@ -27,8 +28,7 @@ class UpdateBknews(graphene.Mutation):
         bknews_set = BreakingNews.objects.filter(id=id)
         if bknews_set:
             # foreign keys
-            if params.get("department") != None:
-                params["department"] = from_global_id(params["department"])[1]
+            lib.assign_value_to_foreign_key(params, "department", Department, "update")
             # ##############
 
             bknews_set.update(**params)

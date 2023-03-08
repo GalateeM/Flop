@@ -48,19 +48,6 @@ class UpdateCourse(graphene.Mutation):
             lib.assign_value_to_foreign_key(params, "week", Week, "update")
 
             #ManyToMany
-            """ supp_tutor_ids =[]
-            supp_tutor = None
-            if params.get("supp_tutor") != None:
-                supp_tutor_ids = [ from_global_id(id)[1] for id in params["supp_tutor"] ]
-                supp_tutor = Tutor.objects.filter(id__in = supp_tutor_ids)
-                del params["supp_tutor"]
-
-            groups_ids = []
-            groups = None
-            if params.get("groups") != None:
-                groups_ids = [ from_global_id(id)[1] for id in params["groups"] ]
-                groups= GenericGroup.objects.filter(id__in = groups_ids)
-                del params["groups"] """
             supp_tutor = lib.get_manyToManyField_values(params, "supp_tutor", Tutor)
             groups = lib.get_manyToManyField_values(params, "groups", GenericGroup)
        
@@ -68,6 +55,7 @@ class UpdateCourse(graphene.Mutation):
             courses = courses_set.first()
             lib.assign_values_to_manyToManyField(courses, "supp_tutor", supp_tutor)
             lib.assign_values_to_manyToManyField(courses, "groups", groups)
+            courses.save()
 
             return UpdateCourse(courses=courses, supp_tutor=courses.supp_tutor.all())
         else:

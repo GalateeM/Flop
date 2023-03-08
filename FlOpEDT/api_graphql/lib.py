@@ -5,7 +5,11 @@ def assign_value_to_foreign_key (params, fk, type_fk, mutation_name):
     """
     if params.get(fk, None):
         id_fk = from_global_id(params[fk])[1]
-        params[fk] = type_fk.objects.get(id=id_fk)
+        try:
+            params[fk] = type_fk.objects.get(id=id_fk)
+        except type_fk.DoesNotExist:
+            if mutation_name == "create":
+                params[fk] = None
     else:
         if mutation_name == "create":
             params[fk] = None
@@ -23,7 +27,7 @@ def get_manyToManyField_values (params, field, type_field):
 def assign_values_to_manyToManyField (model, field, value_to_add):
     """ Pour affecter des valeurs à des arguments de type ManyToMany dans les mutations
     """
-    if value_to_add != None:
+    if value_to_add != None and len(value_to_add) > 0:
         getattr(model, field).clear()
         getattr(model, field).add(*value_to_add)
         model.save()

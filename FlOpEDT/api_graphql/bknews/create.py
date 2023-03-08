@@ -3,6 +3,7 @@ from displayweb.models import BreakingNews
 from base.models import Department
 from .types import BknewsType
 from graphql_relay import from_global_id
+from api_graphql import lib
 
 class CreateBknews(graphene.Mutation):
     class Arguments:
@@ -22,15 +23,9 @@ class CreateBknews(graphene.Mutation):
     @classmethod
     def mutate(cls, root, info, **params):
         # foreign keys
-        department = None
-        if params.get("department") != None:
-            id = from_global_id(params["department"])[1]
-            department = Department.objects.get(id=id)
-            del params["department"]
+        lib.assign_value_to_foreign_key(params, "department", Department, "create")
         # #############
 
         bknews = BreakingNews.objects.create(**params)
-        bknews.department = department
-        bknews.save()
 
         return CreateBknews(bknews=bknews)
