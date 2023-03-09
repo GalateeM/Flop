@@ -94,7 +94,7 @@ def test_filter_dept (client_query, group2 : GenericGroup, group5 : GenericGroup
 
     res = execute_query(client_query, query, "genericGroups")
     data = get_data(res)
-    names = set(["Group 2", "Group 5", "L2 MIASHS", "L3 MIASHS", "Groupe Type 2"])
-    size = set([2, 5])
+    names = set([group2.name, group2.type.name, group2.train_prog.name, group5.name, group5.type.name, group5.train_prog.name])
+    size = set([group2.size, group5.size])
     assert set(data["name"]) == names
     assert set(data["size"]) == size
