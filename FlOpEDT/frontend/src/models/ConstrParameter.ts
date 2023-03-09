@@ -56,6 +56,24 @@ export class ConstrParameter {
     }
 
     static unserialize(obj: any) {
-        return new ConstrParameter(obj.name, obj.type, obj.required, obj.multiple, obj.id_list)
+        const id_list:Array<number> = []
+        obj.id_list.forEach((e:string) => {
+            id_list.push(+e)
+        });
+        return new ConstrParameter(obj.name, obj.type, obj.required, obj.multiple, id_list)
     }
+
+    static types(){
+        return Object.values(ConstrParameterType).filter((e)=>isNaN(Number(e))) as string[]
+    }
+}
+
+export enum ConstrParameterType{
+    course_types,
+    department,
+    groups,
+    modules,
+    train_progs,
+    tutors,
+    weeks
 }

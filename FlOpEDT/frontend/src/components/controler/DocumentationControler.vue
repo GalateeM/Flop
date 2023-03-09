@@ -3,7 +3,7 @@
     <template v-if="isResolved">
         <div>
             <template v-if="doc">
-                <MarkdownDisplayer :doc="doc" />
+                <MarkdownDisplayer :doc="doc" :constraint="constraint"/>
             </template>
         </div>
     </template>
@@ -21,7 +21,7 @@ import { MarkdownParser } from '@/models/MardownParser'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 
 import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
-import { type Ref, ref } from 'vue'
+import { type Ref, ref, onMounted } from 'vue'
 import axios from 'axios'
 
 interface Props {
@@ -33,8 +33,13 @@ const doc: Ref<MarkdownDocumentation | null> = ref(null)
 const p = new MarkdownParser()
 const isResolved = ref(false)
 
+const isMounted = ref(false)
+onMounted(() => {
+    isMounted.value = true
+})
+
 await axios
-    .get('/fr/api/ttapp/docu/' + props.constraint.name + '.md')
+    .get('/fr/api/ttapp/docu/' + props.constraint.className + '.md')
     .then(function (response) {
         isResolved.value = true
         p.parse(response.data, props.constraint).then((response) => (doc.value = response))

@@ -6,17 +6,20 @@ import { SimpleStoreMap } from './SimpleStoreMap'
 
 
 class CourseTypeStore extends SimpleStoreMap<number,CourseType> {
-    constructor() {
-        super()
-        setTimeout(() => {
-            const envItems = window.eval("database['course_types']")
-            Object.keys(envItems).forEach((k) => {
-                const envItem = envItems[k]
-                const id = Number(k)
-                const curItem = new CourseType(id, envItem)
-                this.insertNew(curItem)
-            })
-        }, 5000)
+    gatherData() {
+        return new Promise<Array<CourseType>>((resolve, reject) => {
+            setTimeout(() => {
+                const res: Array<CourseType> = []
+                const envItems = window.eval("database['course_types']")
+                Object.keys(envItems).forEach((k) => {
+                    const envItem = envItems[k]
+                    const id = Number(k)
+                    const curItem = new CourseType(id, envItem)
+                    res.push(curItem)
+                })
+                resolve(res)
+            }, 5000)
+        })
     }
 }
 
@@ -24,12 +27,17 @@ export const useCourseTypeStore = defineStore('courseType', () => {
     /**
      * Sorted by classes then by objects
      */
-    const map: SimpleStoreMap<number,CourseType> = new CourseTypeStore()
+    const store: SimpleStoreMap<number,CourseType> = new CourseTypeStore()
 
-    const items = map.items
+    const items = store.items
+
     function insertNew(item:CourseType){
-        map.insertNew(item)
+        store.insertNew(item)
+    }
+        
+    function initialize() {
+        return store.initialize()
     }
 
-    return { items , insertNew }
+    return { items , insertNew, initialize }
 })
