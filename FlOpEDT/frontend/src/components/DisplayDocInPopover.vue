@@ -12,15 +12,17 @@
                     {{ showDoc ? '⬆' : '⬇' }}
                 </button>
             </div>
-            <template v-if="showDoc">
-                <div class="scrollbar scrollbar-primary">
-                    <Suspense>
-                        <DocumentationControler :constraint="selectedConstraint" />
-                        <template #fallback>
-                            <p>Chargement</p>
-                        </template>
-                    </Suspense>
-                </div>
+            <template v-if="selectedConstraint">
+                <template v-if="showDoc">
+                    <div class="scrollbar scrollbar-primary">
+                        <Suspense>
+                            <DocumentationControler :constraint="selectedConstraint" />
+                            <template #fallback>
+                                <p>Chargement</p>
+                            </template>
+                        </Suspense>
+                    </div>
+                </template>
             </template>
         </div>
     </TriggeredTeleporter>
@@ -37,7 +39,7 @@ const DESACTIVATE_TELEPORTS = ref(false)
 
 interface Props {
     listeningTarget: EventTarget
-    selectedConstraint: Constraint
+    selectedConstraint: Constraint | null
     /**
      * Reference to know if the documentation is shown
      */

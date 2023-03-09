@@ -6,23 +6,19 @@ import { ref } from 'vue'
 import { SimpleStoreMap } from './SimpleStoreMap'
 
 class GroupStore extends SimpleStoreMap<number,Group> {
-    constructor() {
-        super()
-        //Fetch the API to fill the store
-        // const api = ref<FlopAPI>(requireInjection(apiKey))
-        // api.value.fetch.departments().then((value) => {
-        //     value.forEach((d) => this.insertNew(Group.unserialize(d)))
-        //     console.log(this.items.value)
-        // })
-
-        setTimeout(() => {
-            const envItems = window.eval("database['groups']")
-            Object.keys(envItems).forEach((k) => {
-                const envItem = envItems[k]
-                const curItem = Group.unserialize(envItem)
-                this.insertNew(curItem)
-            })
-        }, 5000)
+    gatherData() {
+        return new Promise<Array<Group>>((resolve, reject) => {
+            setTimeout(() => {
+                const res: Array<Group> = []
+                const envItems = window.eval("database['groups']")
+                Object.keys(envItems).forEach((k) => {
+                    const envItem = envItems[k]
+                    const curItem = Group.unserialize(envItem)
+                    res.push(curItem)
+                })
+                resolve(res)
+            }, 5000)
+        })
     }
 }
 
@@ -30,12 +26,17 @@ export const useGroupStore = defineStore('group', () => {
     /**
      * Sorted by classes then by objects
      */
-    const map: SimpleStoreMap<number,Group> = new GroupStore()
+    const store: SimpleStoreMap<number,Group> = new GroupStore()
 
-    const items = map.items
+    const items = store.items
+
     function insertNew(item:Group){
-        map.insertNew(item)
+        store.insertNew(item)
+    }
+        
+    function initialize() {
+        return store.initialize()
     }
 
-    return { items , insertNew }
+    return { items , insertNew, initialize }
 })

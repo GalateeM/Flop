@@ -28,37 +28,37 @@ export class MarkdownParser {
     async parse(file: string, assocCst: Constraint) {
         return new Promise<MarkdownDocumentation>((resolve) => {
             let content = file
+            const paramCallCount = new Map<string, number>()
             //RegExp to find all interpolations (mustache) in the markdown
             const regex = new RegExp('(?<match>{{(?<content>.*)}})', 'g')
             const it = content.matchAll(regex)
 
-            //List of interpolations to be replaced
-            const replacements: [string, string][] = []
             let resultat = it.next()
             while (!resultat.done) {
                 if (resultat.value.groups?.match) {
                     //clean the content of the interpolation
-                    const content = resultat.value.groups?.content.trim()
-                    if (content) {
+                    const interpContent = resultat.value.groups?.content.trim()
+                    if (interpContent) {
                         //Retrieve the constant parameter associated to the interpolation
-                        const cstParam = assocCst.parameters.find((p) => p.name == content)
-                        if (cstParam) {
-                            //Set the replacement to calls to the store associated to the interpolation
-                            const newString = cstParam.id_list
-                                .map((id) => cstParam.name + '.get(' + id + ')', '')
-                                .join("+ ' ' +")
-                            replacements.push([resultat.value.groups.match, newString])
-                        }
+                        // const cstParam = assocCst.parameters.get(interpContent)
+                        const cstParam = {name : interpContent}
+                        // if (cstParam) {
+                            let v = 1
+                            if (paramCallCount.has(cstParam.name)) {
+                                v = paramCallCount.get(cstParam.name) as number
+                                paramCallCount.set(cstParam.name, ++v)
+                            } else paramCallCount.set(cstParam.name, v)
+
+                            //Replace the interpolation call by an anchor point
+                            const newString = '<div id="' + cstParam.name + 'Displayer'+v+'"></div>'
+                            content = content.replace(resultat.value.groups.match,newString)
+
                         resultat = it.next()
                     }
                 }
             }
-
-            //Replace old interpolations by their respective replacement
-            replacements.forEach((e) => (content = content.replaceAll(e[0], '{{' + e[1] + '}}')))
-            console.log(content)
-            resolve(new MarkdownDocumentation(content))
+            const id = assocCst.className + assocCst.id
+            resolve(new MarkdownDocumentation(id,content,paramCallCount))
         })
-        // })
     }
 }

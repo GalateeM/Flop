@@ -3,16 +3,19 @@ import { defineStore } from 'pinia'
 import { SimpleStoreMap } from './SimpleStoreMap'
 
 class TrainProgStore extends SimpleStoreMap<number, TrainProg> {
-    constructor() {
-        super()
-        setTimeout(() => {
-            const env = window.eval("database['train_progs']")
-            Object.keys(env).forEach((key) => {
-                const item = env[key]
-                const CurrentItem = TrainProg.unserialize(item)
-                this.insertNew(CurrentItem)
-            })
-        }, 5000)
+    gatherData() {
+        return new Promise<Array<TrainProg>>((resolve, reject) => {
+            setTimeout(() => {
+                const res: Array<TrainProg> = []
+                const env = window.eval("database['train_progs']")
+                Object.keys(env).forEach((key) => {
+                    const item = env[key]
+                    const curItem = TrainProg.unserialize(item)
+                    res.push(curItem)
+                })
+                resolve(res)
+            }, 5000)
+        })
     }
 }
 
@@ -26,6 +29,10 @@ export const useTrainProgStore = defineStore('trainProg', () => {
     function insertNew(item: TrainProg) {
         store.insertNew(item)
     }
+        
+    function initialize() {
+        return store.initialize()
+    }
 
-    return { items, insertNew }
+    return { items , insertNew, initialize }
 })

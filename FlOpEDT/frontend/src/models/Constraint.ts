@@ -4,28 +4,30 @@ import { ConstrParameter } from '@/models/ConstrParameter'
  * @class
  */
 export class Constraint {
-    private _id!: number
+    private static ID_REGEX = new RegExp('^(?<className>.+)(?<inClassId>\\d)+$')
+
+    private _inClassId!: number
     private _title!: string
-    private _name!: string
+    private _className!: string
     private _weight!: number
     private _is_active!: boolean
     private _comment!: string
     private _modified_at!: string
-    private _parameters!: Array<ConstrParameter>
+    private _parameters!: Map<string, ConstrParameter>
 
     constructor(
-        id: number,
+        inClassId: number,
         title: string,
-        name: string,
+        className: string,
         weight: number,
         is_active: boolean,
         comment: string,
         modified_at: string,
-        parameters: Array<ConstrParameter>
+        parameters: Map<string, ConstrParameter>
     ) {
-        this.id = id
+        this.inClassId = inClassId
         this.title = title
-        this.name = name
+        this.className = className
         this.weight = weight
         this.is_active = is_active
         this.comment = comment
@@ -34,10 +36,21 @@ export class Constraint {
     }
 
     get id() {
-        return this._id
+        return this.className + this._inClassId
     }
     set id(id) {
-        this._id = id
+        const match = id.match(Constraint.ID_REGEX)
+        if (match && match.groups?.inClassId && match.groups?.className) {
+            this._inClassId = +match.groups.inClassId
+            this._className = match.groups.className
+        } else throw Error('Invalid argument')
+    }
+
+    get inClassId() {
+        return this._inClassId
+    }
+    set inClassId(inClassId) {
+        this._inClassId = inClassId
     }
 
     get title() {
@@ -47,11 +60,11 @@ export class Constraint {
         this._title = title
     }
 
-    get name() {
-        return this._name
+    get className() {
+        return this._className
     }
-    set name(name) {
-        this._name = name
+    set className(className) {
+        this._className = className
     }
 
     get weight() {
@@ -94,9 +107,10 @@ export class Constraint {
     }
 
     static unserialize(obj: any) {
-        const listParam: Array<ConstrParameter> = []
+        const listParam = new Map<string, ConstrParameter>()
         obj.parameters.forEach((param: any) => {
-            listParam.push(ConstrParameter.unserialize(param))
+            const p = ConstrParameter.unserialize(param)
+            listParam.set(p.name, p)
         })
         return new Constraint(
             obj.id,

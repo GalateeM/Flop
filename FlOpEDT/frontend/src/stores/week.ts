@@ -3,16 +3,19 @@ import { defineStore } from 'pinia'
 import { SimpleStoreMap } from './SimpleStoreMap'
 
 class WeekStore extends SimpleStoreMap<number,Week> {
-    constructor() {
-        super()
-        setTimeout(() => {
-            const env = window.eval("database['weeks']")
-            Object.keys(env).forEach((key) => {
-                const item = env[key]
-                const CurrentItem = Week.unserialize(item)
-                this.insertNew(CurrentItem)
-            })
-        }, 5000)
+    gatherData() {
+        return new Promise<Array<Week>>((resolve, reject) => {
+            setTimeout(() => {
+                const res: Array<Week> = []
+                const env = window.eval("database['weeks']")
+                Object.keys(env).forEach((key) => {
+                    const item = env[key]
+                    const curItem = Week.unserialize(item)
+                    res.push(curItem)
+                })
+                resolve(res)
+            }, 5000)
+        })
     }
 }
 
@@ -20,12 +23,16 @@ export const useWeekStore = defineStore('week', () => {
     /**
      * Sorted by classes then by objects
      */
-    const map: SimpleStoreMap<number,Week> = new WeekStore()
+    const store: SimpleStoreMap<number,Week> = new WeekStore()
 
-    const items = map.items
+    const items = store.items
     function insertNew(item:Week){
-        map.insertNew(item)
+        store.insertNew(item)
+    }
+        
+    function initialize() {
+        return store.initialize()
     }
 
-    return { items , insertNew }
+    return { items , insertNew, initialize }
 })
