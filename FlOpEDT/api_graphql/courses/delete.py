@@ -21,10 +21,3 @@ class DeleteCourse(graphene.Mutation):
         
         except Course.DoesNotExist:
             print('Course Type with given ID does not exist in the database')
-
-        
-        
-
-
-
-        
