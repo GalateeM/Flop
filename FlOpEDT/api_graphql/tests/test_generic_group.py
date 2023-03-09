@@ -70,6 +70,14 @@ def group5(db, group_type2 : GroupType, training_l3_miashs : TrainingProgramme) 
         type = group_type2, size = 5
     )
 
+@pytest.fixture
+def group6(db, group_type4 : GroupType, training_l3_langues : TrainingProgramme) -> GenericGroup:
+    return GenericGroup.objects.create(
+        name = "Group 6",
+        train_prog = training_l3_langues,
+        type = group_type4, size = 6
+    )
+
 # Query
 def test_filter_dept (client_query, group2 : GenericGroup, group5 : GenericGroup) :
     query = \
@@ -98,3 +106,102 @@ def test_filter_dept (client_query, group2 : GenericGroup, group5 : GenericGroup
     size = set([group2.size, group5.size])
     assert set(data["name"]) == names
     assert set(data["size"]) == size
+
+def test_with_filters (client_query, group4 : GenericGroup, group6 : GenericGroup):
+    query = \
+    """
+        query {
+            genericGroups (dept : "LNG", name_Icontains : "4") {
+                edges {
+                    node {
+                        name
+                        size
+                    }
+                }
+            }
+        }
+    """
+    res = execute_query(client_query, query, "genericGroups")
+    data = get_data(res)
+    assert group4.name in data["name"]
+    assert group6.name not in data["name"]
+
+# Mutations
+def test_mutations (db, client_query, training_l1_info : TrainingProgramme, group_type1 : GroupType, training_l3_langues : TrainingProgramme, group_type4 : GroupType, capsys):
+    group_type1_id = to_global_id("GroupType", group_type1.id)
+    group_type4_id = to_global_id("GroupType", group_type4.id)
+    training_l1_info_id = to_global_id("TrainingProgramme", training_l1_info.id)
+    training_l3_langues_id = to_global_id("TrainingProgramme", training_l3_langues.id)
+
+    create = \
+    """ 
+        mutation {
+            createGenericGroup (
+                name : "Group 01"
+                size : 11
+                trainProg : \"""" + training_l1_info_id + \
+    """\"       type : \"""" + group_type1_id + \
+    """\"       ) {
+                    genericGroup {
+                        id
+                    }
+            }
+        }
+    """
+
+    global_id = execute_mutation(client_query, create, "createGenericGroup", "genericGroup")
+    try:
+        obj_id = from_global_id(global_id)[1]
+        obj = GenericGroup.objects.get(id=obj_id)
+        with capsys.disabled():
+            print("The object was created successfully")
+
+        update = \
+            """ 
+            mutation {
+                updateGenericGroup (
+                    id : \"""" + global_id + \
+            """\"   name : "Group 07"
+                    size : 77
+                    trainProg : \"""" + training_l3_langues_id + \
+        """\"       type : \"""" + group_type4_id + \
+        """\" ) {
+                        genericGroup {
+                            id
+                        }
+                    }
+            }
+        """
+
+        execute_mutation(client_query, update, "updateGenericGroup", "genericGroup")
+        obj_updated = GenericGroup.objects.get(id=obj_id)
+        assert obj.name != obj_updated.name
+        assert obj.size != obj_updated.size
+        assert obj.train_prog.name != obj_updated.train_prog.name
+        assert obj.type.name != obj_updated.type.name
+        with capsys.disabled():
+            print("The object was updated successfully")
+
+        delete = """
+        mutation {
+            deleteGenericGroup ( 
+                id : \"""" + global_id + \
+                """\" ) {
+                genericGroup {
+                    id
+                }
+            }
+            }
+        """
+        execute_mutation(client_query, delete, "deleteGenericGroup", "genericGroup")
+        try:
+            obj_deleted = GenericGroup.objects.get(id=obj_id)
+            with capsys.disabled():
+                print("The object was not deleted")
+        except GenericGroup.DoesNotExist:
+            with capsys.disabled():
+                print("The object was deleted successfully")
+    except GenericGroup.DoesNotExist:
+        with capsys.disabled():
+            print("The object was not created")
+        assert False

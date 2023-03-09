@@ -220,7 +220,6 @@ def test_mutations (db, client_query, department_langues : Department, departmen
             with capsys.disabled():
                 print("The object was deleted successfully")
 
-
     except CourseType.DoesNotExist:
         with capsys.disabled():
             print("The object was not created")
