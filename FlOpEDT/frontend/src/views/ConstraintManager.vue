@@ -2,7 +2,7 @@
     <template v-if="selectedConstraint">
         <DisplayDocInPopover :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget" :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInPopover>
     </template>
-    <DisplayDocInNewConstraint></DisplayDocInNewConstraint>
+    <DisplayDocInNewConstraint :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraint>
 </template>
 
 <script setup lang="ts">
