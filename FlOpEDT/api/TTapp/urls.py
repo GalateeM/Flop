@@ -41,4 +41,4 @@ routerTTapp.register(r'constraint_types', views.FlopConstraintTypeViewSet, basen
 routerTTapp.register(r'novisio', views.NoVisioViewSet, basename ="novisio")
 routerTTapp.register(r'constraints_fields', views.FlopConstraintFieldViewSet, basename ="constraints_fields")
 routerTTapp.register('docu/(?P<name>\w+\.\D{1,4})',views.FlopDocVisu,basename="")
-routerTTapp.register('img/(?P<name>\w+\.\D{1,4})',views.FlopImgVisu,basename="")
+routerTTapp.register('images/(?P<name>\w+\.\D{1,4})',views.FlopImgVisu,basename="")

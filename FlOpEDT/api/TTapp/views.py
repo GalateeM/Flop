@@ -26,6 +26,7 @@ from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from django.apps import apps
 from django.http import FileResponse,HttpResponse
+from pathlib import Path
 from TTapp.FlopConstraint import FlopConstraint, all_subclasses
 from base.models import Department
 import TTapp.TTConstraints.visio_constraints as ttv
@@ -48,6 +49,7 @@ IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
 CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'corrupted.json')
 DOMAIN_REPLACE_REGEX = r"(\$domaine)"
 EN_DIR_NAME = "en"
+REGEX_IMAGE = r"(?:[!]\[(.*?)\])\(((\.\.)(.*?))\)"
 # ---------------
 # ---- TTAPP ----
 # ---------------
@@ -497,95 +499,104 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
         serializer = serializers.FlopConstraintFieldSerializer(fields_list, many=True)
         return Response(serializer.data)
 
+
 class CustomUrl():
-    def __init__(self,url):
-        self.url = url #full url
-        self.protocol = url.split("//")[0] #protocol with : at the end
-        splited_url = url.split("//")[1].split("/")
-        self.domain = splited_url[0] #domain name
-        self.full_domain = self.protocol + "//" + self.domain #full domain with protocol
-        self.lang = splited_url[1] #language
+    def __init__(self, request):
+        self.domain = request.get_host()
+        self.protocol = request.scheme
+        self.full_domain = self.protocol + "://" + self.domain
+        self.splited_path = request.path.split("/")
+        self.lang = self.splited_path[1]
+
 
 @method_decorator(name='list',
-            decorator=swagger_auto_schema(
-            )
-            )
-class FlopDocVisu(viewsets.ViewSet):   
+                  decorator=swagger_auto_schema(
+                  )
+                  )
+class FlopDocVisu(viewsets.ViewSet):
     def list(self, request, **kwargs):
         name = kwargs['name']
-        #weird way to get lang from url, should be modified
-        url = CustomUrl(self.request.build_absolute_uri())
+        # weird way to get lang from url, should be modified
+        url = CustomUrl(request)
+        dir_lang = os.path.join(DOC_DIR, url.lang)
 
-        dir_lang = os.path.join(DOC_DIR,url.lang)
-        file_path = os.path.join(dir_lang,name) 
-        
         try:
             data = json.load(open(CORRUPTED_JSON_PATH))
         except:
             return HttpResponse(status=500)
         forbidden_files = data["corrupted"]
 
-
-        if (url.lang != EN_DIR_NAME):
-            #Test if doc does exist in lang and if not try in english
-            try:
-                file_handle = open(file_path,'r')
-            except:
-                dir_lang = os.path.join(DOC_DIR,EN_DIR_NAME)
-                file_path = os.path.join(dir_lang,name)
-                try:
-                     file_handle = open(file_path,'r')
-                except:
-                    return HttpResponse(status=404)
+        if (url.lang != EN_DIR_NAME):  # if doc not found in lang fallback to english
+            f_path = recursive_search(dir_lang, name)
+            if (len(f_path) == 0):
+               dir_lang = os.path.join(DOC_DIR, EN_DIR_NAME)
+               f_path = recursive_search(dir_lang, name)
+               if (len(f_path) == 0):
+                   return HttpResponse(status=404)
         else:
-            try:
-                file_handle = open(file_path,'r')
-            except:
-                return HttpResponse(status=404) 
-        
-        text = domain_replace(file_handle,url.full_domain)
+            f_path = recursive_search(dir_lang, name)
+            if (len(f_path) == 0):
+                return HttpResponse(status=404)
 
-        #check if file is not fordidden
-        if(name in forbidden_files):
+        file_handle = open(f_path, 'r')
+        text = domain_replace(file_handle, url.full_domain)
+
+        # check if file is not fordidden
+        if (name in forbidden_files):
             print("\033[91m"+"Attempt to access forbidden file : "+name+"\033[0m")
-            return HttpResponse(status=404) 
+            return HttpResponse(status=404)
         else:
-            return HttpResponse(text,content_type="text/plain; charset=utf-8")
-            #return FileResponse(b,content_type="text/plain; charset=utf-8")    
+            return HttpResponse(text, content_type="text/plain; charset=utf-8")
+            # return FileResponse(b,content_type="text/plain; charset=utf-8")
 
-            
     def create(self, request, **kwargs):
         return HttpResponse(status=403)
+
     def update(self, request, **kwargs):
         return HttpResponse(status=403)
+
     def destroy(self, request, **kwargs):
         return HttpResponse(status=403)
 
 
 @method_decorator(name='list',
-            decorator=swagger_auto_schema(
-            )
-            )
+                  decorator=swagger_auto_schema(
+                  )
+                  )
 class FlopImgVisu(viewsets.ViewSet):
-    def list(self, request,**kwargs):
+    def list(self, request, **kwargs):
         name = kwargs['name']
-        file_path = os.path.join(IMG_DIR,name)
-        print(file_path)
-        try:
-            file_handle = open(file_path,'rb')
-        except:
-            return HttpResponse(status=404)     
-        response = FileResponse(file_handle)
-        return response
+        f_path = recursive_search(IMG_DIR, name)
+        if (len(f_path) == 0):
+            return HttpResponse(status=404)
+        file_handle = open(f_path, 'rb')
+        return FileResponse(file_handle)
+
     def create(self, request, **kwargs):
         return HttpResponse(status=403)
+
     def update(self, request, **kwargs):
         return HttpResponse(status=403)
+
     def destroy(self, request, **kwargs):
         return HttpResponse(status=403)
 
 
-def domain_replace(file,domain):
+def domain_replace(file, domain):
     text = file.read()
-    replaced = re.sub(DOMAIN_REPLACE_REGEX,domain,text)
+    # use 4th group (image name) from regex image and add the domain
+    image_path = domain+"/fr/api/ttapp"+r"\4"
+    full_link = "!["+r"\1"+"]("+image_path+")"  # rebuild
+    # if .. is found, match in group 3
+    
+    replaced = re.sub(REGEX_IMAGE, full_link, text)
     return replaced
+
+
+# search in path if filename(or regex) exist return [] if not found
+def recursive_search(path, filename):
+    liste = list(Path(path).rglob(filename))
+    if (len(liste) == 0):
+        return []
+    else:
+        return str(liste[0])
