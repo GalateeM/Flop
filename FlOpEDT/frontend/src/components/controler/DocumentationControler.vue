@@ -1,4 +1,5 @@
 <template>
+    <div class="container">
     <template v-if="isResolved">
         <div>
             <template v-if="doc">
@@ -7,8 +8,11 @@
         </div>
     </template>
     <template v-else>
-        <p>Cannot found documentation</p>
+        <div class="docNotFoundContainer">
+            <b class="text">Cannot found documentation</b>
+        </div>
     </template>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -40,4 +44,22 @@ await axios
     })
 </script>
 
-<style scoped></style>
+<style scoped>
+
+.container{
+    display: table;
+    width: 100%;
+}
+.docNotFoundContainer{
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    height: 10vh;
+}
+
+.text{
+    color:firebrick;
+    font-size:large;    
+}
+
+</style>
