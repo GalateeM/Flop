@@ -8,7 +8,7 @@
         <hr />
         <div>
             <div class="buttonContainer">
-                <button id="doc-show-btn" :class="showBtnClassDefiner()" @click="swap()">
+                <button id="doc-show-btn" :class="showBtnClassDefiner()" @click="swap">
                     {{ showDoc ? '⬆' : '⬇' }}
                 </button>
             </div>
@@ -38,8 +38,16 @@ const DESACTIVATE_TELEPORTS = ref(false)
 interface Props {
     listeningTarget: EventTarget
     selectedConstraint: Constraint
+    /**
+     * Reference to know if the documentation is shown
+     */
+    showDoc: boolean
 }
 const props = withDefaults(defineProps<Props>(), {})
+
+const emit = defineEmits<{
+    (e:'updateShowDoc',value:boolean):void
+}>()
 
 /**
  * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
@@ -48,6 +56,8 @@ function enlargePopover() {
     const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
     if (popover !== null) {
         popover.style['max-width'] = '80vw'
+        window.scroll(popover.getBoundingClientRect().right,0)
+        
     }
     const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
     if (groupeOfButton !== null) {
@@ -58,15 +68,10 @@ function enlargePopover() {
 }
 
 /**
- * Reference to know if the documentation is shown
- */
-const showDoc = ref(false)
-
-/**
  * Swap showDoc value
  */
 function swap() {
-    showDoc.value = !showDoc.value
+    emit('updateShowDoc',props.showDoc)
 }
 
 /**
@@ -75,7 +80,7 @@ function swap() {
  */
 const showBtnClassDefiner = () => {
     enlargePopover()
-    return showDoc.value ? ' minusButton ' : ' plusButton '
+    return props.showDoc ? ' minusButton ' : ' plusButton '
 }
 </script>
 

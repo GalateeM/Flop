@@ -1,6 +1,6 @@
 <template>
     <template v-if="selectedConstraint">
-        <DisplayDocInPopover :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget"></DisplayDocInPopover>
+        <DisplayDocInPopover :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget" :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInPopover>
     </template>
     <DisplayDocInNewConstraint></DisplayDocInNewConstraint>
 </template>
@@ -12,6 +12,8 @@ import DisplayDocInPopover from  '@/components/DisplayDocInPopover.vue'
 import DisplayDocInNewConstraint from  '@/components/DisplayDocInNewConstraint.vue'
 import { useConstraintStore } from '@/stores/constraint'
 import type { Constraint } from '@/models/Constraint'
+
+const showDoc = ref(false)
 
 const constraintStore = useConstraintStore()
 
@@ -45,6 +47,10 @@ listeningTarget.addEventListener(
     },
     false
 )
+
+function swap() {
+    showDoc.value = !showDoc.value
+}
 
 document.addEventListener('click', (e) => {
     const currentPopover = window.eval('currentPopover')
