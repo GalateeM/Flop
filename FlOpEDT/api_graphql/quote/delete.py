@@ -10,7 +10,7 @@ class DeleteQuote(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    quotes = graphene.Field(QuoteType)
+    quotes = graphene.Field(QuoteNode)
 
 
     @classmethod

@@ -3,7 +3,7 @@ import pytest
 from graphene_django.utils.testing import graphql_query
 from base.models import Module, TrainingProgramme, Department, Period
 from people.models import Tutor
-from lib import *
+from lib import execute_query, get_data, execute_mutation, client_query
 
 @pytest.fixture
 def department_miashs(db) -> Department:
