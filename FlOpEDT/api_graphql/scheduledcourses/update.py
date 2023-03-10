@@ -1,7 +1,7 @@
 import graphene
 from base.models import  Course, ScheduledCourse, Room
 from people.models import Tutor
-from .types import ScheduledCourse  
+from .types import ScheduledCourseNode  
 from people.models import Tutor
 from graphql_relay import from_global_id
 from api_graphql import lib
@@ -18,7 +18,7 @@ class UpdateScheduledCourse(graphene.Mutation):
         work_copy = graphene.Int()
         tutor = graphene.Argument(graphene.ID)
 
-    scheduled_courses = graphene.Field(ScheduledCourse)
+    scheduled_courses = graphene.Field(ScheduledCourseNode)
 
     @classmethod
     def mutate(cls, root, info,id, **params):

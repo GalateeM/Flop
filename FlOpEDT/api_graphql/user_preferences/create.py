@@ -12,7 +12,7 @@ class CreateUserPreference(graphene.Mutation):
         user = graphene.Argument(graphene.ID, required = True)
         week = graphene.Argument(graphene.ID, required = True)
         day = graphene.String()
-        start_time = graphene.Int()
+        start_time = graphene.Int(required = True)
         duration = graphene.Int()
         value = graphene.Int()
 

@@ -132,7 +132,7 @@ def test_mutations(db, client_query, course_conception : Course, course_algo : C
                 course : \"""" + course_conception_id + \
     """\"       room : \"""" + room_conception_id + \
     """\"       tutor : \"""" + tutor_conception_id + \
-    """\"
+    """\"       startTime : 2
             ) {
                 scheduledCourses {
                     id
@@ -156,7 +156,7 @@ def test_mutations(db, client_query, course_conception : Course, course_algo : C
         """\"       course : \"""" + course_algo_id + \
         """\"       room : \"""" + room_algo_id + \
         """\"       tutor : \"""" + tutor_algo_prog_id + \
-        """\"
+        """\"       startTime : 5
                 ) {
                     scheduledCourses {
                         id
@@ -168,7 +168,7 @@ def test_mutations(db, client_query, course_conception : Course, course_algo : C
         execute_mutation(client_query, update, "updateScheduledCourse", "scheduledCourses")
         obj_updated = ScheduledCourse.objects.get(id=obj_id)
         assert obj.course.week.nb != obj_updated.course.week.nb
-        assert obj.course.year.nb != obj_updated.course.year.nb
+        assert obj.course.week.year != obj_updated.course.week.year
         assert obj.room.name != obj_updated.room.name
         assert obj.tutor.username != obj_updated.tutor.username
         with capsys.disabled():
