@@ -1,7 +1,8 @@
 import graphene
-from base.models import Room
+from base.models import Room, Department, RoomType
 from .types import RoomNode
 from graphql_relay import from_global_id
+
 
 class DeleteRoom(graphene.Mutation):
     class arguments:
@@ -14,7 +15,7 @@ class DeleteRoom(graphene.Mutation):
         id = from_global_id(id) [1]
         try:
             rooms = Room.objects.get(id=id)
-            rooms.delete
+            rooms.delete()
             return DeleteRoom(rooms)
         except Room.DoesNotExist:
-            print('Breaking new with given ID does not exist in the database')
+            print('Room with given ID does not exist in the database')
