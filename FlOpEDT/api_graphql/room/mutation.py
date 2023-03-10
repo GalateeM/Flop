@@ -5,6 +5,6 @@ from .delete import DeleteRoom
 
 class Mutation(BaseMutation):
 
-    create_rooms = CreateRoom.Field()
-    update_rooms = UpdateRoom.Field()
-    delete_rooms = DeleteRoom.Field()
+    create_room = CreateRoom.Field()
+    update_room = UpdateRoom.Field()
+    delete_room = DeleteRoom.Field()

@@ -5,7 +5,7 @@ from graphql_relay import from_global_id
 
 
 class DeleteRoom(graphene.Mutation):
-    class arguments:
+    class Arguments:
         id = graphene.ID(required=True)
 
     rooms = graphene.Field(RoomNode)
