@@ -7,5 +7,6 @@ class PeriodFilter(FilterSet):
         fields = {
             'id' : ["exact"],
             'department__name' : ['icontains', 'istartswith'],
-            'name' : ['exact']
+            'department__abbrev' : ['exact'],
+            'name' : ['exact', "icontains"]
         }
