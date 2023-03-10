@@ -50,7 +50,7 @@ class UpdateCourse(graphene.Mutation):
             #ManyToMany
             supp_tutor = lib.get_manyToManyField_values(params, "supp_tutor", Tutor)
             groups = lib.get_manyToManyField_values(params, "groups", GenericGroup)
-       
+            
             courses_set.update(**params)
             courses = courses_set.first()
             lib.assign_values_to_manyToManyField(courses, "supp_tutor", supp_tutor)

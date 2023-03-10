@@ -12,9 +12,6 @@ class CourseFilter(FilterSet):
             'no' : ['exact'],
             'tutor__username' : ['exact'],
             'tutor__first_name' : ['icontains', 'istartswith'],
-            'supp_tutor__username' : ['exact'],
-            'supp_tutor__first_name' : ['icontains', 'istartswith'],
-            'groups__name' : ['icontains', 'istartswith'],
             'module__name' : ['icontains', 'istartswith'],
             'module__abbrev' : ['exact'],
             'modulesupp__name' : ['icontains', 'istartswith'],
@@ -27,5 +24,5 @@ class CourseFilter(FilterSet):
         exclude = ('suspens', 'show_id')
     
     def filter_dept(self, queryset, name, value):
-        return queryset.exclude(type__department = None).exclude(room_type = None). \
-        filter(module__train_prog__department__abrev = value)
+        return queryset.exclude(type__department = None).exclude(module__train_prog__department = None). \
+        filter(module__train_prog__department__abbrev = value)
