@@ -20,4 +20,4 @@ class DeleteRoomType(graphene.Mutation):
 
             return DeleteRoomType(room_types)
         except RoomType.DoesNotExist:
-            print("RoomType with the given Id does not exist in the database")
+            print("Room Type with the given Id does not exist in the database")

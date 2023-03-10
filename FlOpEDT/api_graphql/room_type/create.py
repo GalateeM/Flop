@@ -7,8 +7,7 @@ from api_graphql import lib
 class CreateRoomType(graphene.Mutation):
     class Arguments:
         name = graphene.String(graphene.ID, required = True)
-        departments = graphene.Argument(graphene.ID)
-
+        department = graphene.Argument(graphene.ID)
 
     room_types = graphene.Field(RoomTypeNode)
 
@@ -17,7 +16,7 @@ class CreateRoomType(graphene.Mutation):
 
         #foreignkey
 
-        lib.assign_value_to_foreign_key(params,"departments", Department, "create")
+        lib.assign_value_to_foreign_key(params,"department", Department, "create")
 
         room_types = RoomType.objects.create(**params)
         return CreateRoomType(room_types)
