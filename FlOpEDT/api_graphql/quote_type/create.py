@@ -19,7 +19,7 @@ class CreateQuoteType(graphene.mutation):
 
         #foreignkey
 
-        lib.assign_value_to_foreign_key(params, "parents", QuoteType, "create")
+        lib.assign_value_to_foreign_key(params, "parent", QuoteType, "create")
 
         quote_types = QuoteType.objects.create(**params)
         return CreateQuoteType(quote_types)

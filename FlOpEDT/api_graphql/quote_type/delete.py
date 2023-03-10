@@ -22,4 +22,4 @@ class DeleteQuoteType(graphene.mutation):
 
             return DeleteQuoteType(quote_types)
         except QuoteType.DoesNotExist:
-            print("QuoteType with the given Id does not exist")
+            print("Quote Type with the given Id does not exist")

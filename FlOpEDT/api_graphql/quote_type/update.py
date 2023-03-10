@@ -9,7 +9,7 @@ from graphql_relay import from_global_id
 class UpdateQuoteType(graphene.mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String(graphene.ID, required = True)
+        name = graphene.String(graphene.ID)
         abbrev = graphene.String(graphene.ID)
         parent = graphene.Argument(graphene.ID)
 
@@ -31,4 +31,4 @@ class UpdateQuoteType(graphene.mutation):
 
             return UpdateQuoteType(quote_types)
         else:
-            print("QuoteType with the given Id doesn't exist")
+            print("Quote Type with the given Id doesn't exist")
