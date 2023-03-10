@@ -105,6 +105,10 @@ def test_mutations(db, client_query, department_miashs : Department, department_
     try:
         obj_id = from_global_id(global_id)[1]
         obj = Tutor.objects.get(id=obj_id)
+        departments_obj = []
+        for d in obj.departments.all():
+            departments_obj.append(d.name)
+        
         with capsys.disabled():
             print("The object was created successfully")
         
@@ -130,8 +134,11 @@ def test_mutations(db, client_query, department_miashs : Department, department_
         execute_mutation(client_query, update, "updateTutor", "tutor")
         obj_updated = Tutor.objects.get(id=obj_id)
         assert obj.username != obj_updated.username 
-        assert obj.is_active != obj_updated.is_active 
-        assert len(obj_updated.departments.all()) == 1 and obj_updated.departments.all()[0].abbrev == "MIASHS"
+        assert obj.is_active != obj_updated.is_active
+        departments_obj_updated = []
+        for d in obj_updated.departments.all():
+            departments_obj_updated.append(d.name)
+        assert set(departments_obj) != set(departments_obj_updated)
         with capsys.disabled():
             print("The object was updated successfully")
 

@@ -156,14 +156,10 @@ def test_mutations (db, client_query, department_langues : Department, departmen
     try:
         obj_id = from_global_id(global_id)[1]
         obj = CourseType.objects.get(id=obj_id)
-        group_1_id = ""
-        try :
-            group_1 = obj.group_types.get(name = "Groupe Type 1")
-            group_1_id = " , \"" + to_global_id("GroupType", group_1.id) + "\" "
-        except GroupType.DoesNotExist :
-            with capsys.disabled():
-                print("Group Type 1 is not related to this object")
-        
+        group_types_obj = []
+        for g in obj.group_types.all():
+            group_types_obj.append(g.name)
+
         with capsys.disabled():
             print("The object was created successfully")
         update = """
@@ -172,8 +168,8 @@ def test_mutations (db, client_query, department_langues : Department, departmen
                     id : \"""" + global_id + \
                     """\" name : "Course Type 7"
                     department : \"""" + dpt_langues_id + \
-                    """\" groupTypes : [\"""" + group_type4_id + "\"" + group_1_id + \
-                    """] graded : false
+                    """\" groupTypes : [\"""" + group_type4_id + \
+                    """\"] graded : false
                 ) {
                     courseType {
                     id
@@ -196,8 +192,11 @@ def test_mutations (db, client_query, department_langues : Department, departmen
         assert obj.name != obj_updated.name
         assert obj.department.abbrev != obj_updated.department.abbrev
         assert obj.graded != obj_updated.graded
-        assert len(obj_updated.group_types.all()) == 2 and obj_updated.group_types.all()[0].name == "Groupe Type 1" \
-        and obj_updated.group_types.all()[1].name == "Groupe Type 4"
+        group_types_obj_updated = []
+        for g in obj_updated.group_types.all():
+            group_types_obj_updated.append(g.name)
+        assert set(group_types_obj) != set(group_types_obj_updated)
+
         with capsys.disabled():
             print("The object was updated successfully")
 

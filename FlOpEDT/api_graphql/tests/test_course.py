@@ -6,18 +6,9 @@ from people.models import Tutor
 from test_tutor import department_info, department_miashs, department_reseaux, tutor_reseaux, tutor_info, tutor_algo_prog, tutor_conception
 from test_course_type import course_type1, course_type2, course_type4
 from test_modules import training_l2_miashs, training_l3_miashs, period_1, period_2, module_algo_prog, module_conception_log
-from test_generic_group import group_type1, group_type2, group_type3, training_m1_reseaux, training_l1_info, group3, group1, group2, group_type4, department_langues
-# from test_course_type import course_type1, course_type2, course_type3, course_type4, group_type1, group_type2, group_type3, group_type4
-# from test_modules import module_conception_log, module_algo_prog, period_2, department_miashs
-# from test_tutor import department_info, tutor_info, tutor_reseaux, department_reseaux
-# from test_generic_group import group1, group2, group3, group4
+from test_generic_group import group_type1, group_type2, group_type3, training_m1_reseaux, training_l1_info, group3, group1, group2, group4, group_type4, department_langues, training_l3_langues
 from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
-
-# CourseType
-# Tutor many
-# GenericGroup many
-# Module
 
 @pytest.fixture
 def training_l2_reseaux(db, department_reseaux: Department) -> TrainingProgramme:
@@ -125,3 +116,104 @@ def test_filters(client_query, course1:Course, course2:Course):
     data = get_data(res)
     assert course1.type.name in data["name"]
     assert course2.type.name not in data["name"]
+
+# Mutations
+def test_mutations (db, client_query, course_type1 : CourseType, course_type2 : CourseType, module_algo_prog : Module, module_conception_log : Module, group3 : GenericGroup, group1 : GenericGroup, group2 : GenericGroup, group4 : GenericGroup, tutor_reseaux : Tutor, tutor_info : Tutor, tutor_algo_prog : Tutor, tutor_conception : Tutor, capsys) :
+    course_type1_id = to_global_id("CourseType", course_type1.id)
+    course_type2_id = to_global_id("CourseType", course_type2.id)    
+    module_algo_prog_id = to_global_id("Module", module_algo_prog.id)
+    module_conception_log_id = to_global_id("Module", module_conception_log.id)
+    group_1_id = to_global_id("GenericGroup", group1.id)
+    group_2_id = to_global_id("GenericGroup", group2.id)
+    group_3_id = to_global_id("GenericGroup", group3.id)
+    group_4_id = to_global_id("GenericGroup", group4.id)
+    tutor_reseaux_id = to_global_id("Tutor", tutor_reseaux.id)
+    tutor_algo_prog_id = to_global_id("Tutor", tutor_algo_prog.id)
+    tutor_conception_id = to_global_id("Tutor", tutor_conception.id)
+    tutor_info_id = to_global_id("Tutor", tutor_info.id) 
+    
+    create = \
+    """
+        mutation {
+            createCourse (
+                type : \"""" + course_type1_id + \
+    """\"       module : \"""" + module_algo_prog_id + \
+    """\"       groups : [\"""" + group_1_id + "\", \"" + group_2_id + \
+    """\"]      suppTutor : [\"""" + tutor_algo_prog_id + """\", \"""" + tutor_conception_id + \
+    """\"]      
+        ) {
+            courses {
+                id
+            }
+        }
+    }
+    """
+
+    global_id = execute_mutation(client_query, create, "createCourse", "courses")
+    try:
+        obj_id = from_global_id(global_id)[1]
+        obj = Course.objects.get(id=obj_id)
+        groups_obj = tutors_obj = []
+        for g in obj.groups.all():
+            groups_obj.append(g.name)
+        for t in obj.supp_tutor.all():
+            tutors_obj.append(t.username)
+
+        with capsys.disabled():
+            print("The object was created successfully")
+        update = \
+        """
+        mutation {
+            updateCourse (
+                id : \"""" + global_id + \
+    """\"       type : \"""" + course_type2_id + \
+    """\"       module : \"""" + module_conception_log_id + \
+    """\"       groups : [\"""" + group_3_id + "\", \"" + group_4_id + \
+    """\"]      suppTutor : [\"""" + tutor_info_id + """\", \"""" + tutor_reseaux_id + \
+    """\"]      
+        ) {
+            courses {
+                id
+            }
+        }
+    }
+    """
+
+        execute_mutation(client_query, update, "updateCourse", "courses")
+        obj_updated = Course.objects.get(id=obj_id)
+        assert obj.type.name != obj_updated.type.name
+        assert obj.module.name != obj_updated.module.name
+        groups_obj_updated = tutors_obj_updated = []
+        for g in obj_updated.groups.all():
+            groups_obj_updated.append(g.name)
+        for t in obj_updated.supp_tutor.all():
+            tutors_obj_updated.append(t.username)
+        assert set(groups_obj) != set(groups_obj_updated)
+        assert set(tutors_obj) != set(tutors_obj_updated)
+        with capsys.disabled():
+            print("The object was updated successfully")
+
+        delete = """
+        mutation {
+            deleteCourse ( 
+                id : \"""" + global_id + \
+                """\" ) {
+                courses {
+                    id
+                }
+            }
+            }
+        """
+        execute_mutation(client_query, delete, "deleteCourse", "courses")
+        try:
+            obj_deleted = Course.objects.get(id=obj_id)
+            with capsys.disabled():
+                print("The object was not deleted")
+        except Course.DoesNotExist:
+            with capsys.disabled():
+                print("The object was deleted successfully")
+
+    except Course.DoesNotExist:
+        with capsys.disabled():
+            print("The object was not created")
+        assert False
