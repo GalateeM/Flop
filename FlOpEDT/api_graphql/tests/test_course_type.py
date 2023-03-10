@@ -127,6 +127,7 @@ def test_mutations (db, client_query, department_langues : Department, departmen
     group_type1_id = to_global_id("GroupType", group_type1.id)
     group_type3_id = to_global_id("GroupType", group_type3.id)
     group_type4_id = to_global_id("GroupType", group_type4.id)
+    
     create = \
     """
         mutation {

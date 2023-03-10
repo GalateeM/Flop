@@ -36,7 +36,7 @@ urlpatterns = [
     url(views.fav_regexp,
         views.favicon,
         name="favicon"),
-
+     path("test_graphql", views.test_graphql), 
     # directly reachable by users
     # ----------------------------
     re_path(r'room-preference/(?P<tutor>\w{2,8})?', views.room_preference, name='room-pref'),

@@ -1707,3 +1707,6 @@ def get_key_all_tutors(department_abbrev):
     return f'ALL-TUT-D{department_abbrev}'
 
 # </editor-fold desc="HELPERS">
+
+def test_graphql(req, **kwargs):
+    return TemplateResponse(req, "base/graphql.html")

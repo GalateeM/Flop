@@ -64,7 +64,7 @@ urlpatterns = [
         views.favicon,
         name="favicon"),
     re_path(r'^$', views.index, name='index'),
-    path("graphql", GraphQLView.as_view(graphiql=True))
+    path("graphql", GraphQLView.as_view(graphiql=True), name="graphql")
 ]
 
 if 'rosetta' in settings.INSTALLED_APPS:
