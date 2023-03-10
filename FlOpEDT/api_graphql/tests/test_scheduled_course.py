@@ -6,7 +6,8 @@ from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module, 
 from test_modules import module_algo_prog, module_conception_log, training_l3_miashs ,training_l2_miashs, \
 department_miashs, period_1 , period_2, tutor_algo_prog, tutor_conception
 from test_user_preference import week1, week7
-from lib import *
+from lib import execute_query, get_data, execute_mutation, client_query
+from graphql_relay import from_global_id, to_global_id
 
 @pytest.fixture
 def course_type_algo(db) -> CourseType:
@@ -49,8 +50,21 @@ def scheduled2(db, tutor_conception:Tutor,
                 course_conception:Course) -> ScheduledCourse:
     return ScheduledCourse.objects.create(tutor= tutor_conception, room= room_conception, course= course_conception, start_time = 2)
 
+@pytest.fixture
+def scheduled2(db, tutor_conception:Tutor,
+                room_conception:Room,
+                course_conception:Course) -> ScheduledCourse:
+    return ScheduledCourse.objects.create(tutor= tutor_conception, room= room_conception, course= course_conception, start_time = 2)
 
-def test_scheduled_course(client_query,
+@pytest.fixture
+def scheduled3(db, tutor_algo_prog:Tutor,
+                room_conception:Room,
+                course_conception:Course) -> ScheduledCourse:
+    return ScheduledCourse.objects.create(tutor= tutor_algo_prog, room= room_conception, course= course_conception, start_time = 2)
+
+# Query
+
+def test_filter_week_year(client_query,
                         scheduled1 : ScheduledCourse, scheduled2 : ScheduledCourse):
     query = '''
         query {
@@ -82,5 +96,105 @@ def test_scheduled_course(client_query,
     assert scheduled2.room.name not in data["name"]
     assert scheduled2.course.type.name not in data["name"]
 
+def test_filters(client_query,
+                        scheduled2 : ScheduledCourse, scheduled3 : ScheduledCourse):
+    query = '''
+        query {
+            scheduledCourses (week: 1, year : 2022, tutor_Username_Icontains : "JD") {
+                edges {
+                    node {
+                        tutor{
+                            username
+                        }   
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "scheduledCourses")
+    data = get_data(res)
+    assert scheduled2.tutor.username in data["username"]
+    assert scheduled3.tutor.username not in data["username"]
 
-    
+# Mutations
+def test_mutations(db, client_query, course_conception : Course, course_algo : Course, room_algo : Room, room_conception : Room, tutor_algo_prog : Tutor, tutor_conception : Tutor, capsys):
+    course_conception_id = to_global_id("Course", course_conception.id)
+    course_algo_id = to_global_id("Course", course_algo.id)
+    room_algo_id = to_global_id("Room", room_algo.id)
+    room_conception_id = to_global_id("Room", room_conception.id)
+    tutor_algo_prog_id = to_global_id("Course", tutor_algo_prog.id) 
+    tutor_conception_id = to_global_id("Course", tutor_conception.id)
+
+    create = \
+    """
+        mutation {
+            createScheduledCourse (
+                course : \"""" + course_conception_id + \
+    """\"       room : \"""" + room_conception_id + \
+    """\"       tutor : \"""" + tutor_conception_id + \
+    """\"
+            ) {
+                scheduledCourses {
+                    id
+                }
+            }
+        }
+    """
+    global_id = execute_mutation(client_query, create, "createScheduledCourse", "scheduledCourses")
+    try:
+        obj_id = from_global_id(global_id)[1]
+        obj = ScheduledCourse.objects.get(id=obj_id)
+
+        with capsys.disabled():
+            print("The object was created successfully")
+        
+        update = \
+        """
+            mutation {
+                updateScheduledCourse (
+                    id : \"""" + global_id + \
+        """\"       course : \"""" + course_algo_id + \
+        """\"       room : \"""" + room_algo_id + \
+        """\"       tutor : \"""" + tutor_algo_prog_id + \
+        """\"
+                ) {
+                    scheduledCourses {
+                        id
+                    }
+                }
+            }
+        """
+
+        execute_mutation(client_query, update, "updateScheduledCourse", "scheduledCourses")
+        obj_updated = ScheduledCourse.objects.get(id=obj_id)
+        assert obj.course.week.nb != obj_updated.course.week.nb
+        assert obj.course.year.nb != obj_updated.course.year.nb
+        assert obj.room.name != obj_updated.room.name
+        assert obj.tutor.username != obj_updated.tutor.username
+        with capsys.disabled():
+            print("The object was updated successfully")
+
+        delete = """
+        mutation {
+            deleteScheduledCourse ( 
+                id : \"""" + global_id + \
+                """\" ) {
+                scheduledCourses {
+                    id
+                }
+            }
+            }
+        """
+        execute_mutation(client_query, delete, "deleteScheduledCourse", "scheduledCourses")
+        try:
+            obj_deleted = ScheduledCourse.objects.get(id=obj_id)
+            with capsys.disabled():
+                print("The object was not deleted")
+        except ScheduledCourse.DoesNotExist:
+            with capsys.disabled():
+                print("The object was deleted successfully")
+
+    except ScheduledCourse.DoesNotExist:
+        with capsys.disabled():
+            print("The object was not created")
+        assert False

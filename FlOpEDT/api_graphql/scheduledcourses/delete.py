@@ -1,5 +1,5 @@
 import graphene
-from base.models import  Course, ScheduledCourse, Room, Tutor
+from base.models import  Course, ScheduledCourse, Room
 from .types import ScheduledCourse  
 from people.models import Tutor
 from graphql_relay import from_global_id
@@ -20,4 +20,4 @@ class DeleteScheduledCourse(graphene.Mutation):
 
             return DeleteScheduledCourse(scheduled_course)
         except ScheduledCourse.DoesNotExist:
-            print("ScheduledCourse with the given Id does not exist in the database")
+            print("Scheduled Course with the given Id does not exist in the database")
