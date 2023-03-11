@@ -6,20 +6,20 @@ from .types import QuoteNode
 from api_graphql import lib
 from graphql_relay import from_global_id
 
-class UpdateQuote(graphene.mutation):
+class UpdateQuote(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        quote = graphene.String(graphene.ID, required= True)
-        last_name = graphene.String(graphene.ID)
-        for_name = graphene.String(graphene.ID)
-        nick_name = graphene.String(graphene.ID)
-        desc_author = graphene.String(graphene.ID)
-        date = graphene.String(graphene.ID)
-        header = graphene.String(graphene.ID)
+        quote = graphene.String()
+        last_name = graphene.String()
+        for_name = graphene.String()
+        nick_name = graphene.String()
+        desc_author = graphene.String()
+        date = graphene.String()
+        header = graphene.String()
         quote_type = graphene.Argument(graphene.ID)
-        positive_votes = graphene.Int(graphene.ID)
-        negative_votes = graphene.Int(graphene.ID)
-        id_acc = graphene.Int(graphene.ID)
+        positive_votes = graphene.Int()
+        negative_votes = graphene.Int()
+        id_acc = graphene.Int()
 
     quotes = graphene.Field(QuoteNode)
 

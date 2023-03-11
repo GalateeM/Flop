@@ -82,73 +82,78 @@ def test_quote_filter(client_query,
     assert quote2.quote_type.name in data["name"]
     assert quote2.quote_type.abbrev in data["abbrev"]
 
-# # Mutation
-# def test_mutations (db, client_query, quote_type1 : QuoteType, quote_type2 : QuoteType, capsys):
-#     quote_type1_id = to_global_id("QuoteType", quote_type1.id)
-#     quote_type2_id = to_global_id("QuoteType", quote_type2.id)
+# Mutation
+def test_mutations (db, client_query, quote_type1 : QuoteType, quote_type2 : QuoteType, capsys):
+    quote_type1_id = to_global_id("QuoteType", quote_type1.id)
+    quote_type2_id = to_global_id("QuoteType", quote_type2.id)
 
-#     create = \
-#     """
-#         mutation {
-#             createQuote (
-#                 quote : "Azertyuiop"
-#                 quote_type : \"""" + quote_type1_id + \
-#     """\"
-#             ) quotes {
-#                 id
-#             }
-#         }
-#     """
+    create = \
+    """
+        mutation {
+            createQuote (
+                quote : "Azertyuiop"
+                quoteType : \"""" + quote_type1_id + \
+    """\"
+            ) {
+                quotes {
+                    id
+                }
+            }
+        }
+    """
 
-#     global_id = execute_mutation(client_query, create, "createQuote", "quotes")
-#     try:
-#         obj_id = from_global_id(global_id)[1]
-#         obj = Quote.objects.get(id=obj_id)
-#         with capsys.disabled():
-#             print("The object was created successfully")
+    global_id = execute_mutation(client_query, create, "createQuote", "quotes")
+    try:
+        obj_id = from_global_id(global_id)[1]
+        obj = Quote.objects.get(id=obj_id)
+        with capsys.disabled():
+            print("The object was created successfully")
 
-#         update = \
-#     """
-#         mutation {
-#             updateQuote (
-#                 quote : "Qsdfghjklm"
-#                 quote_type : \"""" + quote_type2_id + \
-#     """\"
-#             ) quotes {
-#                 id
-#             }
-#         }
-#     """
+        update = \
+    """
+        mutation {
+            updateQuote (
+                id :\"""" + global_id + \
+    """\"       quote : "Qsdfghjklm"
+                quoteType : \"""" + quote_type2_id + \
+    """\"
+            ) {
+                quotes {
+                    id
+                }
+            }
+        }
+    """
 
-#         execute_mutation(client_query, update, "updateQuote", "quotes")
-#         obj_updated = Quote.objects.get(id=obj_id)
-#         assert obj.quote != obj_updated.quote
-#         assert obj.quote_type.name != obj_updated.quote_type.name
+        execute_mutation(client_query, update, "updateQuote", "quotes")
+        obj_updated = Quote.objects.get(id=obj_id)
+        assert obj.quote != obj_updated.quote
+        assert obj.quote_type.name != obj_updated.quote_type.name
 
-#         with capsys.disabled():
-#             print("The object was updated successfully")
+        with capsys.disabled():
+            print("The object was updated successfully")
 
-#         delete = """
-#         mutation {
-#             deleteQuote ( 
-#                 id : \"""" + global_id + \
-#                 """\" ) {
-#                 quotes {
-#                     id
-#                 }
-#             }
-#             }
-#         """
-#         execute_mutation(client_query, delete, "deleteQuote", "quotes")
-#         try:
-#             obj_deleted = Quote.objects.get(id=obj_id)
-#             with capsys.disabled():
-#                 print("The object was not deleted")
-#         except Quote.DoesNotExist:
-#             with capsys.disabled():
-#                 print("The object was deleted successfully")
+        delete = """
+        mutation {
+            deleteQuote ( 
+                id : \"""" + global_id + \
+                """\" ) {
+                quotes {
+                    id
+                }
+            }
+            }
+        """
+        execute_mutation(client_query, delete, "deleteQuote", "quotes")
+        try:
+            obj_deleted = Quote.objects.get(id=obj_id)
+            with capsys.disabled():
+                print("The object was not deleted")
+        except Quote.DoesNotExist:
+            with capsys.disabled():
+                print("The object was deleted successfully")
 
-#     except Quote.DoesNotExist:
-#         with capsys.disabled():
-#             print("The object was not created")
-#         assert False
+    except Quote.DoesNotExist:
+        with capsys.disabled():
+            print("The object was not created")
+        assert False

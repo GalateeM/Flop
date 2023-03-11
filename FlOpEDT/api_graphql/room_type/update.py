@@ -7,7 +7,7 @@ from api_graphql import lib
 class UpdateRoomType(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String(graphene.ID)
+        name = graphene.String()
         department = graphene.Argument(graphene.ID)
 
 

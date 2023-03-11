@@ -6,7 +6,7 @@ from api_graphql import lib
 
 class CreateRoomType(graphene.Mutation):
     class Arguments:
-        name = graphene.String(graphene.ID, required = True)
+        name = graphene.String(required = True)
         department = graphene.Argument(graphene.ID)
 
     room_types = graphene.Field(RoomTypeNode)

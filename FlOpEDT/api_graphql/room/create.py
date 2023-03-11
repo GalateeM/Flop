@@ -8,7 +8,7 @@ from api_graphql import lib
 
 class CreateRoom(graphene.Mutation):
     class Arguments:
-        name = graphene.String(graphene.ID, required = True)
+        name = graphene.String(required = True)
         types = graphene.List(graphene.ID, required = True)                           
         subroom_of = graphene.List(graphene.ID)
         departments = graphene.List(graphene.ID, required = True)
