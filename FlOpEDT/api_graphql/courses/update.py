@@ -34,7 +34,7 @@ class UpdateCourse(graphene.Mutation):
     supp_tutor = graphene.List(TutorType)
     
     @classmethod
-    def mutate(cls, root, info,id, **params):
+    def mutate(cls, root, info, id, **params):
         id = from_global_id(id)[1]
         courses_set = Course.objects.filter(id=id)
         if courses_set:

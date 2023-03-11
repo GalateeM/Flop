@@ -9,10 +9,10 @@ from graphql_relay import from_global_id
 class UpdatePeriod(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String(graphene.ID, required = True)
+        name = graphene.String()
         department =graphene.Argument(graphene.ID)
-        starting_week = graphene.Int(graphene.ID, required=True)
-        ending_week = graphene.Int(graphene.ID, required = True)
+        starting_week = graphene.Int()
+        ending_week = graphene.Int()
 
 
     period = graphene.Field(PeriodType)

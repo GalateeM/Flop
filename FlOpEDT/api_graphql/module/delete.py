@@ -11,7 +11,7 @@ class DeleteModule(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required = True)
 
-    module = graphene.Field(Module)
+    module = graphene.Field(ModuleNode)
 
     @classmethod
     def mutate(cls, root, info, id):

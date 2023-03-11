@@ -29,4 +29,4 @@ class CreateModule(graphene.Mutation):
         
         module = Module.objects.create(**params)
         
-        return CreateModule(module = module)
+        return CreateModule(module)

@@ -8,11 +8,10 @@ from graphql_relay import from_global_id
 
 class CreatePeriod(graphene.Mutation):
     class Arguments:
-        name = graphene.String(graphene.ID, required = True)
+        name = graphene.String(required = True)
         department =graphene.Argument(graphene.ID)
-        starting_week = graphene.Int(graphene.ID, required=True)
-        ending_week = graphene.Int(graphene.ID, required = True)
-
+        starting_week = graphene.Int(required=True)
+        ending_week = graphene.Int(required = True)
 
     period = graphene.Field(PeriodType)
 

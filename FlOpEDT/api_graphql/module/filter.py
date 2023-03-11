@@ -23,7 +23,6 @@ class ModuleFilter(FilterSet):
 
     def filter_dept(self, queryset, name, value):
         return queryset.exclude(period__department = None, train_prog__department = None).filter(period__department__abbrev = value, train_prog__department__abbrev = value)
-        """ return queryset.exclude(period__department = None).filter(period__department__abbrev = value) & queryset.exclude(train_prog__department = None).filter(train_prog__department__abbrev = value) """
 
     def filter_week(self, queryset, name, value):
         if value > 53 or value < 0:
