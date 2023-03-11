@@ -81,7 +81,8 @@ def test_mutations(db, client_query, quote_type1 : QuoteType, quote_type2 : Quot
         """
             mutation {
             updateQuoteType (
-                name : "Quote Type 7"
+                id : \"""" + global_id + \
+        """\"   name : "Quote Type 7"
                 abbrev : "QT7"
                 parent : \"""" + quote_type2_id + \
     """\"         

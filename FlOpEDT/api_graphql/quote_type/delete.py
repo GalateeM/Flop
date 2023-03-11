@@ -6,7 +6,7 @@ from .types import QuoteTypeNode
 from api_graphql import lib
 from graphql_relay import from_global_id
 
-class DeleteQuoteType(graphene.mutation):
+class DeleteQuoteType(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 

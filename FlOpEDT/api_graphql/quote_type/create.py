@@ -6,10 +6,10 @@ from .types import QuoteTypeNode
 from api_graphql import lib
 from graphql_relay import from_global_id
 
-class CreateQuoteType(graphene.mutation):
+class CreateQuoteType(graphene.Mutation):
     class Arguments:
-        name = graphene.String(graphene.ID, required = True)
-        abbrev = graphene.String(graphene.ID)
+        name = graphene.String(required = True)
+        abbrev = graphene.String()
         parent = graphene.Argument(graphene.ID)
 
     quote_types = graphene.Field(QuoteTypeNode)
@@ -23,6 +23,3 @@ class CreateQuoteType(graphene.mutation):
 
         quote_types = QuoteType.objects.create(**params)
         return CreateQuoteType(quote_types)
-       
-
-

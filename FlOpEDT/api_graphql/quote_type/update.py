@@ -6,11 +6,11 @@ from .types import QuoteTypeNode
 from api_graphql import lib
 from graphql_relay import from_global_id
 
-class UpdateQuoteType(graphene.mutation):
+class UpdateQuoteType(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
-        name = graphene.String(graphene.ID)
-        abbrev = graphene.String(graphene.ID)
+        name = graphene.String()
+        abbrev = graphene.String()
         parent = graphene.Argument(graphene.ID)
 
     quote_types = graphene.Field(QuoteTypeNode)
