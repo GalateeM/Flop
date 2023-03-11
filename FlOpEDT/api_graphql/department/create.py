@@ -1,6 +1,9 @@
 import graphene
+
 from base.models import Department
+
 from .types import DepartmentType
+
 
 class CreateDepartment(graphene.Mutation):
     class Arguments:

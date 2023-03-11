@@ -1,10 +1,11 @@
 from django_filters import FilterSet, CharFilter, NumberFilter
+
 from base.models import Module
+
 
 class ModuleFilter(FilterSet):
     dept = CharFilter(method = 'filter_dept', required = True)
     week = NumberFilter(method = 'filter_week')
-    # pas de filtre year
     
     class Meta:
         model = Module
@@ -29,4 +30,3 @@ class ModuleFilter(FilterSet):
             return Module.objects.none()
         else:
             return queryset.filter(period__starting_week__lte = value, period__ending_week__gte = value)
-        

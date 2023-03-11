@@ -1,10 +1,12 @@
 import graphene
+from graphql_relay import from_global_id
+
 from base.models import  Course, ScheduledCourse, Room
 from people.models import Tutor
-from .types import ScheduledCourseNode  
-from people.models import Tutor
-from graphql_relay import from_global_id
+
 from api_graphql import lib
+from .types import ScheduledCourseNode
+
 
 class UpdateScheduledCourse(graphene.Mutation):
     class Arguments:
@@ -26,9 +28,6 @@ class UpdateScheduledCourse(graphene.Mutation):
         scheduled_course_set = ScheduledCourse.objects.filter(id=id)
 
         if scheduled_course_set:
-
-            #foreignkey
-
             lib.assign_value_to_foreign_key(params, "room", Room, "update")
             lib.assign_value_to_foreign_key(params, "tutor", Tutor, "update")
             lib.assign_value_to_foreign_key(params, "course", Course, "update")

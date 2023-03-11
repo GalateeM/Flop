@@ -1,10 +1,13 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from base.models import Department, GroupType
-from test_course_type import department_info, department_langues, department_reseaux, group_type1, group_type4
-from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
+
+from base.models import Department, GroupType
+
+from lib import execute_query, get_data, execute_mutation, client_query
+from test_course_type import department_info, department_langues, department_reseaux, group_type1, group_type4
+
 
 @pytest.fixture
 def group_type7(db, department_info : Department) -> GroupType:

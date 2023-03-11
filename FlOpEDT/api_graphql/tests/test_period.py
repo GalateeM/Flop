@@ -1,10 +1,13 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from base.models import Period , Department
-from test_course_type import department_miashs, department_langues
-from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
+
+from base.models import Period , Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
+from test_course_type import department_miashs, department_langues
+
 
 @pytest.fixture
 def period_1 (db, department_miashs : Department) -> Period:

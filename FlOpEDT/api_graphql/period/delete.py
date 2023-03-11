@@ -1,16 +1,16 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import PeriodType
-from base.models import Period, Department 
 from graphql_relay import from_global_id
+
+from base.models import Period
+
+from .types import PeriodType
+
 
 class DeletePeriod(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
     period = graphene.Field(PeriodType)
-
 
     @classmethod
     def mutate(cls,root, info, id):

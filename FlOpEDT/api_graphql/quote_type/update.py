@@ -1,10 +1,11 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from quote.models import  QuoteType
-from .types import QuoteTypeNode
-from api_graphql import lib
 from graphql_relay import from_global_id
+
+from quote.models import  QuoteType
+
+from api_graphql import lib
+from .types import QuoteTypeNode
+
 
 class UpdateQuoteType(graphene.Mutation):
     class Arguments:
@@ -21,8 +22,6 @@ class UpdateQuoteType(graphene.Mutation):
         quote_type_set = QuoteType.objects.filter(id=id)
 
         if quote_type_set:
-
-            #foreignkey
             lib.assign_value_to_foreign_key(params, "parent", QuoteType, "update")
 
             quote_type_set.update(**params)

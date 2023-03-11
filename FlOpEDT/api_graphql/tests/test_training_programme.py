@@ -1,11 +1,14 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from base.models import TrainingProgramme, Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_department import department_miashs, department_langues
 from test_modules import training_l2_miashs, training_l3_miashs
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def training_m1_langues(db, department_langues: Department) -> TrainingProgramme:

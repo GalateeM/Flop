@@ -1,10 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from base.models import TrainingProgramme, Department
-from .types import TrainingProgrammeType
-from api_graphql import lib
 from graphql_relay import from_global_id
+
+from base.models import TrainingProgramme
+
+from .types import TrainingProgrammeType
+
 
 class DeleteTrainingProgramme(graphene.Mutation):
     class Arguments:

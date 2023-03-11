@@ -1,8 +1,10 @@
 import graphene
-from base.models import GenericGroup, TrainingProgramme
-from .types import GenericGroupNode
 from graphql_relay import from_global_id
-from api_graphql import lib
+
+from base.models import GenericGroup, TrainingProgramme
+
+from .types import GenericGroupNode
+
 
 class DeleteGenericGroup(graphene.Mutation):
     class Arguments:

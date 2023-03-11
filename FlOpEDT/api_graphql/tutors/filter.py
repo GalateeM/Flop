@@ -1,9 +1,11 @@
 from django_filters import FilterSet, CharFilter, NumberFilter
+
 from people.models import Tutor
+
 from base.models import Department, ScheduledCourse
 
+
 class TutorFilter(FilterSet):
-    # enlever required=True quand on fait un test de query
     dept = CharFilter(method = 'filter_dept')
     week = NumberFilter(method = 'filter_week')
     year = NumberFilter(method = 'filter_year')

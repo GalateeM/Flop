@@ -1,10 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from quote.models import  QuoteType
-from .types import QuoteTypeNode
+
+from quote.models import QuoteType
+
 from api_graphql import lib
-from graphql_relay import from_global_id
+from .types import QuoteTypeNode
+
 
 class CreateQuoteType(graphene.Mutation):
     class Arguments:
@@ -16,9 +16,6 @@ class CreateQuoteType(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
-
-        #foreignkey
-
         lib.assign_value_to_foreign_key(params, "parent", QuoteType, "create")
 
         quote_types = QuoteType.objects.create(**params)

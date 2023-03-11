@@ -1,11 +1,11 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
+
 from base.models import Week, UserPreference
 from people.models import Tutor
-from .types import UserPreferenceNode
-from graphql_relay import from_global_id
+
 from api_graphql import lib
+from .types import UserPreferenceNode
+
 
 class CreateUserPreference(graphene.Mutation):
     class Arguments:

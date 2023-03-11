@@ -1,10 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from quote.models import  QuoteType
-from .types import QuoteTypeNode
-from api_graphql import lib
 from graphql_relay import from_global_id
+
+from quote.models import  QuoteType
+
+from .types import QuoteTypeNode
+
 
 class DeleteQuoteType(graphene.Mutation):
     class Arguments:

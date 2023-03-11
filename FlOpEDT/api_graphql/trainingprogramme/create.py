@@ -1,9 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
+
 from base.models import TrainingProgramme, Department
-from .types import TrainingProgrammeType
+
 from api_graphql import lib
+from .types import TrainingProgrammeType
+
 
 class CreateTrainingProgramme(graphene.Mutation):
     class Arguments:

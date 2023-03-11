@@ -1,11 +1,11 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import ModuleNode
+
 from base.models import Module, TrainingProgramme, Period
 from people.models import Tutor
-from graphql_relay import from_global_id
+
 from api_graphql import lib
+from .types import ModuleNode
+
 
 class CreateModule(graphene.Mutation):
     class Arguments:
@@ -22,7 +22,6 @@ class CreateModule(graphene.Mutation):
     
     @classmethod
     def mutate(cls, root, info, **params):
-        # Foreign keys
         lib.assign_value_to_foreign_key(params, "head", Tutor, "create")
         lib.assign_value_to_foreign_key(params, "train_prog", TrainingProgramme, "create")
         lib.assign_value_to_foreign_key(params, "period", Period, "create")

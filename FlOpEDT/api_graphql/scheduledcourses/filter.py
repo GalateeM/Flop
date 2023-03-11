@@ -1,5 +1,7 @@
 from django_filters import FilterSet, NumberFilter
+
 from base.models import ScheduledCourse
+
 
 class ScheduledCourseFilter(FilterSet):
     week = NumberFilter(required = True, method = 'filter_week')
@@ -24,5 +26,3 @@ class ScheduledCourseFilter(FilterSet):
 
     def filter_year(self, queryset, name, value):
         return queryset.exclude(course__week = None).filter(course__week__year = value)
-        
-    

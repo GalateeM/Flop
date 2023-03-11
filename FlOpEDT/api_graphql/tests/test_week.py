@@ -1,8 +1,9 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from base.models import Week
+
 from lib import execute_query, get_data, client_query
+
 
 def test_filter(db, client_query):
     query = \

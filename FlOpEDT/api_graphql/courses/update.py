@@ -1,19 +1,13 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from base.models import Course, CourseType, Module, RoomType, Week
-from people.models import Tutor
-from .types import CourseNode
-from api_graphql.course_type.types import CourseTypeNode 
-from api_graphql.room_type.types import RoomTypeNode
-from api_graphql.tutors.types import TutorType
-from api_graphql.generic_group.types import GenericGroupNode
-from api_graphql.module.types import ModuleNode
-from api_graphql.week.types import WeekType
-from people.models import Tutor
-from base.models import GenericGroup
 from graphql_relay import from_global_id
+
+from base.models import Course, CourseType, Module, RoomType, Week, GenericGroup
+from people.models import Tutor
+
 from api_graphql import lib
+from .types import CourseNode
+from api_graphql.tutors.types import TutorType
+
 
 class UpdateCourse(graphene.Mutation):
     class Arguments:
@@ -38,7 +32,6 @@ class UpdateCourse(graphene.Mutation):
         id = from_global_id(id)[1]
         courses_set = Course.objects.filter(id=id)
         if courses_set:
-            #foreign key
             lib.assign_value_to_foreign_key(params, "type", CourseType, "update")
             lib.assign_value_to_foreign_key(params, "module", Module, "update")
             lib.assign_value_to_foreign_key(params, "room_type", RoomType, "update")
@@ -47,7 +40,6 @@ class UpdateCourse(graphene.Mutation):
             lib.assign_value_to_foreign_key(params, "pay_module", Module, "update")
             lib.assign_value_to_foreign_key(params, "week", Week, "update")
 
-            #ManyToMany
             supp_tutor = lib.get_manyToManyField_values(params, "supp_tutor", Tutor)
             groups = lib.get_manyToManyField_values(params, "groups", GenericGroup)
             

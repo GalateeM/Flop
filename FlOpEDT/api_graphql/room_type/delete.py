@@ -1,7 +1,9 @@
 import graphene
-from base.models import RoomType
-from .types import RoomTypeNode
 from graphql_relay import from_global_id
+
+from base.models import RoomType
+
+from .types import RoomTypeNode
 
 
 class DeleteRoomType(graphene.Mutation):

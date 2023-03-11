@@ -46,4 +46,3 @@ def get_data(res):
         for key, val in r["node"].items():
             append_data(data, key, val)
     return data
-

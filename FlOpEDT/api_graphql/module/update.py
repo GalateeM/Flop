@@ -1,11 +1,12 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import ModuleNode
+from graphql_relay import from_global_id
+
 from base.models import Module, TrainingProgramme, Period
 from people.models import Tutor
-from graphql_relay import from_global_id
+
 from api_graphql import lib
+from .types import ModuleNode
+
 
 class UpdateModule(graphene.Mutation):
     class Arguments:

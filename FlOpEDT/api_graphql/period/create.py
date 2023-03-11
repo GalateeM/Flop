@@ -1,10 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import PeriodType
+
 from base.models import Period, Department 
+
 from api_graphql import lib
-from graphql_relay import from_global_id
+from .types import PeriodType
+
 
 class CreatePeriod(graphene.Mutation):
     class Arguments:
@@ -17,8 +17,6 @@ class CreatePeriod(graphene.Mutation):
 
     @classmethod
     def mutate(cls, root, info, **params):
-       
-        #foreignKey
         lib.assign_value_to_foreign_key(params, "department", Department, "create")
 
         period = Period.objects.create(**params)

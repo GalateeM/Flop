@@ -1,5 +1,7 @@
 from django_filters import FilterSet, CharFilter, NumberFilter
+
 from base.models import UserPreference, Department
+
 
 class UserPreferenceFilter(FilterSet):
     dept = CharFilter(method = 'filter_dept')

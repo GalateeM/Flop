@@ -1,7 +1,10 @@
 import graphene
-from base.models import Department
-from .types import DepartmentType
 from graphql_relay import from_global_id
+
+from base.models import Department
+
+from .types import DepartmentType
+
 
 class DeleteDepartment(graphene.Mutation):
     class Arguments:

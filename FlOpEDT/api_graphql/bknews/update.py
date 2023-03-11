@@ -1,10 +1,12 @@
-from graphene_django import DjangoObjectType
-from displayweb.models import BreakingNews
 import graphene
-from .types import BknewsType
 from graphql_relay import from_global_id
+
+from displayweb.models import BreakingNews
 from base.models import Department
+
 from api_graphql import lib
+from .types import BknewsType
+
 
 class UpdateBknews(graphene.Mutation):
     class Arguments:
@@ -27,9 +29,7 @@ class UpdateBknews(graphene.Mutation):
         id = from_global_id(id) [1]
         bknews_set = BreakingNews.objects.filter(id=id)
         if bknews_set:
-            # foreign keys
             lib.assign_value_to_foreign_key(params, "department", Department, "update")
-            # ##############
 
             bknews_set.update(**params)
             bknews = bknews_set.first()

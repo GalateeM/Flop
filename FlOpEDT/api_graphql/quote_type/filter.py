@@ -1,5 +1,7 @@
 from django_filters import FilterSet
+
 from quote.models import QuoteType
+
 
 class QuoteTypeFilter(FilterSet):
     class Meta:

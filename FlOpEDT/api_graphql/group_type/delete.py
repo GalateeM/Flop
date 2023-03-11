@@ -1,10 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import GroupTypeNode
-from base.models import Department, GroupType
 from graphql_relay import from_global_id
-from api_graphql import lib
+
+from base.models import GroupType
+
+from .types import GroupTypeNode
+
 
 class DeleteGroupType(graphene.Mutation):
     class Arguments:

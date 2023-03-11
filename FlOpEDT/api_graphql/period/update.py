@@ -1,10 +1,11 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import PeriodType
-from base.models import Period, Department 
-from api_graphql import lib
 from graphql_relay import from_global_id
+
+from base.models import Period, Department 
+
+from api_graphql import lib
+from .types import PeriodType
+
 
 class UpdatePeriod(graphene.Mutation):
     class Arguments:
@@ -18,12 +19,10 @@ class UpdatePeriod(graphene.Mutation):
     period = graphene.Field(PeriodType)
 
     @classmethod
-    def mutate(cls, root, info,id, **params):
+    def mutate(cls, root, info, id, **params):
         id = from_global_id(id)[1]
         period_set = Period.objects.filter(id=id)
         if period_set:
-       
-            #foreignKey
             lib.assign_value_to_foreign_key(params, "department", Department, "update")
 
             period_set.update(**params)

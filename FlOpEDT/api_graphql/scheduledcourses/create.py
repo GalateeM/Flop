@@ -1,10 +1,11 @@
 import graphene
+
 from base.models import  Course, ScheduledCourse, Room
 from people.models import Tutor
-from .types import ScheduledCourseNode
-from people.models import Tutor
-from graphql_relay import from_global_id
+
 from api_graphql import lib
+from .types import ScheduledCourseNode
+
 
 class CreateScheduledCourse(graphene.Mutation):
     class Arguments:
@@ -21,8 +22,6 @@ class CreateScheduledCourse(graphene.Mutation):
 
     @classmethod
     def mutate(cls,root,info, **params):
-
-        #foreignkey
         lib.assign_value_to_foreign_key(params,"course", Course, "create")
         lib.assign_value_to_foreign_key(params,"room", Room, "create")
         lib.assign_value_to_foreign_key(params,"tutor", Tutor, "create")

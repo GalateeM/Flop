@@ -1,11 +1,14 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from displayweb.models import BreakingNews
-from base.models import Department, Week, ModuleTutorRepartition
-from test_tutor import department_info, department_reseaux
-from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
+
+from displayweb.models import BreakingNews
+from base.models import Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
+from test_tutor import department_info, department_reseaux
+
 
 @pytest.fixture
 def y1(db, department_info:Department) -> BreakingNews:
@@ -15,8 +18,7 @@ def y1(db, department_info:Department) -> BreakingNews:
 def y2(db, department_reseaux:Department) -> BreakingNews:
     return BreakingNews.objects.create(department= department_reseaux,week = 15, year = 2022, y=10, txt = "In atque alias et eveniet provident eos")
 
-""" Tests query
-"""
+# Query
 def test_bknews(client_query,
                     y1 : BreakingNews,
                     y2 : BreakingNews):
@@ -56,8 +58,7 @@ def test_bknews_filters1(client_query,
     data = get_data(res)
     assert y1.txt in data["txt"]
 
-""" Tests mutations
-"""
+# Mutations
 def test_mutations(db, client_query, department_info : Department, department_reseaux : Department, capsys):
     dpt_info_id = to_global_id('Department', department_info.id)
     dpt_reseaux_id = to_global_id('Department', department_reseaux.id)

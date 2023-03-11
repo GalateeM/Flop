@@ -1,10 +1,12 @@
-from graphene_django import DjangoObjectType
-from base.models import CourseType, GroupType, Department
 import graphene
+from graphql_relay import from_global_id
+
+from base.models import CourseType, GroupType, Department
+
+from api_graphql import lib
 from .types import CourseTypeNode
 from api_graphql.group_type.types import GroupTypeNode
-from graphql_relay import from_global_id
-from api_graphql import lib
+
 
 class UpdateCourseType(graphene.Mutation):
     class Arguments:
@@ -17,22 +19,16 @@ class UpdateCourseType(graphene.Mutation):
         graded = graphene.Boolean()
     
     course_type = graphene.Field(CourseTypeNode)
-    # manyToManyField
     group_types = graphene.List(GroupTypeNode)
-    # #################
 
     @classmethod
     def mutate(cls, root, info, id, **params):
         id = from_global_id(id) [1]
         course_type_set = CourseType.objects.filter(id=id)
         if course_type_set:
-            # foreign keys
             lib.assign_value_to_foreign_key(params, "department", Department, "update")
-            # ##############
 
-            # manyToManyField
             group_types = lib.get_manyToManyField_values(params, "group_types", GroupType)
-            # ###################
         
             course_type_set.update(**params)
             course_type = course_type_set.first()

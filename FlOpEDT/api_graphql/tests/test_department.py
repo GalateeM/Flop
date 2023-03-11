@@ -1,10 +1,13 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from base.models import Department
-from test_course_type import department_langues, department_info, department_miashs, department_reseaux
-from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
+
+from base.models import Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
+from test_course_type import department_langues, department_info, department_miashs, department_reseaux
+
 
 """ Test Query
 """

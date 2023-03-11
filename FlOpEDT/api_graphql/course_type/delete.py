@@ -1,8 +1,10 @@
-from graphene_django import DjangoObjectType
 import graphene
-from base.models import CourseType
-from .types import CourseTypeNode
 from graphql_relay import from_global_id
+
+from base.models import CourseType
+
+from .types import CourseTypeNode
+
 
 class DeleteCourseType(graphene.Mutation):
     class Arguments:

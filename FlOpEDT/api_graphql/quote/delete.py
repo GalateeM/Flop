@@ -1,17 +1,16 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from quote.models import Quote, QuoteType
-from .types import QuoteNode
-from api_graphql import lib
 from graphql_relay import from_global_id
+
+from quote.models import Quote
+
+from .types import QuoteNode
+
 
 class DeleteQuote(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
     quotes = graphene.Field(QuoteNode)
-
 
     @classmethod
     def mutate(cls,root, info, id):

@@ -1,14 +1,17 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from people.models import Tutor
-from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module, TrainingProgramme, Department, Period
+from base.models import ScheduledCourse, Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_scheduled_course import week1, week7, module_algo_prog, module_conception_log, training_l3_miashs ,training_l2_miashs, \
 department_miashs, period_1 , period_2, tutor_algo_prog, tutor_conception, \
 course_type_algo, room_algo, course_algo, scheduled1, \
 course_type_conception, room_conception, course_conception, scheduled2
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def department_info(db) -> Department:
@@ -34,8 +37,7 @@ def tutor_reseaux(db, department_reseaux : Department) -> Tutor:
     res.save()
     return res
 
-""" Tests query
-"""
+# Query
 def test_all_tutors_dept(client_query,
                     tutor_info : Tutor, 
                     tutor_reseaux : Tutor):
@@ -74,8 +76,7 @@ def test_tutors_algo(client_query,
     assert tutor_algo_prog.first_name in data["firstName"]
     assert tutor_algo_prog.username in data["username"]
     
-""" Tests mutations
-"""
+# Mutations
 def test_mutations(db, client_query, department_miashs : Department, department_info : Department, department_reseaux : Department, capsys):
     dpt_info_id = to_global_id('Department', department_info.id)
     dpt_reseaux_id = to_global_id('Department', department_reseaux.id)

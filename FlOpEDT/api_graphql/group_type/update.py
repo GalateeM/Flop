@@ -1,10 +1,11 @@
-from graphene_django import DjangoObjectType
 import graphene
-from django.db import models
-from .types import GroupTypeNode
-from base.models import Department, GroupType
 from graphql_relay import from_global_id
+
+from base.models import Department, GroupType
+
 from api_graphql import lib
+from .types import GroupTypeNode
+
 
 class UpdateGroupType(graphene.Mutation):
     class Arguments:
@@ -19,7 +20,6 @@ class UpdateGroupType(graphene.Mutation):
         id = from_global_id(id) [1]
         group_type_set = GroupType.objects.filter(id = id)
         if group_type_set:
-            # foreignKey
             lib.assign_value_to_foreign_key(params, "department", Department, "create")
             
             group_type_set.update(**params)

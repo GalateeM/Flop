@@ -1,5 +1,7 @@
 from django_filters import FilterSet, CharFilter
+
 from base.models import CourseType, Department
+
 
 class CourseTypeFilter(FilterSet):
     dept = CharFilter(required = True, method = 'filter_dept')

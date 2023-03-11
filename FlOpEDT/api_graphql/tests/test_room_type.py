@@ -1,11 +1,14 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from base.models import RoomType, Department
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_rooms import room_type_info, room_type_reseaux
 from test_department import department_langues, department_info, department_reseaux
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def room_type_info2(db, \

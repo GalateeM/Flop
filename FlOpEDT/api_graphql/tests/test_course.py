@@ -1,14 +1,17 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from base.models import Course, CourseType, Module, Week, RoomType, GenericGroup, TrainingProgramme, Department, Period
+from graphql_relay import from_global_id, to_global_id
+
+from base.models import Course, CourseType, Module, GenericGroup, TrainingProgramme, Department, Period
 from people.models import Tutor
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_tutor import department_info, department_miashs, department_reseaux, tutor_reseaux, tutor_info, tutor_algo_prog, tutor_conception
 from test_course_type import course_type1, course_type2, course_type4
 from test_modules import training_l2_miashs, training_l3_miashs, period_1, period_2, module_algo_prog, module_conception_log
 from test_generic_group import group_type1, group_type2, group_type3, training_m1_reseaux, training_l1_info, group3, group1, group2, group4, group_type4, department_langues, training_l3_langues
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def training_l2_reseaux(db, department_reseaux: Department) -> TrainingProgramme:

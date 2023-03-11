@@ -1,14 +1,16 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from base.models import TrainingProgramme, Department, GroupType, GenericGroup
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_modules import training_l2_miashs, training_l3_miashs
 from test_department import department_info, department_langues, department_miashs, department_reseaux
 from test_course_type import group_type1, group_type2, group_type3, group_type4
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
 
-# Train_prog
+
 @pytest.fixture
 def training_l1_info(db, department_info: Department) -> TrainingProgramme:
     return TrainingProgramme.objects.create(
@@ -26,9 +28,6 @@ def training_m1_reseaux(db, department_reseaux: Department) -> TrainingProgramme
     return TrainingProgramme.objects.create(
         abbrev="M1RES", name="M1 RESEAUX",
         department=department_reseaux)
-
-# Group types
-#1 info 2 misahs 3 reseaux 4 langues
 
 @pytest.fixture
 def group1(db, group_type1 : GroupType, training_l1_info : TrainingProgramme) -> GenericGroup:

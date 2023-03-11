@@ -1,13 +1,16 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from people.models import Tutor
-from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module, TrainingProgramme, Department, Period
+from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module
+
+from lib import execute_query, get_data, execute_mutation, client_query
 from test_modules import module_algo_prog, module_conception_log, training_l3_miashs ,training_l2_miashs, \
 department_miashs, period_1 , period_2, tutor_algo_prog, tutor_conception
 from test_user_preference import week1, week7
-from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def course_type_algo(db) -> CourseType:

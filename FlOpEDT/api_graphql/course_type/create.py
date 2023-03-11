@@ -1,9 +1,11 @@
 import graphene
+
 from base.models import CourseType, GroupType, Department
+
+from api_graphql import lib
 from .types import CourseTypeNode
 from api_graphql.group_type.types import GroupTypeNode
-from graphql_relay import from_global_id
-from api_graphql import lib
+
 
 class CreateCourseType(graphene.Mutation):
     class Arguments:
@@ -15,18 +17,12 @@ class CreateCourseType(graphene.Mutation):
         graded = graphene.Boolean()
     
     course_type = graphene.Field(CourseTypeNode)
-    # manyToManyField
     group_types = graphene.List(GroupTypeNode)
-    # #################
     
     @classmethod
     def mutate(cls, root, info, **params):
-        # foreign keys
         lib.assign_value_to_foreign_key(params, "department", Department, "create")
-        
-        # manyToManyField
         group_types = lib.get_manyToManyField_values(params, "group_types", GroupType)
-        # #################
 
         course_type = CourseType.objects.create(**params)
         lib.assign_values_to_manyToManyField(course_type, "group_types", group_types)

@@ -1,7 +1,10 @@
 import graphene
-from people.models import Tutor
-from .types import TutorType
 from graphql_relay import from_global_id
+
+from people.models import Tutor
+
+from .types import TutorType
+
 
 class DeleteTutor(graphene.Mutation):
         class Arguments:

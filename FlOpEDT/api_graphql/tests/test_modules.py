@@ -1,10 +1,13 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
+from graphql_relay import from_global_id, to_global_id
+
 from base.models import Module, TrainingProgramme, Department, Period
 from people.models import Tutor
+
 from lib import execute_query, get_data, execute_mutation, client_query
-from graphql_relay import from_global_id, to_global_id
+
 
 @pytest.fixture
 def department_miashs(db) -> Department:

@@ -1,10 +1,12 @@
 import graphene
+
 from base.models import Room, Department, RoomType
+
+from api_graphql import lib
 from .types import RoomNode
 from api_graphql.room_type.types import RoomTypeNode
 from api_graphql.department.types import DepartmentType
-from graphql_relay import from_global_id
-from api_graphql import lib
+
 
 class CreateRoom(graphene.Mutation):
     class Arguments:
@@ -20,11 +22,10 @@ class CreateRoom(graphene.Mutation):
 
     @classmethod
     def mutate(cls,root,info, **params):   
-
-        #ManyToMany
         types = lib.get_manyToManyField_values(params, "types", RoomType)
         subroom_of = lib.get_manyToManyField_values(params, "subroom_of", Room)
         departments = lib.get_manyToManyField_values(params, "departments", Department)
+
         rooms = Room.objects.create(**params)
         
         lib.assign_values_to_manyToManyField(rooms, "types", types)

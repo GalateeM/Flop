@@ -1,5 +1,7 @@
 from django_filters import FilterSet
+
 from base.models import GroupType
+
 
 class GroupTypeFilter(FilterSet):
     class Meta:

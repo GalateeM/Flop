@@ -1,9 +1,10 @@
 import graphene
-from base.models import  Course, ScheduledCourse, Room
-from .types import ScheduledCourseNode
-from people.models import Tutor
 from graphql_relay import from_global_id
-from api_graphql import lib
+
+from base.models import  ScheduledCourse
+
+from .types import ScheduledCourseNode
+
 
 class DeleteScheduledCourse(graphene.Mutation):
     class Arguments:

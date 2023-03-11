@@ -1,10 +1,11 @@
 from _pytest.fixtures import fixture
 import pytest
 from graphene_django.utils.testing import graphql_query
-from quote.models import Quote, QuoteType
-from lib import execute_query, get_data, execute_mutation, client_query
 from graphql_relay import from_global_id, to_global_id
 
+from quote.models import Quote, QuoteType
+
+from lib import execute_query, get_data, execute_mutation, client_query
 
 
 @pytest.fixture

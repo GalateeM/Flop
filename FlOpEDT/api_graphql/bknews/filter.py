@@ -1,5 +1,7 @@
 from django_filters import FilterSet
+
 from displayweb.models import BreakingNews
+
 
 class BknewsFilter(FilterSet):
     class Meta:
