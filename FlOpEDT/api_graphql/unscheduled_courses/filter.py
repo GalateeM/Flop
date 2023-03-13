@@ -37,19 +37,19 @@ class UnscheduledCourseFilter(FilterSet):
 
         # Filtering by week
         week = self.request.GET.get('week', None)
-        if week is not None:
+        if week:
             queryset = queryset.exclude(week = None).filter(week__nb=week)
             scheduled_courses = scheduled_courses.exclude(course__week = None).filter(course__week__nb=week)
 
         # Filtering by work_copy
         work_copy = self.request.GET.get('work_copy', None)
-        if work_copy is not None:
+        if work_copy:
             queryset = queryset.filter(work_copy=work_copy)
             scheduled_courses = scheduled_courses.filter(course__work_copy=work_copy)
 
         # Filtering by department
         dept = self.request.GET.get('dept', None)
-        if dept is not None:
+        if dept:
             queryset = queryset.exclude(type__department = None).filter(module__train_prog__department__abbrev=dept)
             scheduled_courses = scheduled_courses.exclude(course__type__department = None).filter(course__module__train_prog__department__abbrev=dept)
 

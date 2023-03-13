@@ -1,18 +1,24 @@
-query = "query { modules (dept : \"INFO\") { edges { node { name } } } }" 
+const query = `
+  query {
+    modules (dept : "INFO"){
+      edges {
+        node {
+          id
+          name
+        }
+      }
+    }
+  }
+`;
+
 $.ajax({
-    type: "GET",
-    // dataType: 'text',
-    // headers: {Accept: 'text/csv'},
-    url: url_graphql,
-    async: true,
-    success: function (msg, ts, req) {
-      console.log(msg)
-    },
-    error: function (msg, ts, req) {
-      console.log("error");
-      console.log(req)
-      console.log(ts)
-    },
-    contentType: 'application/json',
-    data: JSON.stringify({"query": query}),
-  });
+  type: "GET",
+  url: url_graphql,
+  data: { query: query },
+  success: function(response) {
+    console.log(response);
+  },
+  error: function(error) {
+    console.log(error);
+  }
+});
