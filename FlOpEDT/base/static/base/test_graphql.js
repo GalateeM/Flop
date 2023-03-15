@@ -1,16 +1,17 @@
 const query = `
   query {
-    modules (dept : "INFO"){
+    modules (dept :\"INFO\", week : "{\\"week\\" : 13, \\"year\\" : 2022}"){
       edges {
         node {
-          id
-          name
+          name,
+          abbrev
+          url
         }
       }
     }
   }
 `;
-
+console.log(query)
 $.ajax({
   type: "GET",
   url: url_graphql,

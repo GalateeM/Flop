@@ -1475,13 +1475,14 @@ function swap_data(fetched, current, type) {
 function fetch_module() {
   console.log(modules_info);
   var exp_week = wdw_weeks.get_selected();
-  let context = {dept : department, week : exp_week};
   const query = `
   query {
-      modules (dept :\"${context.dept}\", week : "{\\"week\\" : ${context.week.week}, \\"year\\" : ${context.week.year}}") {
+      modules (dept :\"${department}\", week : "{\\"week\\" : ${exp_week.week}, \\"year\\" : ${exp_week.year}}") {
           edges {
               node {
                   name
+                  abbrev
+                  url
               }
           }
       }
@@ -1492,17 +1493,18 @@ console.log(query)
   show_loader(true);
   $.ajax({
     type: "GET",
-    url: build_url(url_module, context),
+    url: url_graphql,
     // async: true,
     data: { query: query },
-    success: function(response, modules_info) {
+    success: function(response) {
       console.log(response)
+      const modules = response.data.modules.edges;
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
-        for (const module in response) {
-          const abbrev = module.abbrev;
-          const name = module.name;
-          const url = module.url;
+        for (const module of modules) {
+          const abbrev = module.node.abbrev;
+          const name = module.node.name;
+          const url = module.node.url;
           if (! modules_info.hasOwnProperty(abbrev)) {
             modules_info[abbrev] = {
               name : name,
@@ -1511,6 +1513,7 @@ console.log(query)
             console.log(modules_info);
           }
         }
+        show_loader(false);
       }  
     },
     error: function(error) {
