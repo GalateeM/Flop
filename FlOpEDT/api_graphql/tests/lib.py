@@ -14,8 +14,8 @@ def client_query(client):
 def execute_query(client_query, query, type):
     response = client_query(query)
     content = json.loads(response.content)
-    """ print(content)
-    assert False """
+    # print(content)
+    # assert False
     assert 'errors' not in content
     res = content["data"][type]["edges"]
     return res

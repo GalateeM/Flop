@@ -1473,39 +1473,88 @@ function swap_data(fetched, current, type) {
   -----------------*/
 // Get all the information of the module present in the week and stored him in a dictionary of Module_info
 function fetch_module() {
+  console.log(modules_info);
   var exp_week = wdw_weeks.get_selected();
-  let context = {dept: department};
-  exp_week.add_to_context(context);
+  let context = {dept : department, week : exp_week};
+  const query = `
+  query {
+      modules (dept :\"${context.dept}\", week : "{\\"week\\" : ${context.week.week}, \\"year\\" : ${context.week.year}}") {
+          edges {
+              node {
+                  name
+              }
+          }
+      }
+  }
+`
+console.log(query)
   
   show_loader(true);
   $.ajax({
     type: "GET",
-    dataType: 'text',
-    headers: {Accept: 'text/csv'},
     url: build_url(url_module, context),
-    async: true,
-    success: function (msg, ts, req) {
+    // async: true,
+    data: { query: query },
+    success: function(response, modules_info) {
+      console.log(response)
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
-        d3.csvParse(msg, translate_module_from_csv);
-      }
-      show_loader(false);
+        for (const module in response) {
+          const abbrev = module.abbrev;
+          const name = module.name;
+          const url = module.url;
+          if (! modules_info.hasOwnProperty(abbrev)) {
+            modules_info[abbrev] = {
+              name : name,
+              url : url
+            };
+            console.log(modules_info);
+          }
+        }
+      }  
     },
-    error: function (msg) {
-      console.log("error");
+    error: function(error) {
+      console.log(error);
       show_loader(false);
     }
   });
 }
-function translate_module_from_csv(d) { 
-  //console.log(d);
-  if (Object.keys(modules_info).indexOf(d.abbrev) == -1) {
-    modules_info[d.abbrev] = {
-      name: d.name,
-      url: d.url
-    };
-  }
-}
+
+
+// function fetch_module() {
+//   var exp_week = wdw_weeks.get_selected();
+//   let context = {dept: department};
+//   exp_week.add_to_context(context);
+  
+//   show_loader(true);
+//   $.ajax({
+//     type: "GET",
+//     dataType: 'text',
+//     headers: {Accept: 'text/csv'},
+//     url: build_url(url_module, context),
+//     async: true,
+//     success: function (msg, ts, req) {
+//       var sel_week = wdw_weeks.get_selected();
+//       if (Week.compare(exp_week, sel_week) == 0) {
+//         d3.csvParse(msg, translate_module_from_csv);
+//       }
+//       show_loader(false);
+//     },
+//     error: function (msg) {
+//       console.log("error");
+//       show_loader(false);
+//     }
+//   });
+// }
+// function translate_module_from_csv(d) { 
+//   //console.log(d);
+//   if (Object.keys(modules_info).indexOf(d.abbrev) == -1) {
+//     modules_info[d.abbrev] = {
+//       name: d.name,
+//       url: d.url
+//     };
+//   }
+// }
 
 /*-----------------
   ------Tutor------

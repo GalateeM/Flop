@@ -1,11 +1,13 @@
+import json
+
 from django_filters import FilterSet, CharFilter, NumberFilter
 
-from base.models import Module
+from base.models import Module, Course
 
 
 class ModuleFilter(FilterSet):
     dept = CharFilter(method = 'filter_dept', required = True)
-    week = NumberFilter(method = 'filter_week')
+    week = CharFilter(method = 'filter_week')
     
     class Meta:
         model = Module
@@ -26,7 +28,9 @@ class ModuleFilter(FilterSet):
         return queryset.exclude(period__department = None, train_prog__department = None).filter(period__department__abbrev = value, train_prog__department__abbrev = value)
 
     def filter_week(self, queryset, name, value):
-        if value > 53 or value < 0:
+        value = json.loads(value)
+        if value["week"] > 53 or value["week"] < 0:
             return Module.objects.none()
         else:
-            return queryset.filter(period__starting_week__lte = value, period__ending_week__gte = value)
+            modules_id = Course.objects.filter(week__nb = value["week"], week__year = value["year"]).values_list("module__id")
+            return queryset.filter(pk__in = modules_id)
