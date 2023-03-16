@@ -255,4 +255,6 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 GRAPHENE = {
     "SCHEMA": "api_graphql.schema.schema",
+    # ajouté car certaines requêtes (par exemple all_tutors) ont plus de 100 lignes alors que relay limite ces requêtes à 100
+    'RELAY_CONNECTION_MAX_LIMIT': 500   
 }

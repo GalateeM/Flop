@@ -37,6 +37,14 @@ def tutor_reseaux(db, department_reseaux : Department) -> Tutor:
     res.save()
     return res
 
+@pytest.fixture
+def tutor_point(db, department_reseaux : Department) -> Tutor:
+    res = Tutor.objects.create(username=".",  first_name="Point")
+    res.save()
+    res.departments.add(department_reseaux)
+    res.save()
+    return res
+
 # Query
 def test_all_tutors_dept(client_query,
                     tutor_info : Tutor, 
@@ -56,6 +64,25 @@ def test_all_tutors_dept(client_query,
     data = get_data(res)
     assert tutor_reseaux.username in data["username"]
     assert tutor_info.username not in data["username"]
+
+def test_tutor_sup_A(client_query, tutor_reseaux : Tutor, tutor_point : Tutor):
+    query = """
+        query {
+    tutors (username_Gt :"A"){
+        edges {
+        node {
+            username
+        }
+        }
+    }
+    }
+    """
+    res = execute_query (client_query, query, "tutors")
+    data = get_data(res)
+    assert tutor_reseaux.username in data["username"]
+    assert tutor_point.username not in data["username"]
+
+
 
 def test_tutors_algo(client_query, tutor_algo_prog: Tutor, tutor_conception : Tutor, tutor_blabla : Tutor,
     scheduled1 : ScheduledCourse, scheduled2 : ScheduledCourse,scheduled_blabla: ScheduledCourse, course_algo : Course, course_blabla : Course):

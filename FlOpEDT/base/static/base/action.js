@@ -306,24 +306,32 @@ function confirm_room_change(d) {
 
 function fetch_all_tutors() {
   if (all_tutors.length == 0) {
+    const query = `
+    query {
+      tutors (dept : \"${department}\", username_Gt :"A"){
+        edges {
+          node {
+            username
+          }
+        }
+      }
+    }
+    `
     show_loader(true);
     $.ajax({
       type: "GET",
-      dataType: 'json',
-      url: build_url(url_all_tutors, {dept: department}),
+      url: url_graphql,
       async: false,
-      success: function (data) {
-        
-        all_tutors = data
-          .map(function(d) { return d.username; })
-          .filter(function (d) {
-            return d > 'A';
-          });
-        all_tutors.sort();
+      data : {query : query},
+      success: function (response) {
+        const tutors = response.data.tutors.edges;
+        for (const tutor of tutors) {
+          all_tutors.push(tutor.node.username);
+        }
         show_loader(false);
       },
-      error: function (msg) {
-        console.log("error");
+      error: function (error) {
+        console.log(error);
         show_loader(false);
       }
     });
@@ -823,7 +831,6 @@ function apply_ckbox(dk) {
           return;
         }
         edt_but.attr("visibility", "visible");
-
         fetch_all();
 
       } else {

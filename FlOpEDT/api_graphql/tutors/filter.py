@@ -17,7 +17,7 @@ class TutorFilter(FilterSet):
         model = Tutor
         fields = {
             'id' : ['exact'],
-            'username' : ['icontains', 'istartswith'],
+            'username' : ['icontains', 'istartswith', 'gt'],
             'last_name' : ['icontains', 'istartswith'],
             'first_name' : ['icontains', 'istartswith'],
             'email' : ['icontains', 'istartswith']
