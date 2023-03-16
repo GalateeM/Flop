@@ -28,6 +28,12 @@ const currentWeek: Ref<FlopWeek> = ref({
     year: now.getFullYear(),
 })
 
+//Find the user language
+const currentUrl = window.location.pathname;
+const regex = new RegExp('(/(?<lang>.*?)/).*')
+const lang = currentUrl.match(regex)?.groups?.lang
+
+
 const roomreservationImports=[{nameOfImport:'PopperComponent',valueOfImport:Popper}] 
 const constraintmanagerImports=[{nameOfImport:'VueShowdown',valueOfImport:VueShowdown}] 
 
@@ -41,8 +47,8 @@ const pinia = createPinia()
 apps.forEach(({ appName, app, importedComponents }) => { //faire un if pour app.component() dans la bonne app
     // Provide the api access
     app.provide(apiKey, readonly(api))
-
     app.provide(currentWeekKey, readonly(currentWeek.value))
+    app.provide('lang',lang)
 
     app.use(pinia)
 
