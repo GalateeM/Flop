@@ -1,10 +1,5 @@
 <template>
-    <TriggeredTeleporter
-        to=".popover-body"
-        :disable="DESACTIVATE_TELEPORTS"
-        :listeningTarget="listeningTarget"
-        eventName="contextmenu"
-    >
+    <Teleport to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :key="key">
         <hr />
         <div>
             <div class="buttonContainer">
@@ -15,25 +10,19 @@
             <template v-if="selectedConstraint">
                 <template v-if="showDoc">
                     <div class="scrollbar scrollbar-primary">
-                        <Suspense>
-                            <DocumentationControler :constraint="selectedConstraint" />
-                            <template #fallback>
-                                <p>Chargement</p>
-                            </template>
-                        </Suspense>
+                        <DocumentationControler :constraint="selectedConstraint" />
                     </div>
                 </template>
             </template>
         </div>
-    </TriggeredTeleporter>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
-import TriggeredTeleporter from '@/components/controler/TriggeredTeleporter.vue'
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 
 import type { Constraint } from '@/models/Constraint'
-import { ref } from 'vue'
+import { onMounted, onUpdated, ref, watch } from 'vue'
 
 const DESACTIVATE_TELEPORTS = ref(false)
 
@@ -47,8 +36,15 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), {})
 
+const key = ref(0)
+//Force the component to rerender by updating a ref
+const forceTeleport = () => key.value++
+
+const eventName = 'contextmenu'
+props.listeningTarget.addEventListener(eventName, (e) => forceTeleport(), false)
+
 const emit = defineEmits<{
-    (e:'updateShowDoc',value:boolean):void
+    (e: 'updateShowDoc', value: boolean): void
 }>()
 
 /**
@@ -58,8 +54,7 @@ function enlargePopover() {
     const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
     if (popover !== null) {
         popover.style['max-width'] = '80vw'
-        window.scroll(popover.getBoundingClientRect().right,0)
-        
+        window.scroll(popover.getBoundingClientRect().right, 0)
     }
     const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
     if (groupeOfButton !== null) {
@@ -73,7 +68,7 @@ function enlargePopover() {
  * Swap showDoc value
  */
 function swap() {
-    emit('updateShowDoc',props.showDoc)
+    emit('updateShowDoc', props.showDoc)
 }
 
 /**
