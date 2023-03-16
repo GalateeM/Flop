@@ -1,6 +1,6 @@
 <template>
     <template v-if="idList.length == 0">
-        <p>Tous</p>
+        <p>All</p>
     </template>
     <template v-else>
         <template v-for="itemId in idList" :key="itemId">

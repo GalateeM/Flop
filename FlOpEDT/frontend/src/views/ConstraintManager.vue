@@ -7,7 +7,10 @@
             @updateShowDoc="swap"
         ></DisplayDocInPopover>
     </template>
-    <DisplayDocInNewConstraint :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraint>
+    <Suspense>
+        <DisplayDocInNewConstraint :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraint>
+    </Suspense>
+
 </template>
 
 <script setup lang="ts">
