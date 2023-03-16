@@ -29,7 +29,7 @@ import { MarkdownParser } from '@/models/MardownParser'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 
 import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
-import { type Ref, ref, onMounted, inject, watch } from 'vue'
+import { type Ref, ref, inject, watch } from 'vue'
 
 import axios from 'axios'
 
@@ -37,6 +37,9 @@ interface Props {
     constraint: Constraint
 }
 const props = withDefaults(defineProps<Props>(), {})
+
+const lang = inject('lang')
+
 
 const doc: Ref<MarkdownDocumentation | null> = ref(null)
 const p = new MarkdownParser()
@@ -48,7 +51,7 @@ watch(
     (nV, oV) => {if(nV != oV) queryDoc()}
 )
 
-const lang = inject('lang')
+
 async function queryDoc() {
     isQuerying.value = true
     await axios
