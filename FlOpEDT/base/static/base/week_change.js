@@ -1473,7 +1473,6 @@ function swap_data(fetched, current, type) {
   -----------------*/
 // Get all the information of the module present in the week and stored him in a dictionary of Module_info
 function fetch_module() {
-  console.log(modules_info);
   var exp_week = wdw_weeks.get_selected();
   const query = `
   query {
@@ -1488,16 +1487,14 @@ function fetch_module() {
       }
   }
 `
-console.log(query)
   
   show_loader(true);
   $.ajax({
     type: "GET",
     url: url_graphql,
-    // async: true,
+    async: true,
     data: { query: query },
     success: function(response) {
-      console.log(response)
       const modules = response.data.modules.edges;
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
@@ -1510,7 +1507,6 @@ console.log(query)
               name : name,
               url : url
             };
-            console.log(modules_info);
           }
         }
         show_loader(false);
@@ -1523,83 +1519,59 @@ console.log(query)
   });
 }
 
-
-// function fetch_module() {
-//   var exp_week = wdw_weeks.get_selected();
-//   let context = {dept: department};
-//   exp_week.add_to_context(context);
-  
-//   show_loader(true);
-//   $.ajax({
-//     type: "GET",
-//     dataType: 'text',
-//     headers: {Accept: 'text/csv'},
-//     url: build_url(url_module, context),
-//     async: true,
-//     success: function (msg, ts, req) {
-//       var sel_week = wdw_weeks.get_selected();
-//       if (Week.compare(exp_week, sel_week) == 0) {
-//         d3.csvParse(msg, translate_module_from_csv);
-//       }
-//       show_loader(false);
-//     },
-//     error: function (msg) {
-//       console.log("error");
-//       show_loader(false);
-//     }
-//   });
-// }
-// function translate_module_from_csv(d) { 
-//   //console.log(d);
-//   if (Object.keys(modules_info).indexOf(d.abbrev) == -1) {
-//     modules_info[d.abbrev] = {
-//       name: d.name,
-//       url: d.url
-//     };
-//   }
-// }
-
 /*-----------------
   ------Tutor------
   -----------------*/
 // Get all the information of the Tutor present in the week and stored him in a dictionary of Tutor_info
 function fetch_tutor() {
   var exp_week = wdw_weeks.get_selected();
-  let context = {dept: department};
-  exp_week.add_to_context(context);
+  const query = 
+  `
+    query {
+        tutors (dept :\"${department}\", week : "{\\"week\\" : ${exp_week.week}, \\"year\\" : ${exp_week.year}}") {
+            edges {
+                node {
+                    username
+                    firstName
+                    lastName
+                    email
+                }
+            }
+        }
+    }
+  `
 
   show_loader(true);
   $.ajax({
     type: "GET",
-    headers: {Accept: 'text/csv'},
-    dataType: 'text',
-    url: build_url(url_tutor, context),
+    url: url_graphql,
     async: true,
-    success: function (msg, ts, req) {
+    data: { query: query },
+    success: function(response) {
+      const tutors = response.data.tutors.edges;
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {
-        d3.csvParse(msg, translate_tutor_from_csv);
-      }
-      show_loader(false);
+        for (const tutor of tutors) {
+          const username = tutor.node.username;
+          const lastName = tutor.node.lastName;
+          const firstName = tutor.node.firstName;
+          const email = tutor.node.email;
+          if (! tutors_info.hasOwnProperty(username)) {
+            tutors_info[username] = {
+              full_name : firstName + " " + lastName,
+              email : email
+            };
+          }
+        }
+        show_loader(false);
+      }  
     },
-    error: function (xhr, status, msg) {
-      console.log("error");
-      console.log(msg);
+    error: function(error) {
+      console.log(error);
       show_loader(false);
     }
   });
 }
-function translate_tutor_from_csv(d) {
-  if (Object.keys(tutors_info).indexOf(d.username) == -1) {
-    tutors_info[d.username] = {
-      full_name: d.first_name + " " + d.last_name,
-      email: d.email
-    };
-  }
-}
-
-
-
 
 /*
 Reste :

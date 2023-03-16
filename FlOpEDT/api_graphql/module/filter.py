@@ -32,5 +32,5 @@ class ModuleFilter(FilterSet):
         if value["week"] > 53 or value["week"] < 0:
             return Module.objects.none()
         else:
-            modules_id = Course.objects.filter(week__nb = value["week"], week__year = value["year"]).values_list("module__id")
+            modules_id = Course.objects.exclude(week = None).filter(week__nb = value["week"], week__year = value["year"]).values_list("module__id", flat = True)
             return queryset.filter(pk__in = modules_id)

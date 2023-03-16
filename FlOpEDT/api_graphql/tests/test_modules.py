@@ -153,29 +153,29 @@ def course2(db,tutor_conception:Tutor, module_conception_log:Module, course_type
     res.save()
     return res
 
-# def test_all_modules(client_query,
-#                     module_conception_log : Module, 
-#                     module_algo_prog : Module):
-#     query = '''
-#         query {
-#             modules (dept :\"MIASHS\"){
-#                 edges {
-#                     node {
-#                         abbrev
-#                         head {
-#                             username
-#                         }
-#                     }
-#                 }
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "modules")
-#     data = get_data(res)
-#     assert module_conception_log.abbrev in data["abbrev"]
-#     assert module_algo_prog.abbrev in data["abbrev"]
-#     assert module_conception_log.head.username in data["username"]
-#     assert module_algo_prog.head.username in data["username"]
+def test_all_modules(client_query,
+                    module_conception_log : Module, 
+                    module_algo_prog : Module):
+    query = '''
+        query {
+            modules (dept :\"MIASHS\"){
+                edges {
+                    node {
+                        abbrev
+                        head {
+                            username
+                        }
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "modules")
+    data = get_data(res)
+    assert module_conception_log.abbrev in data["abbrev"]
+    assert module_algo_prog.abbrev in data["abbrev"]
+    assert module_conception_log.head.username in data["username"]
+    assert module_algo_prog.head.username in data["username"]
 
 def test_modules_with_filters_1(client_query,
                                 module_conception_log: Module, module_algo_prog : Module, course1 : Course, course2 : Course):
@@ -196,113 +196,113 @@ def test_modules_with_filters_1(client_query,
     assert module_conception_log.name in data["name"]
     assert module_algo_prog.name not in data["name"]
 
-# def test_modules_with_filters_2(client_query,
-#                                 module_algo_prog: Module):
-#     query = '''
-#         query {
-#             modules (dept :\"MIASHS\", name_Icontains : \"l\",
-#             trainProg_Abbrev : \"L2M\") {
-#                 edges {
-#                     node {
-#                         url
-#                     }
-#                 }
-#             }
-#         }
-#     '''
-#     res = execute_query (client_query, query, "modules")
-#     data = get_data(res)
-#     assert module_algo_prog.url in data["url"]
+def test_modules_with_filters_2(client_query,
+                                module_algo_prog: Module):
+    query = '''
+        query {
+            modules (dept :\"MIASHS\", name_Icontains : \"l\",
+            trainProg_Abbrev : \"L2M\") {
+                edges {
+                    node {
+                        url
+                    }
+                }
+            }
+        }
+    '''
+    res = execute_query (client_query, query, "modules")
+    data = get_data(res)
+    assert module_algo_prog.url in data["url"]
 
-# def test_mutations(db, client_query, tutor_algo_prog : Tutor, tutor_conception : Tutor, period_1 : Period, period_2 : Period, training_l2_miashs : TrainingProgramme, training_l3_miashs : TrainingProgramme, capsys):
-#     tutor_algo_prog_id = to_global_id("Tutor", tutor_algo_prog.id)
-#     tutor_conception_id = to_global_id("Tutor", tutor_conception.id)
-#     period_1_id = to_global_id("Period", period_1.id)
-#     period_2_id = to_global_id("Period", period_2.id)
-#     training_l2_miashs_id = to_global_id("TrainingProgramme", training_l2_miashs.id)
-#     training_l3_miashs_id = to_global_id("TrainingProgramme", training_l3_miashs.id)
+def test_mutations(db, client_query, tutor_algo_prog : Tutor, tutor_conception : Tutor, period_1 : Period, period_2 : Period, training_l2_miashs : TrainingProgramme, training_l3_miashs : TrainingProgramme, capsys):
+    tutor_algo_prog_id = to_global_id("Tutor", tutor_algo_prog.id)
+    tutor_conception_id = to_global_id("Tutor", tutor_conception.id)
+    period_1_id = to_global_id("Period", period_1.id)
+    period_2_id = to_global_id("Period", period_2.id)
+    training_l2_miashs_id = to_global_id("TrainingProgramme", training_l2_miashs.id)
+    training_l3_miashs_id = to_global_id("TrainingProgramme", training_l3_miashs.id)
 
-#     create = \
-#     """ 
-#         mutation {
-#             createModule (
-#                 name : "Module 1"
-#                 abbrev : "MDL1"
-#                 head : \"""" + tutor_algo_prog_id + \
-#     """\"       ppn : "ppn 1"
-#                 trainProg : \"""" + training_l2_miashs_id + \
-#     """\"       period : \"""" + period_2_id + \
-#     """\"       url : "http://module_1.com"
-#                 description : "Azertyuiop"
-#             ) {
-#                 module {
-#                     id
-#                 }
-#             }
-#         }
-#     """
+    create = \
+    """ 
+        mutation {
+            createModule (
+                name : "Module 1"
+                abbrev : "MDL1"
+                head : \"""" + tutor_algo_prog_id + \
+    """\"       ppn : "ppn 1"
+                trainProg : \"""" + training_l2_miashs_id + \
+    """\"       period : \"""" + period_2_id + \
+    """\"       url : "http://module_1.com"
+                description : "Azertyuiop"
+            ) {
+                module {
+                    id
+                }
+            }
+        }
+    """
 
-#     global_id = execute_mutation(client_query, create, "createModule", "module")
-#     try:
-#         obj_id = from_global_id(global_id)[1]
-#         obj = Module.objects.get(id=obj_id)
+    global_id = execute_mutation(client_query, create, "createModule", "module")
+    try:
+        obj_id = from_global_id(global_id)[1]
+        obj = Module.objects.get(id=obj_id)
 
-#         update = \
-#     """ 
-#         mutation {
-#             updateModule (
-#                 id : \"""" + global_id + \
-#     """\"       name : "Module 7"
-#                 abbrev : "MDL7"
-#                 head : \"""" + tutor_conception_id + \
-#     """\"       ppn : "ppn 7"
-#                 trainProg : \"""" + training_l3_miashs_id + \
-#     """\"       period : \"""" + period_1_id + \
-#     """\"       url : "http://module_7.com"
-#                 description : "Qsdfghjklm"
-#             ) {
-#                 module {
-#                     id
-#                 }
-#             }
-#         }
-#     """
-#         execute_mutation(client_query, update, "updateModule", "module")
-#         obj_updated = Module.objects.get(id=obj_id)
-#         assert obj.name != obj_updated.name
-#         assert obj.abbrev != obj_updated.abbrev
-#         assert obj.head.username != obj_updated.head.username
-#         assert obj.ppn != obj_updated.ppn
-#         assert obj.train_prog.name != obj_updated.train_prog.name
-#         assert obj.period.name != obj_updated.period.name
-#         assert obj.url != obj_updated.url
-#         assert obj.description != obj_updated.description
-#         with capsys.disabled():
-#             print("The object was updated successfully")
+        update = \
+    """ 
+        mutation {
+            updateModule (
+                id : \"""" + global_id + \
+    """\"       name : "Module 7"
+                abbrev : "MDL7"
+                head : \"""" + tutor_conception_id + \
+    """\"       ppn : "ppn 7"
+                trainProg : \"""" + training_l3_miashs_id + \
+    """\"       period : \"""" + period_1_id + \
+    """\"       url : "http://module_7.com"
+                description : "Qsdfghjklm"
+            ) {
+                module {
+                    id
+                }
+            }
+        }
+    """
+        execute_mutation(client_query, update, "updateModule", "module")
+        obj_updated = Module.objects.get(id=obj_id)
+        assert obj.name != obj_updated.name
+        assert obj.abbrev != obj_updated.abbrev
+        assert obj.head.username != obj_updated.head.username
+        assert obj.ppn != obj_updated.ppn
+        assert obj.train_prog.name != obj_updated.train_prog.name
+        assert obj.period.name != obj_updated.period.name
+        assert obj.url != obj_updated.url
+        assert obj.description != obj_updated.description
+        with capsys.disabled():
+            print("The object was updated successfully")
         
-#         delete = """
-#         mutation {
-#             deleteModule ( 
-#                 id : \"""" + global_id + \
-#                 """\" ) {
-#                 module {
-#                     id
-#                 }
-#             }
-#         }
-#         """
+        delete = """
+        mutation {
+            deleteModule ( 
+                id : \"""" + global_id + \
+                """\" ) {
+                module {
+                    id
+                }
+            }
+        }
+        """
 
-#         execute_mutation(client_query, delete, "deleteModule", "module")
+        execute_mutation(client_query, delete, "deleteModule", "module")
 
-#         try:
-#             obj_deleted = Module.objects.get(id=obj_id)
-#             with capsys.disabled():
-#                 print("The object was not deleted")
-#         except Module.DoesNotExist:
-#             with capsys.disabled():
-#                 print("The object was deleted successfully")
+        try:
+            obj_deleted = Module.objects.get(id=obj_id)
+            with capsys.disabled():
+                print("The object was not deleted")
+        except Module.DoesNotExist:
+            with capsys.disabled():
+                print("The object was deleted successfully")
     
-#     except Module.DoesNotExist:
-#         with capsys.disabled():
-#             print("The object was not created")
-#         assert False
+    except Module.DoesNotExist:
+        with capsys.disabled():
+            print("The object was not created")
+        assert False

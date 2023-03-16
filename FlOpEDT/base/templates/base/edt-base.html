@@ -38,7 +38,11 @@
   var transversal_groupes_fi = "{% url 'api:groups:transversal-list' %}";
 
   var url_ttconstraint = "{% url 'api:ttapp:constraint-list' %}"
+  // non fait car trop complexe : appelé dans all.js et edt-only.js -> 
+  // d3.json(build_url(rooms_fi, context_dept), 
+  // function (d) { main('rooms', d); });
   var rooms_fi = "{% url 'api:rooms:all-list' %}";
+  // ---------------------------------------------- //
   var constraints_fi = "{% url 'api:fetch:constraints-list' %}";
     
     var url_tutor = "{% url 'api:people:tutor-list' %}";

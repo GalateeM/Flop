@@ -4,13 +4,20 @@ from graphene_django.utils.testing import graphql_query
 from graphql_relay import from_global_id, to_global_id
 
 from people.models import Tutor
-from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module
+from base.models import Week, Course,Room, ScheduledCourse, CourseType, Module, Department
 
 from lib import execute_query, get_data, execute_mutation, client_query
 from test_modules import module_algo_prog, module_conception_log, training_l3_miashs ,training_l2_miashs, \
 department_miashs, period_1 , period_2, tutor_algo_prog, tutor_conception
 from test_user_preference import week1, week7
 
+@pytest.fixture
+def tutor_blabla(db, department_miashs : Department) -> Tutor:
+    res = Tutor.objects.create(username="BL", first_name="Bla")
+    res.save()
+    res.departments.add(department_miashs)
+    res.save()
+    return res
 
 @pytest.fixture
 def course_type_algo(db) -> CourseType:
@@ -24,12 +31,21 @@ def room_algo(db) -> Room:
 def course_algo(db, module_algo_prog: Module, course_type_algo: CourseType, week7 : Week) -> Course:
     return Course.objects.create(module=module_algo_prog, type= course_type_algo, week = week7)
 
+@pytest.fixture
+def course_blabla(db, module_algo_prog: Module, course_type_algo: CourseType, week7 : Week, tutor_conception : Tutor) -> Course:
+    return Course.objects.create(module=module_algo_prog, type= course_type_algo, week = week7, tutor = tutor_conception)
 
 @pytest.fixture
 def scheduled1(db, tutor_algo_prog:Tutor,
                 room_algo:Room,
                 course_algo:Course) -> ScheduledCourse:
     return ScheduledCourse.objects.create(tutor= tutor_algo_prog, room= room_algo, course= course_algo, start_time = 5)
+
+@pytest.fixture
+def scheduled_blabla(db, tutor_blabla:Tutor,
+                room_algo:Room,
+                course_algo:Course) -> ScheduledCourse:
+    return ScheduledCourse.objects.create(tutor= tutor_blabla, room= room_algo, course= course_algo, start_time = 5)
 
 @pytest.fixture
 def course_type_conception(db) -> CourseType:
