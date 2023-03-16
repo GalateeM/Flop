@@ -1,6 +1,6 @@
 <template>
     <div>
-        <VueShowdown :markdown="doc.textContent" />
+        <VueShowdown :markdown="doc.textContent"  :options="{ tables: true }" />
     </div>
     <template v-if="teleportable">
         <template v-if="constraint">
