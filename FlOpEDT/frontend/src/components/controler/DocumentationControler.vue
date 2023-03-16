@@ -21,7 +21,7 @@ import { MarkdownParser } from '@/models/MardownParser'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 
 import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
-import { type Ref, ref, onMounted } from 'vue'
+import { type Ref, ref, onMounted, inject } from 'vue'
 import axios from 'axios'
 
 interface Props {
@@ -38,8 +38,9 @@ onMounted(() => {
     isMounted.value = true
 })
 
+const lang = inject('lang')
 await axios
-    .get('/fr/api/ttapp/docu/' + props.constraint.className + '.md')
+    .get(`/${lang}/api/ttapp/docu/${props.constraint.className}.md`)
     .then(function (response) {
         isResolved.value = true
         p.parse(response.data, props.constraint).then((response) => (doc.value = response))

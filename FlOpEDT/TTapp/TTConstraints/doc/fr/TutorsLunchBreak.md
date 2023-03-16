@@ -1,19 +1,12 @@
-A AJOUTER AUTOMATIQUEMENT:
+### Description
+Garantit que les profs {{ tutors }} ont une pause repas (ou autre) d'au moins {{ lunch_length }} minutes
+entre {{ start_time }} et {{ end_time }} les {{ week_days }}.
+### Exemples
+| Contexte                                                                                 |OK                                 | Not Ok|
+|------------------------------------------------------------------------------------------|------------------------------------------------------------|--------------------------------------------------------------------|
+| tutors : MPH <br> start_time : 12h30 <br> end_time : 14h  <br> lunch_length : 60 minutes | ![Situation autorisée](../images/ok_tutors_lunch_break.png) | ![Situation interdite](../images/forbidden_tutors_lunch_break.png)|
 
 ### Paramètres:
-- tutors :
-- start_time: 
-- end_time:
-- lunch_length : 
-
-### Description
-Cette contrainte garantit que les profs {tutors} aient une pause pour déjeuner (ou autre chose) de {lunch_length} minutes
-au moins entre {start_time} et {end_time} les {week_days}.
-
-### Exemple : 
-- tutors = [MPH]
-- start_time = 12h30
-- end_time = 14h
-- lunch_length = 60 minutes
-
-Ok:![Situation autorisée](../images/ok_tutors_lunch_break.png), Pas ok : ![Situation interdite](../images/forbidden_tutors_lunch_break.png)
+- start_time: minutes depuis minuit (entier)
+- end_time: minutes depuis minuit (entier)
+- lunch_length : minutes (entier)
