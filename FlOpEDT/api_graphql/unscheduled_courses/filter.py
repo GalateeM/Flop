@@ -1,13 +1,12 @@
-from django_filters import FilterSet, CharFilter, NumberFilter
+from django_filters import FilterSet, CharFilter, NumberFilter, BooleanFilter
 
 from base.models import Course, ScheduledCourse
 
 
 class UnscheduledCourseFilter(FilterSet):
-    year = NumberFilter(field_name='week__year')
-    week = NumberFilter(field_name='week__nb')
-    work_copy = NumberFilter(field_name='work_copy')
-    dept = CharFilter(field_name='module__train_prog__department__abbrev')
+    year = NumberFilter(method='filter_year')
+    week = NumberFilter(method='filter_week')
+    dept = CharFilter(method='filter_department')
 
     class Meta:
         model = Course
@@ -26,38 +25,21 @@ class UnscheduledCourseFilter(FilterSet):
             'pay_module__abbrev' : ['exact'],
         }
         exclude = ('suspens', 'show_id')
-        
+    
+    def filter_week(self, queryset, name, value):
+        print("week")
+        return queryset.exclude(week = None).filter(week__nb=value)
+    
+    def filter_year(self, queryset, name, value):
+        print("year")
+        return queryset.exclude(week = None).filter(week__year=value)
+    
+    def filter_department(self, queryset, name, value):
+        print("dept")
+        return queryset.filter(module__train_prog__department__abbrev=value)
+
     def filter_queryset(self, queryset):
-        scheduled_courses = ScheduledCourse.objects.all()
-        # Filtering by year
-        year = self.request.GET.get('year', None)
-        if year:
-            queryset = queryset.exclude(week = None).filter(week__year=year)
-            scheduled_courses = scheduled_courses.exclude(course__week = None).filter(course__week__year=year)
-
-        # Filtering by week
-        week = self.request.GET.get('week', None)
-        if week:
-            queryset = queryset.exclude(week = None).filter(week__nb=week)
-            scheduled_courses = scheduled_courses.exclude(course__week = None).filter(course__week__nb=week)
-
-        # Filtering by work_copy
-        work_copy = self.request.GET.get('work_copy', None)
-        if work_copy:
-            queryset = queryset.filter(work_copy=work_copy)
-            scheduled_courses = scheduled_courses.filter(course__work_copy=work_copy)
-
-        # Filtering by department
-        dept = self.request.GET.get('dept', None)
-        if dept:
-            queryset = queryset.exclude(type__department = None).filter(module__train_prog__department__abbrev=dept)
-            scheduled_courses = scheduled_courses.exclude(course__type__department = None).filter(course__module__train_prog__department__abbrev=dept)
-
-        # Exclude scheduled courses
+        courses_ids = queryset.values_list('id')
+        scheduled_courses = ScheduledCourse.objects.filter(course__id__in = courses_ids)
         scheduled_course_ids = scheduled_courses.values_list('course__id', flat=True)
-        print(f"len cou = {len(queryset)}")
-        print(f"len unsc_cou_excp = {len(queryset) - len(scheduled_course_ids)}")
-        queryset = queryset.exclude(pk__in=scheduled_course_ids)
-        print(f"len sch_cou = {len(scheduled_course_ids)}")
-        print(f"len unsc_cou = {len(queryset)}")
-        return queryset
+        return queryset.exclude(pk__in=scheduled_course_ids)
