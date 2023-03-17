@@ -946,10 +946,8 @@ function create_quote() {
     async: true,
     success: function (msg) {
       var quote = msg.slice(1,-1) ;
-
       svg.get_dom("vg").select(".quote").select("text")
         .text(quote);
-
       show_loader(false);
 
     },

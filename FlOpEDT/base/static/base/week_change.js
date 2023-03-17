@@ -477,6 +477,9 @@ function fetch_bknews(first) {
         msg,
         translate_bknews_from_csv
       );
+      console.log(msg);
+      console.log("cont");
+      console.log(bknews.cont);
 
       var sel_week = wdw_weeks.get_selected();
       if (Week.compare(exp_week, sel_week) == 0) {

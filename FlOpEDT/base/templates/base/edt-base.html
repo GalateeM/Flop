@@ -45,13 +45,24 @@
   // ---------------------------------------------- //
   var constraints_fi = "{% url 'api:fetch:constraints-list' %}";
     
+    // non fait car trop complexe : notamment fetch_tutor_preferences 
+    // et le viewSet de userPreference difficile à comprendre 
     var url_user_pref = "{% url 'api:user-actual-list' %}";
     var url_user_pref_default = "{% url 'api:user-def-list' %}";
+    // ---------------------------------------------------------- //
 
+    // non fait car fetch_bknews est difficile à comprendre et on ne voit pas où sont les bknews sur l'edt
     var url_bknews = "{% url 'api:extra:bknews-list' %}";
-    var url_quote = "{% url 'api:extra:random-quote-list' %}";
+    // ---------------------------------------------------------- //
 
+    // non fait car utilisé dans create_quote donc pas un query
+    var url_quote = "{% url 'api:extra:random-quote-list' %}";
+    // ---------------------------------------------------------- //
+
+  // non fait car fetch_cours beaucoup trop complexe
   var url_cours_pp = "{% url 'api:fetch:unscheduledcourses-list' %}";
+  // ---------------------------------------------------------- //
+
 
   var url_weekdays = "{% url 'api:fetch:weekdays-list' %}";
   
