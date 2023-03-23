@@ -4,7 +4,7 @@
     </template>
     <template v-else>
         <template v-for="itemId in idList" :key="itemId">
-            <p>{{ values.get(itemId) }}</p>
+            <span>{{ values.get(itemId) + " " }}</span>
         </template>
     </template>
 </template>
