@@ -47,7 +47,7 @@ import re
 DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
 IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
 TEMP_DIR = os.path.join(os.getcwd(),'temp')
-CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'corrupted.json')
+CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'discarded.json')
 DOMAIN_REPLACE_REGEX = r"(\$domaine)"
 EN_DIR_NAME = "en"
 REGEX_IMAGE = r"(?:[!]\[(.*?)\])\(((\.\.)(.*?))\)"
