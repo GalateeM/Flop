@@ -2,14 +2,23 @@ from django.apps import AppConfig
 import os
 import json
 import re
+import shutil
+from MyFlOp.colors import Tcolors
 from pathlib import Path
 from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
+TEMP_DIR = os.path.join(os.getcwd(),'temp')
+LANG_LIST = ["fr","en"]
+CLEAR_TEMP_FILES = True
 
 class MyflopConfig(AppConfig):
     name = 'MyFlOp'
     verbose_name = "My Application"
     def ready(self):
-        if os.environ.get('RUN_MAIN') != 'true':
+        createDiscardFile()
+        purgeTempFolder()
+
+def createDiscardFile():
+    if os.environ.get('RUN_MAIN') != 'true':
             #lists of discarted files
             corrupted = []
             unavailable_pics = []
@@ -49,3 +58,22 @@ class MyflopConfig(AppConfig):
             with open("discarded.json",'w') as file:
                 file.write('{"discarded": '+version_json+'}')
             file.close()
+
+def purgeTempFolder():
+    if(CLEAR_TEMP_FILES):
+        for l in LANG_LIST:
+            lang_dir_path = os.path.join(TEMP_DIR,l)
+
+            try:
+                shutil.rmtree(lang_dir_path)
+            except:
+                print(Tcolors.WARNING,"Directory",lang_dir_path,"does not exist",Tcolors.ENDC)
+
+            try:
+                os.mkdir(lang_dir_path)
+            except:
+                print(Tcolors.WARNING,"Directory",lang_dir_path,"has not been created")
+    else:
+        print(Tcolors.WARNING,"Temp directory will not be cleared, you can modify it in : \n","FlopEDT/MyFlOp/apps.py", Tcolors.ENDC)
+
+
