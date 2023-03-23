@@ -671,7 +671,7 @@ def doc_interpolation(docu):
             paramCallCount[name] = 0
 
         paramCallCount[name] = paramCallCount.get(name) + 1 
-        rep = '<div id="'+ name + 'Displayer' + str(paramCallCount.get(name)) + '"></div>'
+        rep = '<span id="'+ name + 'Displayer' + str(paramCallCount.get(name)) + '"></span>'
 
         ###
         newstring += rep
