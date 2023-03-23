@@ -22,4 +22,4 @@ FlOpEDT/misc/logs
 # Gurobi license file
 /gurobi.lic
 FlOpEDT/static/vue/dist/*.hot-update.js*
-/FlOpEDT/corrupted.json
+/FlOpEDT/discarded.json
