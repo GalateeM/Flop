@@ -599,7 +599,7 @@ class FlopImgVisu(viewsets.ViewSet):
         return HttpResponse(status=403)
 
 
-def domain_replace(file, domain):
+def image_interpolation(file, domain):
     text = file.read()
     # use 4th group (image name) from regex image and add the domain
     image_path = domain+"/fr/api/ttapp"+r"\4"
@@ -661,17 +661,20 @@ def check_file(path,url,name):
         json_path = open(file_temp_path)
     except:
         found = False
-    #if not found then we create it
+   
 
 
     if(found):
+        ##if cached file exist we return it
         json_file = json.load(json_path)
         print('Opened cached file')
         
         return (json.dumps(json_file),"Success")
     else:
+        #create file
+
         file_handle = open(path, 'r')
-        text = domain_replace(file_handle, url.full_domain)
+        text = image_interpolation(file_handle, url.full_domain)
         text,dico_inter = interpolation(text)
 
         full_dico = {
