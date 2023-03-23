@@ -526,7 +526,7 @@ class FlopDocVisu(viewsets.ViewSet):
             data = json.load(open(CORRUPTED_JSON_PATH))
         except:
             return HttpResponse(status=500)
-        forbidden_files = data["corrupted"]
+        forbidden_files = data["discarded"]
 
 
         if (url.lang != EN_DIR_NAME):  # if doc not found in lang fallback to english
