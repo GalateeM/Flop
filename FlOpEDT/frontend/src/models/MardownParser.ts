@@ -50,7 +50,7 @@ export class MarkdownParser {
                             } else paramCallCount.set(cstParam.name, v)
 
                             //Replace the interpolation call by an anchor point
-                            const newString = '<div id="' + cstParam.name + 'Displayer'+v+'"></div>'
+                            const newString = '<span id="' + cstParam.name + 'Displayer'+v+'"></span>'
                             content = content.replace(resultat.value.groups.match,newString)
 
                         resultat = it.next()

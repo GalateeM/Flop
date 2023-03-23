@@ -1,17 +1,24 @@
 <template>
     <div>
-        <VueShowdown :markdown="doc.textContent"  :options="{ tables: true }" />
+        <VueShowdown :markdown="doc.textContent" :options="{ tables: true }" />
     </div>
     <template v-if="teleportable">
         <template v-if="constraint">
-            <template v-for="CstParType in ConstrParameter.types()" :key="CstParType">
-                <template v-if="constraint.parameters.get(CstParType)">
-                    <template v-for="i in getNumberOfCallAsArray(CstParType)" :key="i">
-                        <Teleport :to="'#' + CstParType + 'Displayer' + i">
-                            <ConstraintParameterDisplayer
-                                :idList="(constraint.parameters.get(CstParType)?.id_list as unknown[])"
-                                :values="storesItems.get(CstParType)"
-                            />
+            <template v-for="paramReqName in paramRequestedName" :key="paramReqName">
+                <template v-if="constraint.parameters.get(paramReqName)">
+                    <template v-for="callCount in getNumberOfCallAsArray(paramReqName)" :key="callCount">
+                        <Teleport :to="'#' + paramReqName + 'Displayer' + callCount">
+                            <template
+                                v-if="ConstrParameter.primitiveTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
+                                <SimpleConstraintParameterDisplayer
+                                    :values="(constraint.parameters.get(paramReqName)?.id_list as unknown[])" />
+                            </template>
+                            <template
+                                v-if="ConstrParameter.objectTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
+                                <ConstraintParameterDisplayer
+                                    :idList="(constraint.parameters.get(paramReqName)?.id_list as unknown[])"
+                                    :values="storesItems.get(constraint.parameters.get(paramReqName)?.type as string)" />
+                            </template>
                         </Teleport>
                     </template>
                 </template>
@@ -38,9 +45,11 @@ import { useModuleStore } from '@/stores/module'
 import { useTrainProgStore } from '@/stores/trainProg'
 import { useTutorStore } from '@/stores/tutor'
 import { useWeekStore } from '@/stores/week'
+import { useRoomStore } from '@/stores/roomRework'
 import type { Constraint } from '@/models/Constraint'
 
 import ConstraintParameterDisplayer from './ConstraintParameterDisplayer.vue'
+import SimpleConstraintParameterDisplayer from './SimpleConstraintParameterDisplayer.vue'
 import { ConstrParameter } from '@/models/ConstrParameter'
 
 interface Props {
@@ -63,6 +72,7 @@ const moduleStore = useModuleStore()
 const trainProgStore = useTrainProgStore()
 const tutorStore = useTutorStore()
 const weekStore = useWeekStore()
+const roomStore = useRoomStore()
 
 /**
  * initialize all constraint parameters stores with Promises
@@ -76,6 +86,7 @@ async function initializeStores() {
         trainProgStore.initialize(),
         tutorStore.initialize(),
         weekStore.initialize(),
+        roomStore.initialize()
     ]
     await Promise.all(promises)
 }
@@ -85,6 +96,11 @@ const teleportable = ref(false)
 onMounted(() => {
     teleportable.value = true //Allow the teleportation of parameters displayer
 })
+
+/**
+ * List of the requested interpolation
+ */
+const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
 
 /**
  * Return an integer array from 1 to the number of call of interpolation in the doc property
@@ -102,14 +118,16 @@ function getNumberOfCallAsArray(param: string) {
  * Map of the items in the stores, accessible by the parameter name
  */
 const storesItems = new Map<string, any>([
-    ['course_types', courseTypeStore.items],
-    ['department', departmentStore.items],
-    ['groups', groupStore.items],
-    ['modules', moduleStore.items],
-    ['train_progs', trainProgStore.items],
-    ['tutors', tutorStore.items],
-    ['weeks', weekStore.items],
+    ["base.CourseType", courseTypeStore.items],
+    ["base.Department", departmentStore.items],
+    ["base.StructuralGroup", groupStore.items],
+    ["base.Module", moduleStore.items],
+    ["base.TrainingProgramme", trainProgStore.items],
+    ["people.Tutor", tutorStore.items],
+    ["base.Week", weekStore.items],
+    ["base.Room", roomStore.items]
 ])
+
 </script>
 
 <style scoped></style>

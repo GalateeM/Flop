@@ -2,6 +2,29 @@
  * @class
  */
 export class ConstrParameter {
+    /**
+     * Constraint parameter object types
+     */
+    private static CONSTR_PARAMETER_TYPE = [
+        "base.Week",
+        "base.TrainingProgramme",
+        "base.CourseType",
+        "base.Module",
+        "people.Tutor",
+        "base.StructuralGroup",
+        "base.Room",
+        "base.Department"
+    ]
+
+    /**
+     * Constraint parameter primitive types
+     */
+    private static CONSTR_PARAMETER_PRIMITIVE_TYPE = [
+        "PositiveSmallIntegerField",
+        "CharField",
+        "BooleanField",
+    ]
+
     private _name!: string
     private _type!: string //Should be an enum
     private _required!: boolean
@@ -56,24 +79,20 @@ export class ConstrParameter {
     }
 
     static unserialize(obj: any) {
-        const id_list:Array<number> = []
-        obj.id_list.forEach((e:string) => {
+        const id_list: Array<number> = []
+        obj.id_list.forEach((e: string) => {
             id_list.push(+e)
         });
         return new ConstrParameter(obj.name, obj.type, obj.required, obj.multiple, id_list)
     }
 
-    static types(){
-        return Object.values(ConstrParameterType).filter((e)=>isNaN(Number(e))) as string[]
-    }
-}
 
-export enum ConstrParameterType{
-    course_types,
-    department,
-    groups,
-    modules,
-    train_progs,
-    tutors,
-    weeks
+
+    static objectTypes() {
+        return ConstrParameter.CONSTR_PARAMETER_TYPE
+    }
+
+    static primitiveTypes() {
+        return ConstrParameter.CONSTR_PARAMETER_PRIMITIVE_TYPE
+    }
 }
