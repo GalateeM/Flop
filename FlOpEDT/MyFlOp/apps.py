@@ -15,7 +15,7 @@ class MyflopConfig(AppConfig):
     verbose_name = "My Application"
     def ready(self):
         createDiscardFile()
-        purgeTempFolder()
+        initTemp()
 
 def createDiscardFile():
     if os.environ.get('RUN_MAIN') != 'true':
@@ -58,6 +58,21 @@ def createDiscardFile():
             with open("discarded.json",'w') as file:
                 file.write('{"discarded": '+version_json+'}')
             file.close()
+def initTemp():
+    if( not(Path.exists(Path(TEMP_DIR))) ):
+        print(Tcolors.WARNING,"Temp dir does not exist, creating it",Tcolors.ENDC)
+        try:
+            os.mkdir(TEMP_DIR)
+        except:
+            print(Tcolors.WARNING,"Temp dir has not been created, aborting creation",Tcolors.ENDC)
+            return
+    purgeTempFolder()
+    
+
+    
+
+
+
 
 def purgeTempFolder():
     if(CLEAR_TEMP_FILES):
@@ -67,12 +82,12 @@ def purgeTempFolder():
             try:
                 shutil.rmtree(lang_dir_path)
             except:
-                print(Tcolors.WARNING,"Directory",lang_dir_path,"does not exist",Tcolors.ENDC)
+                print(Tcolors.OKBLUE,"Directory",lang_dir_path,"does not exist",Tcolors.ENDC)
 
             try:
                 os.mkdir(lang_dir_path)
             except:
-                print(Tcolors.WARNING,"Directory",lang_dir_path,"has not been created")
+                print(Tcolors.WARNING,"Directory",lang_dir_path,"has not been created",Tcolors.ENDC)
     else:
         print(Tcolors.WARNING,"Temp directory will not be cleared, you can modify it in : \n","FlopEDT/MyFlOp/apps.py", Tcolors.ENDC)
 
