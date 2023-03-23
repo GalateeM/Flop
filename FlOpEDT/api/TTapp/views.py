@@ -46,6 +46,7 @@ import re
 
 DOC_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc')
 IMG_DIR = os.path.join(os.getcwd(),'TTapp/TTConstraints/doc/images')
+TEMP_DIR = os.path.join(os.getcwd(),'temp')
 CORRUPTED_JSON_PATH = os.path.join(os.getcwd(),'corrupted.json')
 DOMAIN_REPLACE_REGEX = r"(\$domaine)"
 EN_DIR_NAME = "en"
@@ -516,6 +517,8 @@ class CustomUrl():
 class FlopDocVisu(viewsets.ViewSet):
     def list(self, request, **kwargs):
         name = kwargs['name']
+        name_no_extensions = name.split(".")[0]
+        print(name_no_extensions)
         # weird way to get lang from url, should be modified
         url = CustomUrl(request)
         dir_lang = os.path.join(DOC_DIR, url.lang)
@@ -526,8 +529,10 @@ class FlopDocVisu(viewsets.ViewSet):
             return HttpResponse(status=500)
         forbidden_files = data["corrupted"]
 
+
         if (url.lang != EN_DIR_NAME):  # if doc not found in lang fallback to english
             f_path = recursive_search(dir_lang, name)
+            
             if (len(f_path) == 0):
                dir_lang = os.path.join(DOC_DIR, EN_DIR_NAME)
                f_path = recursive_search(dir_lang, name)
@@ -538,15 +543,27 @@ class FlopDocVisu(viewsets.ViewSet):
             if (len(f_path) == 0):
                 return HttpResponse(status=404)
 
-        file_handle = open(f_path, 'r')
-        text = domain_replace(file_handle, url.full_domain)
-
-        # check if file is not fordidden
         if (name in forbidden_files):
             print("\033[91m"+"Attempt to access forbidden file : "+name+"\033[0m")
             return HttpResponse(status=404)
-        else:
-            return HttpResponse(text, content_type="text/plain; charset=utf-8")
+
+
+
+        json_file,status = check_file(f_path,url,name_no_extensions)
+        
+
+        #file_handle = open(f_path, 'r')
+        #text = domain_replace(file_handle, url.full_domain)
+        
+
+
+
+
+        #text,dico_inter = interpolation(text)
+        # check if file is not fordidden
+        
+        
+        return HttpResponse(json_file, content_type="application/json; charset=utf-8")
             # return FileResponse(b,content_type="text/plain; charset=utf-8")
 
     def create(self, request, **kwargs):
@@ -582,7 +599,7 @@ class FlopImgVisu(viewsets.ViewSet):
         return HttpResponse(status=403)
 
 
-def domain_replace(file, domain):
+def image_interpolation(file, domain):
     text = file.read()
     # use 4th group (image name) from regex image and add the domain
     image_path = domain+"/fr/api/ttapp"+r"\4"
@@ -600,3 +617,76 @@ def recursive_search(path, filename):
         return []
     else:
         return str(liste[0])
+    
+
+def interpolation(docu):
+    reg = r'({{(.*?)}})'
+
+    pattern = re.compile(reg)
+    paramCallCount = {}
+    newstring = ''
+    start = 0
+    for m in re.finditer(pattern, docu):
+        ###
+        end, newstart = m.span()
+        newstring += docu[start:end]
+        ###
+
+        name = m.group(2).strip()
+        if(paramCallCount.get(name) == None):
+            paramCallCount[name] = 0
+
+        paramCallCount[name] = paramCallCount.get(name) + 1 
+        rep = '<div id="'+ name + 'Displayer' + str(paramCallCount.get(name)) + '"></div>'
+
+        ###
+        newstring += rep
+        start = newstart
+        ###
+
+    newstring += docu[start:]
+    return (newstring,paramCallCount)
+
+
+def check_file(path,url,name):
+    name = name + ".json"
+    json_path = None
+    found = True
+
+    temp_path = os.path.join(TEMP_DIR,url.lang)
+    file_temp_path = os.path.join(temp_path,name)
+
+    #test if cached file exist
+    try:
+        json_path = open(file_temp_path)
+    except:
+        found = False
+   
+
+
+    if(found):
+        ##if cached file exist we return it
+        json_file = json.load(json_path)
+        print('Opened cached file')
+        
+        return (json.dumps(json_file),"Success")
+    else:
+        #create file
+
+        file_handle = open(path, 'r')
+        text = image_interpolation(file_handle, url.full_domain)
+        text,dico_inter = interpolation(text)
+
+        full_dico = {
+            "text" : text,
+            "inter" : dico_inter
+        }
+        json_file = json.dumps(full_dico)
+        try:
+            json_path = open(file_temp_path,'x')
+            json_path.write(json_file)
+        except:
+            return("","Error1")
+        
+        print("Created temp file", name)
+        return (json_file,"Success")

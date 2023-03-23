@@ -1,6 +1,7 @@
 # Web services REST
 
 S'applique aux groupes : {{ groups }}
+{{ groups }}
 
 S'applique aux départments : {{ department }}
 
@@ -43,4 +44,4 @@ Il est plutot un style d'architecture
 - GET pour recup des ressources mais pas POST
 	- Pour le reste on utilise POST,PUT et DELETE
 
-![UneImage]($domaine/fr/api/ttapp/img/ok_tutors_lunch_break.png/)
+![UneImage](../images/ok_tutors_lunch_break.png/)
