@@ -32,6 +32,7 @@ from base.models import Department
 import TTapp.TTConstraints.visio_constraints as ttv
 from django.contrib.postgres.fields.array import ArrayField
 from base.timing import all_possible_start_times, Day
+from MyFlOp.colors import Tcolors
 
 from drf_yasg import openapi
 from rest_framework import viewsets,generics
@@ -543,7 +544,7 @@ class FlopDocVisu(viewsets.ViewSet):
                 return HttpResponse(status=404)
 
         if (name in forbidden_files):
-            print("\033[91m"+"Attempt to access forbidden file : "+name+"\033[0m")
+            print(Tcolors.FAIL+"Attempt to access forbidden file : "+name+Tcolors.ENDC)
             return HttpResponse(status=404)
 
         json_file,success = check_file(f_path,url,name_no_extensions)
