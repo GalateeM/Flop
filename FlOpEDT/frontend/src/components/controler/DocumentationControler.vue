@@ -25,45 +25,39 @@
 
 <script setup lang="ts">
 import type { Constraint } from '@/models/Constraint'
-import { MarkdownParser } from '@/models/MardownParser'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
-
+import { queryDoc } from '@/composables/API_documentation'
 import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
 import { type Ref, ref, inject, watch } from 'vue'
-
-import axios from 'axios'
 
 interface Props {
     constraint: Constraint
 }
 const props = withDefaults(defineProps<Props>(), {})
 
-const lang = inject('lang')
+const lang = inject('lang') as string
 
 
 const doc: Ref<MarkdownDocumentation | null> = ref(null)
-const p = new MarkdownParser()
 const isResolved = ref(false)
 const isQuerying = ref(false)
-queryDoc()
+queryDocu()
 watch(
     () => props.constraint,
-    (nV, oV) => {if(nV != oV) queryDoc()}
+    (nV, oV) => { if (nV != oV) queryDocu() }
 )
 
 
-async function queryDoc() {
+async function queryDocu() {
     isQuerying.value = true
-    await axios
-        .get(`/${lang}/api/ttapp/docu/${props.constraint.className}.md`)
-        .then(function (response) {
+    isResolved.value = false
+    await queryDoc(props.constraint.className, lang)
+        .then(res => {
             isResolved.value = true
-            p.parse(response.data, props.constraint).then((response) => (doc.value = response))
+            doc.value = res as MarkdownDocumentation
         })
-        .catch(function (error) {
-            isResolved.value = false
-        })
-        .finally(() => (isQuerying.value = false))
+        .catch(error => console.log(error))
+        .finally(() => isQuerying.value = false)
 }
 
 </script>
@@ -73,6 +67,7 @@ async function queryDoc() {
     display: table;
     width: 100%;
 }
+
 .docNotFoundContainer {
     display: table-cell;
     vertical-align: middle;
