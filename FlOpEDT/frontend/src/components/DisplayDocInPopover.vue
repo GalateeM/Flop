@@ -1,5 +1,5 @@
 <template>
-    <Teleport to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :key="key">
+    <Teleport to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :key="key"><!-- KEY = ADAPTER-->
         <hr />
         <div>
             <div class="buttonContainer">
@@ -22,7 +22,8 @@
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 
 import type { Constraint } from '@/models/Constraint'
-import { onMounted, onUpdated, ref, watch } from 'vue'
+import { addEventListenerForForceTeleport } from '@/viewsAdapters/displayDocInPopoverAdapter';
+import { ref } from 'vue'
 
 const DESACTIVATE_TELEPORTS = ref(false)
 
@@ -36,33 +37,9 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), {})
 
-const key = ref(0)
-//Force the component to rerender by updating a ref
-const forceTeleport = () => key.value++
-
-const eventName = 'contextmenu'
-props.listeningTarget.addEventListener(eventName, (e) => forceTeleport(), false)
-
 const emit = defineEmits<{
     (e: 'updateShowDoc', value: boolean): void
 }>()
-
-/**
- * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
- */
-function enlargePopover() {
-    const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
-    if (popover !== null) {
-        popover.style['max-width'] = '80vw'
-        window.scroll(popover.getBoundingClientRect().right, 0)
-    }
-    const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
-    if (groupeOfButton !== null) {
-        groupeOfButton.style['align-items'] = 'center'
-        groupeOfButton.style['justify-content'] = 'center'
-        groupeOfButton.style['display'] = 'flex'
-    }
-}
 
 /**
  * Swap showDoc value
@@ -76,9 +53,18 @@ function swap() {
  * permit to setup the display parameters
  */
 const showBtnClassDefiner = () => {
-    enlargePopover()
     return props.showDoc ? ' minusButton ' : ' plusButton '
 }
+
+
+/*
+================================ ADAPTATER ================================ 
+*/
+const key = ref(0)
+//Force the component to rerender by updating a ref
+addEventListenerForForceTeleport(key,props.listeningTarget);
+
+
 </script>
 
 <style scoped>

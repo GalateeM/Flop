@@ -25,6 +25,7 @@ import DocumentationControler from '@/components/controler/DocumentationControle
 import { ConstraintClass } from '@/models/ConstraintClass'
 import axios from 'axios'
 import { Constraint } from '@/models/Constraint'
+import { addEventListenerToCancelButton, increaseSizeOfModal, modifyDisplay } from '@/viewsAdapters/displayDocInNewConstraintAdapter'
 
 interface Props {
     /**
@@ -38,7 +39,7 @@ const props = withDefaults(defineProps<Props>(), {})
  * Swap showDoc value
  */
 function swap() {
-    increaseSizeOfModal()
+    increaseSizeOfModal(props.showDoc)//Adapter
     emit('updateShowDoc', props.showDoc)
 }
 
@@ -56,86 +57,29 @@ const showBtnClassDefiner = () => {
     return props.showDoc ? ' minusButton ' : ' plusButton '
 }
 
-/*
-================================ ADAPTATER ================================ 
-
-/**
- * Increase the width of the modal's window when documentation is displayed or not
- */
-function increaseSizeOfModal() {
-    const modal = document.getElementsByClassName('modal-dialog').item(0) as HTMLElement
-    if (props.showDoc) {
-        modal.className = 'modal-dialog modal-dialog-centered modal-dialog-scrollable'
-    } else {
-        modal.className = 'modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl'
-    }
-}
-
-/**
- * modify the modal window's DOM to make the teleported component clickable
- * only called Once
- *
- */
-function modifyDisplay() {
-    const modal = document.getElementsByClassName('modal-content').item(0) as HTMLElement
-    modal.style['flex-direction'] = 'row'
-
-    const header = document.getElementsByClassName('modal-header').item(0) as HTMLElement
-    const body = document.getElementsByClassName('modal-body').item(0) as HTMLElement
-    const footer = document.getElementsByClassName('modal-footer').item(0) as HTMLElement
-    if (header) {
-        modal.removeChild(header)
-    }
-    if (body) {
-        modal.removeChild(body)
-    }
-    if (footer) {
-        modal.removeChild(footer)
-    }
-    const oldDiv = document.createElement('div')
-    oldDiv.appendChild(header)
-    oldDiv.appendChild(body)
-    oldDiv.appendChild(footer)
-    modal.appendChild(oldDiv)
-
-    const docDisplayer = document.createElement('div')
-    docDisplayer.className = 'docDisplayer'
-    modal.appendChild(docDisplayer)
-}
-
-/**
- * variable which allows the modification of the modal window's DOM only once
- */
-const domModified = ref(false)
-
-if (!domModified.value) {
-    modifyDisplay()
-    domModified.value = true
-}
-
 /**
  * Reference to know if the constraint classes map is loaded
  */
-const isLoaded = ref(false)
+ const isLoaded = ref(false)
+
+ 
 /**
  * Map of all constraint classes
  */
 const cstClasses = new Map<string, ConstraintClass>()
 //Load all constraint classes et set them in a dedicated map
 await axios.get('/fr/api/ttapp/constraint_types/').then(function (response) {
-    response.data.forEach((element) => {
+    response.data.forEach((element: any) => {
         const classe = ConstraintClass.unserialize(element)
         cstClasses.set(classe.className, classe)
         isLoaded.value = true
     })
 })
 
-const key = ref(0)
-const rerenderDocControler = () => key.value++
 /**
  * Constraint being created
  */
-const constraint: Ref<Constraint | null> = ref(null)
+ const constraint: Ref<Constraint | null> = ref(null)
 /**
  * Select field to choose the constraint class
  */
@@ -145,20 +89,19 @@ constraintEditTypeField?.addEventListener('change', () => {
     const cstClass = Array.from(cstClasses.values()).find((e) => constraintEditTypeField.value == e.local_name)
     if (cstClass) {
         constraint.value = new Constraint(0, '', cstClass.className, 0, true, '', '', new Map())
-        rerenderDocControler()
     } else {
         constraint.value = null
     }
 })
 
-/**
- * Cancel button of the popover
- */
-const cancelEditBtn = document.getElementById('cancel-edit-constraint') as HTMLInputElement
-//Set the selectedConstraint to null when user leave the popover
-cancelEditBtn?.addEventListener('click', () => {
-    constraint.value = null
-})
+
+/*
+================================ ADAPTATER ================================ 
+*/
+modifyDisplay()
+addEventListenerToCancelButton(constraint)
+
+
 </script>
 
 <style scoped>
