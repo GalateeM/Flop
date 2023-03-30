@@ -1,27 +1,17 @@
 <template>
-    <template v-if="currentPopoverFound"><!--currentPopoverFound = Adapter-->
-        <DisplayDocInPopoverAdapter
-            :selectedConstraint="selectedConstraint"
-            :listeningTarget="listeningTarget"
-            :showDoc="showDoc" 
-            @updateShowDoc="swap"
-        ></DisplayDocInPopoverAdapter>
-    </template>
-    <Suspense>
-        <DisplayDocInNewConstraint :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraint>
-    </Suspense>
+    <ConstraintManagerAdapter :showDoc="showDoc" :currentPopoverFound="currentPopoverFound" :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget" @updateShowDoc="swap"></ConstraintManagerAdapter>
 
 </template>
 
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 
-import DisplayDocInPopover from '@/components/DisplayDocInPopover.vue'
-import DisplayDocInNewConstraint from '@/components/DisplayDocInNewConstraint.vue'
 import { useConstraintStore } from '@/stores/constraint'
 import type { Constraint } from '@/models/Constraint'
 import { afterInitializingConstraintStoreFromAdapter, getListeningTarget, getPopoverFound, resetSelectedConstraint, selectConstraintFromPopover, updatePopoversByShowingDoc } from '@/viewsAdapters/ConstraintManagerAdapter'
 import DisplayDocInPopoverAdapter from '@/viewsAdapters/DisplayDocInPopoverAdapter.vue'
+import DisplayDocInNewConstraintAdpater from '@/viewsAdapters/DisplayDocInNewConstraintAdpater.vue'
+import ConstraintManagerAdapter from '@/viewsAdapters/ConstraintManagerAdapter.vue'
 
 const selectedConstraint: Ref<Constraint | null> = ref(null)
 const showDoc = ref(false)

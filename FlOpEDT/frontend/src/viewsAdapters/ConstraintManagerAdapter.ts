@@ -1,7 +1,6 @@
 /* eslint-disable */
 import type { Constraint } from "@/models/Constraint";
 import { ref, type Ref } from "vue";
-import { increaseSizeOfModal } from "./displayDocInNewConstraintAdapter";
 
 const listeningTarget = document.getElementById('constraints-body') as EventTarget
 const POPOVER_EVENT_NAME = 'contextmenu'
@@ -53,5 +52,18 @@ function setCurrentConstraint(fct:Function){
         currentPopoverFound.value = true
         const cst = currentPopover._element.getAttribute('data-cst-id') as string
         fct(cst)
+    }
+}
+
+/**
+ * Increase the width of the modal's window when documentation is displayed or not
+ * @param showDoc 
+ */
+function increaseSizeOfModal(showDoc:boolean) {
+    const modal = document.getElementsByClassName('modal-dialog').item(0) as HTMLElement
+    if (showDoc) {
+        modal.className = 'modal-dialog modal-dialog-centered modal-dialog-scrollable'
+    } else {
+        modal.className = 'modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl'
     }
 }
