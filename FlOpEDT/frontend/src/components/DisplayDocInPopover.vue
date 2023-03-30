@@ -1,5 +1,4 @@
 <template>
-    <Teleport to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :key="key"><!-- KEY = ADAPTER-->
         <hr />
         <div>
             <div class="buttonContainer">
@@ -15,20 +14,14 @@
                 </template>
             </template>
         </div>
-    </Teleport>
 </template>
 
 <script setup lang="ts">
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 
 import type { Constraint } from '@/models/Constraint'
-import { addEventListenerForForceTeleport } from '@/viewsAdapters/displayDocInPopoverAdapter';
-import { ref } from 'vue'
-
-const DESACTIVATE_TELEPORTS = ref(false)
 
 interface Props {
-    listeningTarget: EventTarget
     selectedConstraint: Constraint | null
     /**
      * Reference to know if the documentation is shown
@@ -57,12 +50,6 @@ const showBtnClassDefiner = () => {
 }
 
 
-/*
-================================ ADAPTATER ================================ 
-*/
-const key = ref(0)
-//Force the component to rerender by updating a ref
-addEventListenerForForceTeleport(key,props.listeningTarget);
 
 
 </script>

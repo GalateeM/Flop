@@ -1,11 +1,11 @@
 <template>
     <template v-if="currentPopoverFound"><!--currentPopoverFound = Adapter-->
-        <DisplayDocInPopover
+        <DisplayDocInPopoverAdapter
             :selectedConstraint="selectedConstraint"
             :listeningTarget="listeningTarget"
             :showDoc="showDoc" 
             @updateShowDoc="swap"
-        ></DisplayDocInPopover>
+        ></DisplayDocInPopoverAdapter>
     </template>
     <Suspense>
         <DisplayDocInNewConstraint :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraint>
@@ -21,7 +21,7 @@ import DisplayDocInNewConstraint from '@/components/DisplayDocInNewConstraint.vu
 import { useConstraintStore } from '@/stores/constraint'
 import type { Constraint } from '@/models/Constraint'
 import { afterInitializingConstraintStoreFromAdapter, getListeningTarget, getPopoverFound, resetSelectedConstraint, selectConstraintFromPopover, updatePopoversByShowingDoc } from '@/viewsAdapters/ConstraintManagerAdapter'
-import { enlargePopover } from '@/viewsAdapters/displayDocInPopoverAdapter'
+import DisplayDocInPopoverAdapter from '@/viewsAdapters/DisplayDocInPopoverAdapter.vue'
 
 const selectedConstraint: Ref<Constraint | null> = ref(null)
 const showDoc = ref(false)
@@ -41,7 +41,6 @@ function afterInitializingConstraintStore(){
  * this function change the value of the showDoc
  */
 function swap() {
-    enlargePopover() //Adapter
     updatePopoversByShowingDoc(showDoc.value);//Adapter
     showDoc.value = !showDoc.value
 }
