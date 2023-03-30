@@ -22,8 +22,8 @@
 <script setup lang="ts">
 import { ref, type Ref } from 'vue'
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
-import { ConstraintClass } from '@/models/ConstraintClass'
-import axios from 'axios'
+import type { ConstraintClass } from '@/models/ConstraintClass'
+import {loadConstraintClass} from "@/composables/API_constraint"
 import { Constraint } from '@/models/Constraint'
 
 interface Props {
@@ -120,14 +120,11 @@ const isLoaded = ref(false)
 /**
  * Map of all constraint classes
  */
-const cstClasses = new Map<string, ConstraintClass>()
+let cstClasses = new Map<string, ConstraintClass>()
 //Load all constraint classes et set them in a dedicated map
-await axios.get('/fr/api/ttapp/constraint_types/').then(function (response) {
-    response.data.forEach((element) => {
-        const classe = ConstraintClass.unserialize(element)
-        cstClasses.set(classe.className, classe)
+await loadConstraintClass().then(function (response) {
+        cstClasses = response
         isLoaded.value = true
-    })
 })
 
 const key = ref(0)

@@ -1,5 +1,6 @@
 import { MarkdownDocumentation } from "@/models/MarkdownDocumentation"
-import axios from "axios"
+
+import { useFetch } from "@/composables/api"
 
 /**
  * 
@@ -7,19 +8,16 @@ import axios from "axios"
  * @param lang 
  * @returns a Promise containing the MarkdownDocumentation 
  */
-export async function queryDoc(documentationName:string,lang:string) {
-    return new Promise((resolve,reject) => axios
-        .get(`/${lang}/api/ttapp/docu/${documentationName}.md`)
-        .then( (response) => {
-            const interpolationsCount = new Map<string,number>()
-            Object.keys(response.data.inter).forEach(p => {
-                interpolationsCount.set(p,response.data.inter[p])
-            })
-            const doc = new MarkdownDocumentation(response.data.text,interpolationsCount)
-            resolve(doc)     
+export async function queryDoc(documentationName: string, lang: string) {
+    return new Promise((resolve, reject) => useFetch(`/${lang}/api/ttapp/docu/${documentationName}.md`, MarkdownDocumentation).then((response) => {
+        const interpolationsCount = new Map<string, number>()
+        Object.keys(response.inter).forEach(p => {
+            interpolationsCount.set(p, response.inter[p])
         })
-        .catch( (error) => {
+        const doc = new MarkdownDocumentation(response.text, interpolationsCount)
+        resolve(doc)
+    })
+        .catch((error) => { 
             reject(error)
-        })
-    )
+        }))
 }
