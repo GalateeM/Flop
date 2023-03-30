@@ -5,7 +5,7 @@
     <template v-if="teleportable">
         <template v-if="constraint">
             <template v-for="paramReqName in paramRequestedName" :key="paramReqName">
-                <template v-if="constraint.parameters.get(paramReqName)">
+                <template v-if="constraintHasParameter(paramReqName)">
                     <template v-for="callCount in getNumberOfCallAsArray(paramReqName)" :key="callCount">
                         <Teleport :to="'#' + paramReqName + 'Displayer' + callCount">
                             <template
@@ -106,12 +106,23 @@ const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
  * Return an integer array from 1 to the number of call of interpolation in the doc property
  * If the parameter is not called, returns an empty array
  *
- * @param param The constraint parameter to check
+ * @param paramName The constraint parameter to check
  */
-function getNumberOfCallAsArray(param: string) {
-    const nbCall = props.doc.paramCallCount.get(param) as number
+function getNumberOfCallAsArray(paramName: string) {
+    const nbCall = props.doc.paramCallCount.get(paramName) as number
     if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1)
-    else return []
+    else { 
+        console.warn(`${paramName} not found in the documentation map of interporlation`)
+        return [] 
+    }
+}
+
+function constraintHasParameter(paramName : string){
+    const res = props.constraint.parameters.has(paramName)
+    if (!res)
+        console.warn(`${paramName} not found in the constraint's parameters`)
+
+    return res;
 }
 
 /**
