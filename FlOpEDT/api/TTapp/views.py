@@ -521,7 +521,8 @@ class FlopDocVisu(viewsets.ViewSet):
 
         url = CustomUrl(request)
         dir_lang = os.path.join(DOC_DIR, url.lang)
-        #Try to check if file is not in the forbidden file
+
+        # Try to check if file is not in the forbidden file
         try:
             data = json.load(open(CORRUPTED_JSON_PATH))
         except:
@@ -529,30 +530,26 @@ class FlopDocVisu(viewsets.ViewSet):
         forbidden_files = data["discarded"]
 
         if (name in forbidden_files):
-            print(Tcolors.FAIL+"Attempt to access forbidden file : "+name+Tcolors.ENDC)
+            print(f"{Tcolors.FAIL}{Tcolors.BOLD}Attempt to access forbidden file : {name}{Tcolors.ENDC}")
             return HttpResponse(status=404)
 
-
         # if doc not found in language will try to find it in english
-        if (url.lang != EN_DIR_NAME):  
+        if (url.lang != EN_DIR_NAME):
             f_path = recursive_search(dir_lang, name)
             if (len(f_path) == 0):
                dir_lang = os.path.join(DOC_DIR, EN_DIR_NAME)
                f_path = recursive_search(dir_lang, name)
                if (len(f_path) == 0):
                    return HttpResponse(status=404)
-        #english doc
+        # english doc
         else:
             f_path = recursive_search(dir_lang, name)
             if (len(f_path) == 0):
                 return HttpResponse(status=404)
 
-        
-
-        json_file, success = check_file(f_path, url, name_no_extensions)
-
-        if (not (success)):
-            return HttpResponse(status=500)
+        # will replace image path and interpolate file
+        # return json_file containing text and map
+        json_file = check_file(f_path, url, name_no_extensions)
 
         return HttpResponse(json_file, content_type="application/json; charset=utf-8")
 
@@ -616,10 +613,10 @@ def check_file(path, url, name):
     if (found):
         # if cached file exist we return it
         json_file = json.load(json_path)
-        print('Opened cached file')
-        return (json.dumps(json_file), True)
+        print(f'{Tcolors.OKGREEN}Opened cached file{Tcolors.ENDC}')
+        return json.dumps(json_file)
     else:
-        # create file
+        # create json and attempt to write it in cache
         file_handle = open(path, 'r')
         text = image_interpolation(file_handle, url.full_domain)
         text, dico_inter = doc_interpolation(text)
@@ -633,26 +630,26 @@ def check_file(path, url, name):
             json_path = open(file_temp_path, 'x')
             json_path.write(json_file)
         except:
-            return ("", False)
+            print(
+                f"{Tcolors.FAIL}{Tcolors.BOLD}CAN'T WRITE FILE INTO TEMP, BAD PERFORMANCE EXPECTED{Tcolors.ENDC}")
+            return json_file
 
-        print(Tcolors.OKGREEN, "Created temp file", name, Tcolors.ENDC)
-        return (json_file, True)
+        print(f"{Tcolors.OKGREEN}Created json file {name} {Tcolors.ENDC}")
+        return json_file
 
 
 def image_interpolation(file, domain):
     text = file.read()
-    # use 4th group (image name) from regex image and add the domain
+    # use 4th group (image name, identified by r\4) from regex image and add the domain
     image_path = domain+"/fr/api/ttapp"+r"\4"
     full_link = "!["+r"\1"+"]("+image_path+")"  # rebuild
-    # if .. is found, match in group 3
 
     replaced = re.sub(REGEX_IMAGE, full_link, text)
     return replaced
 
 
-# search in path if filename(or regex) exist return [] if not found
-
 def doc_interpolation(docu):
+    # will replace in the doc every {{xx}} with <span id=xxDisplayer>...
     reg = r'({{(.*?)}})'
 
     pattern = re.compile(reg)
