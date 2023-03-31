@@ -23,7 +23,7 @@
 import { ref, type Ref } from 'vue'
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 import type { ConstraintClass } from '@/models/ConstraintClass'
-import {loadConstraintClass} from "@/composables/API_constraint"
+import {loadConstraintClass} from "@/composables/API_Constraint"
 import { Constraint } from '@/models/Constraint'
 
 interface Props {

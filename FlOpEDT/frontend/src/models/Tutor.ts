@@ -1,4 +1,4 @@
-import { Department } from "@/models/Department"
+
 
 /**
  * @class
@@ -9,9 +9,9 @@ export class Tutor {
     private _first_name!: string
     private _last_name!:string
     private _email!: string
-    private _departments!: Array<Department>
+    private _departments!: Array<any>
 
-    constructor(id: number, username: string, first_name:string, last_name:string, email:string,departements:Array<Department>) {
+    constructor(id: number, username: string, first_name:string, last_name:string, email:string,departements:Array<any>) {
         this.id = id
         this.username = username
     }
@@ -67,10 +67,6 @@ export class Tutor {
     }
 
     static unserialize(obj: any) {
-        const listParam: Array<Department> = []
-        obj.parameters.forEach((dept: any) => {
-            listParam.push(Department.unserialize(dept))
-        })
-        return new Tutor(obj.id, obj.username,obj.first_name, obj.last_name, obj.email,obj.departements)
+        return new Tutor(obj.id, obj.name,obj.first_name, obj.last_name, obj.email,obj.departements)
     }
 }
