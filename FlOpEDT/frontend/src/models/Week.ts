@@ -6,7 +6,7 @@ export class Week {
     private _nb!: number
     private _year!: number
 
-    constructor(id: number, nb: number, year:number) {
+    constructor(id: number, nb: number, year: number) {
         this.id = id
         this.nb = nb
         this.year = year
@@ -33,7 +33,7 @@ export class Week {
         this._year = year
     }
 
-    toString(){
+    toString() {
         return this.nb + "/" + this.year
     }
 

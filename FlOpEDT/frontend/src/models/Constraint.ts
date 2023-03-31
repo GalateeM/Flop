@@ -1,10 +1,16 @@
 import { ConstrParameter } from '@/models/ConstrParameter'
 
 /**
+ * Regular expression catching the class name and the id in the class
+ * of a constraint
+ */
+const ID_REGEX = new RegExp('^(?<className>.+)(?<inClassId>\\d)+$')
+
+/**
  * @class
  */
 export class Constraint {
-    private static ID_REGEX = new RegExp('^(?<className>.+)(?<inClassId>\\d)+$')
+    
 
     private _inClassId!: number
     private _title!: string
@@ -39,7 +45,7 @@ export class Constraint {
         return this.className + this._inClassId
     }
     set id(id) {
-        const match = id.match(Constraint.ID_REGEX)
+        const match = id.match(ID_REGEX)
         if (match && match.groups?.inClassId && match.groups?.className) {
             this._inClassId = +match.groups.inClassId
             this._className = match.groups.className

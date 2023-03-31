@@ -6,9 +6,9 @@
 
 <script setup lang="ts">
 import DisplayDocInNewConstraint from '@/components/DisplayDocInNewConstraint.vue'
+import { loadConstraintClass } from '@/composables/API_Constraint';
 import { Constraint } from '@/models/Constraint';
-import { ConstraintClass } from '@/models/ConstraintClass';
-import axios from 'axios';
+import type { ConstraintClass } from '@/models/ConstraintClass';
 import { ref, type Ref } from 'vue'
 interface Props {
     /**
@@ -25,7 +25,7 @@ const emit = defineEmits<{
 /**
  * Map of all constraint classes
  */
- const cstClasses = new Map<string, ConstraintClass>()
+ let cstClasses = new Map<string, ConstraintClass>()
  /**
  * Select field to choose the constraint class
  */
@@ -44,12 +44,17 @@ const emit = defineEmits<{
     emit('updateShowDoc', props.showDoc)
 }
 //Load all constraint classes et set them in a dedicated map
-await axios.get('/fr/api/ttapp/constraint_types/').then(function (response) {
-    response.data.forEach((element: any) => {
-        const classe = ConstraintClass.unserialize(element)
-        cstClasses.set(classe.className, classe)
+// await axios.get('/fr/api/ttapp/constraint_types/').then(function (response) {
+//     response.data.forEach((element: any) => {
+//         const classe = ConstraintClass.unserialize(element)
+//         cstClasses.set(classe.className, classe)
+//         //isLoaded.value = true
+//     })
+// })
+
+await loadConstraintClass().then(function (response) {
+        cstClasses = response
         //isLoaded.value = true
-    })
 })
 
 //Listen when the user select a new constraint to rerender the documentation displayer
