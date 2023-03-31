@@ -1,6 +1,6 @@
 ### Description
 Garantit que les groupes {{ groups }} ont une pause repas (ou autre) d'au moins {{ lunch_length }} minutes
-entre {{ start_time }} et {{ end_time }} les {{ week_days }}.
+entre {{ start_lunch_time }} et {{ end_lunch_time }} les {{ weekdays }}.
 ### Exemples
 | Contexte | OK | Not Ok |
 |:--:|:--:|:--:|

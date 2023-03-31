@@ -17,15 +17,18 @@ class MyflopConfig(AppConfig):
         createDiscardFile()
         initTemp()
 
+
+
+
 def createDiscardFile():
     if os.environ.get('RUN_MAIN') != 'true':
             #lists of discarted files
             corrupted = []
             unavailable_pics = []
             #available languages
-            languages = ["fr/","en/"]
             path = 'TTapp/TTConstraints/doc/'
-            for language in languages:
+            for language in LANG_LIST:
+                language += "/"
                 entries = next(os.walk(path+language))[2]
                 for file_name in entries:
                     f = open(path+language+file_name,'r')
@@ -46,18 +49,27 @@ def createDiscardFile():
                         if(invalid_path):
                             unavailable_pics.append(file_name)
                     f.close()
-            #Warning when a file is corrupted
+            #Warning in red when a file is corrupted
             if(len(corrupted)>0):
-                print("\033[91mWARNING!! Check corrupted files: \033[00m")
+                print(Tcolors.FAIL,"WARNING!! Check corrupted files:",Tcolors.ENDC)
                 for file in corrupted:
                     print(" - "+file)
-                print(" end")
+            #Warning to see discarded files
+            if(len(unavailable_pics)>0):
+                print(Tcolors.WARNING,"Files discarded because of an incorrect pic's path:",Tcolors.ENDC)
+                for file in unavailable_pics:
+                    print(" - "+file)
+
             #Append lists of discarded files and write them in a json
             list_discarded = list(set().union(list(corrupted), list(unavailable_pics)))
             version_json = json.dumps(list_discarded)
             with open("discarded.json",'w') as file:
                 file.write('{"discarded": '+version_json+'}')
             file.close()
+
+
+
+
 def initTemp():
     if( not(Path.exists(Path(TEMP_DIR))) ):
         print(Tcolors.WARNING,"Temp dir does not exist, creating it",Tcolors.ENDC)
@@ -70,9 +82,6 @@ def initTemp():
     
 
     
-
-
-
 
 def purgeTempFolder():
     if(CLEAR_TEMP_FILES):

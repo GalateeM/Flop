@@ -1,5 +1,4 @@
 <template>
-    <Teleport to=".popover-body" :disable="DESACTIVATE_TELEPORTS" :key="key">
         <hr />
         <div>
             <div class="buttonContainer">
@@ -15,19 +14,14 @@
                 </template>
             </template>
         </div>
-    </Teleport>
 </template>
 
 <script setup lang="ts">
 import DocumentationControler from '@/components/controler/DocumentationControler.vue'
 
 import type { Constraint } from '@/models/Constraint'
-import { onMounted, onUpdated, ref, watch } from 'vue'
-
-const DESACTIVATE_TELEPORTS = ref(false)
 
 interface Props {
-    listeningTarget: EventTarget
     selectedConstraint: Constraint | null
     /**
      * Reference to know if the documentation is shown
@@ -36,33 +30,9 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), {})
 
-const key = ref(0)
-//Force the component to rerender by updating a ref
-const forceTeleport = () => key.value++
-
-const eventName = 'contextmenu'
-props.listeningTarget.addEventListener(eventName, (e) => forceTeleport(), false)
-
 const emit = defineEmits<{
     (e: 'updateShowDoc', value: boolean): void
 }>()
-
-/**
- * Enlarge the width of the parent popover & center the bottons Duplicate/Modify/Delete
- */
-function enlargePopover() {
-    const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
-    if (popover !== null) {
-        popover.style['max-width'] = '80vw'
-        window.scroll(popover.getBoundingClientRect().right, 0)
-    }
-    const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
-    if (groupeOfButton !== null) {
-        groupeOfButton.style['align-items'] = 'center'
-        groupeOfButton.style['justify-content'] = 'center'
-        groupeOfButton.style['display'] = 'flex'
-    }
-}
 
 /**
  * Swap showDoc value
@@ -76,9 +46,12 @@ function swap() {
  * permit to setup the display parameters
  */
 const showBtnClassDefiner = () => {
-    enlargePopover()
     return props.showDoc ? ' minusButton ' : ' plusButton '
 }
+
+
+
+
 </script>
 
 <style scoped>

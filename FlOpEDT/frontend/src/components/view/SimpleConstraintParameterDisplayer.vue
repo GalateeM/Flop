@@ -1,6 +1,11 @@
 <template>
-    <template v-for="item in values" :key="item">
-        <span>{{ item + " "}}</span>
+    <template v-if="values.length == 0">
+        <span>All</span>
+    </template>
+    <template v-else>
+        <template v-for="item in values" :key="item">
+            <span>{{ item + " " }}</span>
+        </template>
     </template>
 </template>
 
