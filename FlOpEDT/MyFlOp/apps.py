@@ -7,25 +7,27 @@ from MyFlOp.colors import Tcolors
 from pathlib import Path
 from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
 TEMP_DIR = os.path.join(os.getcwd(),'temp')
+#Avalaible languages
 LANG_LIST = ["fr","en"]
 CLEAR_TEMP_FILES = True
 
 class MyflopConfig(AppConfig):
     name = 'MyFlOp'
     verbose_name = "My Application"
+    #Launched when the server start
     def ready(self):
         createDiscardFile()
         initTemp()
 
 
 
-
+#Search for documentation's files with problems and add their name to the discarded.json
 def createDiscardFile():
     if os.environ.get('RUN_MAIN') != 'true':
-            #lists of discarted files
+            #Lists of discarted files
             corrupted = []
             unavailable_pics = []
-            #available languages
+            #Path to te documentations
             path = 'TTapp/TTConstraints/doc/'
             for language in LANG_LIST:
                 language += "/"
