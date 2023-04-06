@@ -1,6 +1,6 @@
 <template>
     <div>
-        <VueShowdown :markdown="doc.textContent" :options="{ tables: true }" />
+        <VueShowdown :markdown="doc.textContent" :options="{ tables: true }" :extensions="[POST_PROCESSING_EXTENSION]" />
     </div>
     <template v-if="teleportable">
         <template v-if="constraint">
@@ -138,6 +138,23 @@ const storesItems = new Map<string, any>([
     ["base.Week", weekStore.items],
     ["base.Room", roomStore.items]
 ])
+
+/**
+ * Classes to add to the tables processed by vueshowdown
+ */
+const TABLE_CLASSES = "table table-bordered"
+
+/**
+ * Post processing extension for the vueshowdown component
+ */
+const POST_PROCESSING_EXTENSION = {
+    type: 'output', //Specify that it is a post processing(i.e. applied after the markdown is converted to html)
+    filter: function (text: string) {
+        return text
+            //Add the classes to tables
+            .replace(/<table>/g, `<table class="${TABLE_CLASSES}">`)
+    }
+};
 
 </script>
 
