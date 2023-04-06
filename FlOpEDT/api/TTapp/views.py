@@ -502,6 +502,7 @@ class FlopConstraintFieldViewSet(viewsets.ViewSet):
 
 
 class CustomUrl():
+    #Class to better handle url
     def __init__(self, request):
         self.domain = request.get_host()
         self.protocol = request.scheme
@@ -568,6 +569,7 @@ class FlopDocVisu(viewsets.ViewSet):
                   )
                   )
 class FlopImgVisu(viewsets.ViewSet):
+    #Work the same as FlopDocVisu
     def list(self, request, **kwargs):
         name = kwargs['name']
         f_path = recursive_search(IMG_DIR, name)
