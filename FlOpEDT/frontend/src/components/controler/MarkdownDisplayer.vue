@@ -28,16 +28,9 @@
 </template>
 
 <script setup lang="ts">
-/**
- * Display a contraint documentation and teleport parameters displayer where the documentation
- * ask it
- */
-
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 import { VueShowdown } from 'vue-showdown'
-
 import { onMounted, ref } from 'vue'
-
 import { useCourseTypeStore } from '@/stores/courseType'
 import { useDepartmentStore } from '@/stores/departmentRework'
 import { useGroupStore } from '@/stores/group'
@@ -47,11 +40,18 @@ import { useTutorStore } from '@/stores/tutor'
 import { useWeekStore } from '@/stores/week'
 import { useRoomStore } from '@/stores/roomRework'
 import type { Constraint } from '@/models/Constraint'
-
 import ConstraintParameterDisplayer from '@/components/view/ConstraintParameterDisplayer.vue'
 import SimpleConstraintParameterDisplayer from '@/components/view/SimpleConstraintParameterDisplayer.vue'
 import { ConstrParameter } from '@/models/ConstrParameter'
 
+/** =========================================================================================
+ * Display a contraint documentation and teleport parameters displayer where the documentation
+ * ask it
+ */
+
+/**
+ * Properties declaration interface of the component
+ */
 interface Props {
     /**
      * Documentation to render
@@ -103,20 +103,28 @@ onMounted(() => {
 const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
 
 /**
- * Return an integer array from 1 to the number of call of interpolation in the doc property
- * If the parameter is not called, returns an empty array
+ * Return an integer array from 1 to the number of call of interpolation in the doc property.
+ * If the parameter is not called, returns an empty array and warn in the console.
  *
  * @param paramName The constraint parameter to check
+ * @returns an integer array from 1 to the number of call
  */
 function getNumberOfCallAsArray(paramName: string) {
     const nbCall = props.doc.paramCallCount.get(paramName) as number
-    if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1)
+    if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1) //Create the array from 1 to nbCall
     else { 
         console.warn(`${paramName} not found in the documentation map of interporlation`)
         return [] 
     }
 }
 
+/**
+ * Check if the constraint has the called parameter.
+ * Warn in the console if not.
+ * 
+ * @param paramName the constraint parameter name
+ * @returns true if the constraint has the called parameter, else false
+ */
 function constraintHasParameter(paramName : string){
     const res = props.constraint.parameters.has(paramName)
     if (!res)
