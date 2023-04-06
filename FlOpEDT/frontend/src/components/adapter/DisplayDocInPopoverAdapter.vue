@@ -10,7 +10,7 @@
 
 
 <script setup lang="ts">
-import DisplayDocInPopover from '@/components/DisplayDocInPopover.vue'
+import DisplayDocInPopover from '@/components/view/DisplayDocInPopover.vue'
 import type { Constraint } from "@/models/Constraint";
 import { ref, type Ref } from "vue";
 

@@ -27,7 +27,7 @@
 import type { Constraint } from '@/models/Constraint'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 import { queryDoc } from '@/composables/API_documentation'
-import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
+import MarkdownDisplayer from '@/components/controler/MarkdownDisplayer.vue'
 import { type Ref, ref, inject, watch } from 'vue'
 
 interface Props {

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { ref} from 'vue'
-import ConstraintManagerAdapter from '@/viewsAdapters/ConstraintManagerAdapter.vue'
+import ConstraintManagerAdapter from '@/components/adapter/ConstraintManagerAdapter.vue'
 
 
 const showDoc = ref(false)

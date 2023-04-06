@@ -48,8 +48,8 @@ import { useWeekStore } from '@/stores/week'
 import { useRoomStore } from '@/stores/roomRework'
 import type { Constraint } from '@/models/Constraint'
 
-import ConstraintParameterDisplayer from './ConstraintParameterDisplayer.vue'
-import SimpleConstraintParameterDisplayer from './SimpleConstraintParameterDisplayer.vue'
+import ConstraintParameterDisplayer from '@/components/view/ConstraintParameterDisplayer.vue'
+import SimpleConstraintParameterDisplayer from '@/components/view/SimpleConstraintParameterDisplayer.vue'
 import { ConstrParameter } from '@/models/ConstrParameter'
 
 interface Props {

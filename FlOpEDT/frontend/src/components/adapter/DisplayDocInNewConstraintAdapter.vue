@@ -1,11 +1,11 @@
 <template>
-        <Teleport to=".docDisplayer" :disable="DESACTIVATE_TELEPORTS">
+        <Teleport to=".modal-content" :disable="DESACTIVATE_TELEPORTS">
             <DisplayDocInNewConstraint :showDoc="showDoc" :constraint="constraint" @updateShowDoc="swap"></DisplayDocInNewConstraint>
         </Teleport>
 </template>
 
 <script setup lang="ts">
-import DisplayDocInNewConstraint from '@/components/DisplayDocInNewConstraint.vue'
+import DisplayDocInNewConstraint from '@/components/view/DisplayDocInNewConstraint.vue'
 import { loadConstraintClass } from '@/composables/API_Constraint';
 import { Constraint } from '@/models/Constraint';
 import type { ConstraintClass } from '@/models/ConstraintClass';
@@ -32,29 +32,15 @@ const emit = defineEmits<{
  const constraintEditTypeField = document.getElementById('constraint-edit-type') as HTMLInputElement
 
 /**
- * Reference to know if the constraint classes map is loaded
- */
- //const isLoaded = ref(false)
-
-/**
  * Swap showDoc value
  */
  function swap() {
     increaseSizeOfModal(props.showDoc)//Adapter
     emit('updateShowDoc', props.showDoc)
 }
-//Load all constraint classes et set them in a dedicated map
-// await axios.get('/fr/api/ttapp/constraint_types/').then(function (response) {
-//     response.data.forEach((element: any) => {
-//         const classe = ConstraintClass.unserialize(element)
-//         cstClasses.set(classe.className, classe)
-//         //isLoaded.value = true
-//     })
-// })
 
 await loadConstraintClass().then(function (response) {
         cstClasses = response
-        //isLoaded.value = true
 })
 
 //Listen when the user select a new constraint to rerender the documentation displayer
@@ -91,6 +77,7 @@ function modifyDisplay() {
     const header = document.getElementsByClassName('modal-header').item(0) as HTMLElement
     const body = document.getElementsByClassName('modal-body').item(0) as HTMLElement
     const footer = document.getElementsByClassName('modal-footer').item(0) as HTMLElement
+    footer.style.flex = "1"
     if (header) {
         modal.removeChild(header)
     }
@@ -101,14 +88,12 @@ function modifyDisplay() {
         modal.removeChild(footer)
     }
     const oldDiv = document.createElement('div')
+    oldDiv.style.flexDirection = "column"
+    oldDiv.style.display = "flex"
     oldDiv.appendChild(header)
     oldDiv.appendChild(body)
     oldDiv.appendChild(footer)
     modal.appendChild(oldDiv)
-
-    const docDisplayer = document.createElement('div')
-    docDisplayer.className = 'docDisplayer'
-    modal.appendChild(docDisplayer)
 }
 
 /**

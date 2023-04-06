@@ -4,13 +4,13 @@
             :showDoc="showDoc" @updateShowDoc="swap" :popoverMaxWidth="POPOVER_MAX_WIDTH"></DisplayDocInPopoverAdapter>
     </template>
     <Suspense>
-        <DisplayDocInNewConstraintAdpater :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraintAdpater>
+        <DisplayDocInNewConstraintAdapter :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraintAdapter>
     </Suspense>
 </template>
 
 <script setup lang="ts">
-import DisplayDocInPopoverAdapter from '@/viewsAdapters/DisplayDocInPopoverAdapter.vue'
-import DisplayDocInNewConstraintAdpater from '@/viewsAdapters/DisplayDocInNewConstraintAdpater.vue'
+import DisplayDocInPopoverAdapter from '@/components/adapter/DisplayDocInPopoverAdapter.vue'
+import DisplayDocInNewConstraintAdapter from '@/components/adapter/DisplayDocInNewConstraintAdapter.vue'
 import type { Constraint } from '@/models/Constraint';
 import { ref, type Ref } from 'vue';
 import { useConstraintStore } from '@/stores/constraint';

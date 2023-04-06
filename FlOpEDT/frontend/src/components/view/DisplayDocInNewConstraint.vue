@@ -84,13 +84,14 @@ const showBtnClassDefiner = () => {
 }
 
 .documentationContainer {
-    height: 100%;
     display: flex;
+    flex: 1;
 }
 
 .scrollbar {
     max-height: 70vh;
     overflow-y: scroll;
+    flex:1;
 }
 
 .scrollbar-primary::-webkit-scrollbar {
