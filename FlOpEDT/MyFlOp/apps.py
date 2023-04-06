@@ -9,7 +9,7 @@ from django.contrib.staticfiles.management.commands.runserver import Command as 
 TEMP_DIR = os.path.join(os.getcwd(),'temp')
 #Available languages
 LANG_LIST = ["fr","en"]
-CLEAR_TEMP_FILES = True
+CLEAR_TEMP_FILES = True #var to tell to clean or not temp files (default : True)
 
 class MyflopConfig(AppConfig):
     name = 'MyFlOp'
@@ -73,12 +73,13 @@ def createDiscardFile():
 
 
 def initTemp():
+    #Will try to create temp dir 
     if( not(Path.exists(Path(TEMP_DIR))) ):
-        print(Tcolors.WARNING,"Temp dir does not exist, creating it",Tcolors.ENDC)
+        print(f"{Tcolors.WARNING}Temp dir does not exist, creating it{Tcolors.ENDC}")
         try:
             os.mkdir(TEMP_DIR)
         except:
-            print(Tcolors.WARNING,"Temp dir has not been created, aborting creation",Tcolors.ENDC)
+            print(f"{Tcolors.WARNING}Temp dir has not been created, aborting creation{Tcolors.ENDC}")
             return
     purgeTempFolder()
     
@@ -86,6 +87,7 @@ def initTemp():
     
 
 def purgeTempFolder():
+    #Will clean all temp files in temp dir
     if(CLEAR_TEMP_FILES):
         for l in LANG_LIST:
             lang_dir_path = os.path.join(TEMP_DIR,l)
@@ -93,13 +95,13 @@ def purgeTempFolder():
             try:
                 shutil.rmtree(lang_dir_path)
             except:
-                print(Tcolors.OKBLUE,"Directory",lang_dir_path,"does not exist",Tcolors.ENDC)
+                print(f"{Tcolors.OKBLUE}Directory {lang_dir_path} does not exist{Tcolors.ENDC}")
 
             try:
                 os.mkdir(lang_dir_path)
             except:
-                print(Tcolors.WARNING,"Directory",lang_dir_path,"has not been created",Tcolors.ENDC)
+                print(f"{Tcolors.WARNING}Directory {lang_dir_path} has not been created{Tcolors.ENDC}")
     else:
-        print(Tcolors.WARNING,"Temp directory will not be cleared, you can modify it in : \n","FlopEDT/MyFlOp/apps.py", Tcolors.ENDC)
+        print(f"{Tcolors.WARNING}Temp directory will not be cleared, you can modify it in : \nFlopEDT/MyFlOp/apps.py{Tcolors.ENDC}")
 
 
