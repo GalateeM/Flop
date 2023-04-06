@@ -1,7 +1,7 @@
 <template>
     <template v-if="currentPopoverFound">
         <DisplayDocInPopoverAdapter :selectedConstraint="selectedConstraint" :listeningTarget="listeningTarget"
-            :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInPopoverAdapter>
+            :showDoc="showDoc" @updateShowDoc="swap" :popoverMaxWidth="POPOVER_MAX_WIDTH"></DisplayDocInPopoverAdapter>
     </template>
     <Suspense>
         <DisplayDocInNewConstraintAdpater :showDoc="showDoc" @updateShowDoc="swap"></DisplayDocInNewConstraintAdpater>
@@ -14,6 +14,9 @@ import DisplayDocInNewConstraintAdpater from '@/viewsAdapters/DisplayDocInNewCon
 import type { Constraint } from '@/models/Constraint';
 import { ref, type Ref } from 'vue';
 import { useConstraintStore } from '@/stores/constraint';
+
+const POPOVER_MAX_WIDTH = `80vw`
+
 interface Props {
     /**
      * Reference to know if the documentation is shown

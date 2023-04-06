@@ -18,6 +18,10 @@ interface Props{
     listeningTarget: EventTarget
     selectedConstraint: Constraint | null
     showDoc: boolean
+    /**
+     * Popover max width
+     */
+    popoverMaxWidth: string
 }
 
 const props = withDefaults(defineProps<Props>(), {})
@@ -33,7 +37,7 @@ const emit = defineEmits<{
 function enlargePopover() {
     const popover = document.getElementsByClassName('popover').item(0) as HTMLElement
     if (popover !== null) {
-        popover.style.maxWidth = '80vw'
+        popover.style.maxWidth = props.popoverMaxWidth
         window.scroll(popover.getBoundingClientRect().right, 0)
     }
     const groupeOfButton = document.getElementsByClassName('btn-group').item(0) as HTMLElement
