@@ -7,7 +7,7 @@ from MyFlOp.colors import Tcolors
 from pathlib import Path
 from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
 TEMP_DIR = os.path.join(os.getcwd(),'temp')
-#Avalaible languages
+#Available languages
 LANG_LIST = ["fr","en"]
 CLEAR_TEMP_FILES = True
 
@@ -27,7 +27,7 @@ def createDiscardFile():
             #Lists of discarted files
             corrupted = []
             unavailable_pics = []
-            #Path to te documentations
+            #Path to the documentations
             path = 'TTapp/TTConstraints/doc/'
             for language in LANG_LIST:
                 language += "/"
