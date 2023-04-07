@@ -111,16 +111,24 @@ function modifyDisplay() {
     modal.appendChild(oldDiv)
 }
 
-//Listen when the user select a new constraint to rerender the documentation displayer
-constraintEditTypeField?.addEventListener('change', () => {
-
+/**
+ * find the constraint based on the selected constraint in the field.
+ * Set to null if no match is found
+ */
+function setConstraint() {
     const cstClass = Array.from(cstClasses.values()).find((e) => constraintEditTypeField.value == e.local_name)
     if (cstClass) {
         constraint.value = new Constraint(0, '', cstClass.className, 0, true, '', '', new Map())
     } else {
         constraint.value = null
     }
+}
 
+/**
+ * Reload the constraint when the user select a constraint
+ */
+constraintEditTypeField?.addEventListener('change', () => {
+    setConstraint()
 })
 
 await loadConstraintClass().then(function (response) {
@@ -138,12 +146,15 @@ watch(
 
 /**
  * Observer on the modal that reset the constraint when the modal is hidden
+ * and change the constraint when it is opened
  */
 new MutationObserver((mutationList: any[], observer: any) =>
     mutationList.forEach((mutation: { type: string; attributeName: string; }) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
             if (!modalElement.classList.contains('show'))
                 constraint.value = null
+            else
+                setConstraint()
         }
     })).observe(modalElement, {
         attributes: true
