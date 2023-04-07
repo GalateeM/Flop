@@ -2,6 +2,11 @@ import { useFetch } from "@/composables/api"
 import { Constraint } from "@/models/Constraint"
 import { ConstraintClass } from "@/models/ConstraintClass"
 
+/**
+ * Load the constraint classes
+ * 
+ * @returns a map of ConstraintClass where key are class name
+ */
 export async function loadConstraintClass(){
     return await useFetch('/fr/api/ttapp/constraint_types', ConstraintClass).then(function (response) {
         const res = new Map<string, ConstraintClass>()
@@ -14,6 +19,11 @@ export async function loadConstraintClass(){
 }
 
 const URL_GET_ALL = "/fr/api/ttapp/constraint"
+/**
+ * Load the constraints
+ * 
+ * @returns a map of Constraint where key are constraint id
+ */
 export async function getAllConstraint(){
     return useFetch(URL_GET_ALL,Constraint)
     .then(items => {

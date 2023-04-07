@@ -30,7 +30,7 @@ export abstract class SimpleStoreMap<ID_TYPE, ITEM_TYPE extends I_Identifiable<I
      * Mutator for
      * {@link map}
      *
-     * Insert a new entry in the second layout
+     * Insert a new entry
      */
     insertNew(item: ITEM_TYPE) {
         if (!this.map.value.has(item.id)) {

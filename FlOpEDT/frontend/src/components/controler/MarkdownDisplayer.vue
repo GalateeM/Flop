@@ -28,16 +28,9 @@
 </template>
 
 <script setup lang="ts">
-/**
- * Display a contraint documentation and teleport parameters displayer where the documentation
- * ask it
- */
-
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 import { VueShowdown } from 'vue-showdown'
-
 import { onMounted, ref } from 'vue'
-
 import { useCourseTypeStore } from '@/stores/courseType'
 import { useDepartmentStore } from '@/stores/departmentRework'
 import { useGroupStore } from '@/stores/group'
@@ -47,11 +40,18 @@ import { useTutorStore } from '@/stores/tutor'
 import { useWeekStore } from '@/stores/week'
 import { useRoomStore } from '@/stores/roomRework'
 import type { Constraint } from '@/models/Constraint'
-
-import ConstraintParameterDisplayer from './ConstraintParameterDisplayer.vue'
-import SimpleConstraintParameterDisplayer from './SimpleConstraintParameterDisplayer.vue'
+import ConstraintParameterDisplayer from '@/components/view/ConstraintParameterDisplayer.vue'
+import SimpleConstraintParameterDisplayer from '@/components/view/SimpleConstraintParameterDisplayer.vue'
 import { ConstrParameter } from '@/models/ConstrParameter'
 
+/** =========================================================================================
+ * Display a contraint documentation and teleport parameters displayer where the documentation
+ * ask it
+ */
+
+/**
+ * Properties declaration interface of the component
+ */
 interface Props {
     /**
      * Documentation to render
@@ -64,80 +64,6 @@ interface Props {
     constraint: Constraint
 }
 const props = withDefaults(defineProps<Props>(), {})
-
-const courseTypeStore = useCourseTypeStore()
-const departmentStore = useDepartmentStore()
-const groupStore = useGroupStore()
-const moduleStore = useModuleStore()
-const trainProgStore = useTrainProgStore()
-const tutorStore = useTutorStore()
-const weekStore = useWeekStore()
-const roomStore = useRoomStore()
-
-/**
- * initialize all constraint parameters stores with Promises
- */
-async function initializeStores() {
-    const promises = [
-        courseTypeStore.initialize(),
-        departmentStore.initialize(),
-        groupStore.initialize(),
-        moduleStore.initialize(),
-        trainProgStore.initialize(),
-        tutorStore.initialize(),
-        weekStore.initialize(),
-        roomStore.initialize()
-    ]
-    await Promise.all(promises)
-}
-
-await initializeStores()
-const teleportable = ref(false)
-onMounted(() => {
-    teleportable.value = true //Allow the teleportation of parameters displayer
-})
-
-/**
- * List of the requested interpolation
- */
-const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
-
-/**
- * Return an integer array from 1 to the number of call of interpolation in the doc property
- * If the parameter is not called, returns an empty array
- *
- * @param paramName The constraint parameter to check
- */
-function getNumberOfCallAsArray(paramName: string) {
-    const nbCall = props.doc.paramCallCount.get(paramName) as number
-    if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1)
-    else { 
-        console.warn(`${paramName} not found in the documentation map of interporlation`)
-        return [] 
-    }
-}
-
-function constraintHasParameter(paramName : string){
-    const res = props.constraint.parameters.has(paramName)
-    if (!res)
-        console.warn(`${paramName} not found in the constraint's parameters`)
-
-    return res;
-}
-
-/**
- * Map of the items in the stores, accessible by the parameter name
- */
-const storesItems = new Map<string, any>([
-    ["base.CourseType", courseTypeStore.items],
-    ["base.Department", departmentStore.items],
-    ["base.StructuralGroup", groupStore.items],
-    ["base.Module", moduleStore.items],
-    ["base.TrainingProgramme", trainProgStore.items],
-    ["people.Tutor", tutorStore.items],
-    ["base.Week", weekStore.items],
-    ["base.Room", roomStore.items]
-])
 
 /**
  * Classes to add to the tables processed by vueshowdown
@@ -156,6 +82,92 @@ const POST_PROCESSING_EXTENSION = {
     }
 };
 
+const courseTypeStore = useCourseTypeStore()
+const departmentStore = useDepartmentStore()
+const groupStore = useGroupStore()
+const moduleStore = useModuleStore()
+const trainProgStore = useTrainProgStore()
+const tutorStore = useTutorStore()
+const weekStore = useWeekStore()
+const roomStore = useRoomStore()
+
+/**
+ * Map of the items in the stores, accessible by the parameter name
+ */
+ const storesItems = new Map<string, any>([
+    ["base.CourseType", courseTypeStore.items],
+    ["base.Department", departmentStore.items],
+    ["base.StructuralGroup", groupStore.items],
+    ["base.Module", moduleStore.items],
+    ["base.TrainingProgramme", trainProgStore.items],
+    ["people.Tutor", tutorStore.items],
+    ["base.Week", weekStore.items],
+    ["base.Room", roomStore.items]
+])
+
+/**
+ * List of the requested interpolation
+ */
+ const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
+
+/**
+ * Does the parameter displayer can be teleported ?
+ */
+const teleportable = ref(false)
+
+/**
+ * initialize all constraint parameters stores with Promises
+ */
+async function initializeStores() {
+    const promises = [
+        courseTypeStore.initialize(),
+        departmentStore.initialize(),
+        groupStore.initialize(),
+        moduleStore.initialize(),
+        trainProgStore.initialize(),
+        tutorStore.initialize(),
+        weekStore.initialize(),
+        roomStore.initialize()
+    ]
+    await Promise.all(promises)
+}
+
+/**
+ * Return an integer array from 1 to the number of call of interpolation in the doc property.
+ * If the parameter is not called, returns an empty array and warn in the console.
+ *
+ * @param paramName The constraint parameter to check
+ * @returns an integer array from 1 to the number of call
+ */
+function getNumberOfCallAsArray(paramName: string) {
+    const nbCall = props.doc.paramCallCount.get(paramName) as number
+    if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1) //Create the array from 1 to nbCall
+    else {
+        console.warn(`${paramName} not found in the documentation map of interporlation`)
+        return []
+    }
+}
+
+/**
+ * Check if the constraint has the called parameter.
+ * Warn in the console if not.
+ * 
+ * @param paramName the constraint parameter name
+ * @returns true if the constraint has the called parameter, else false
+ */
+function constraintHasParameter(paramName: string) {
+    const res = props.constraint.parameters.has(paramName)
+    if (!res)
+        console.warn(`${paramName} not found in the constraint's parameters`)
+
+    return res;
+}
+
+
+await initializeStores()
+onMounted(() => {
+    teleportable.value = true //Allow the teleportation of parameters displayer
+})
 </script>
 
 <style scoped></style>

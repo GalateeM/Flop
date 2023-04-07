@@ -27,27 +27,46 @@
 import type { Constraint } from '@/models/Constraint'
 import type { MarkdownDocumentation } from '@/models/MarkdownDocumentation'
 import { queryDoc } from '@/composables/API_documentation'
-import MarkdownDisplayer from '@/components/view/MarkdownDisplayer.vue'
+import MarkdownDisplayer from '@/components/controler/MarkdownDisplayer.vue'
 import { type Ref, ref, inject, watch } from 'vue'
 
+/** =========================================================================================
+ * In charge to load the documentation of the constraint and give it to a deticated displayer
+ */
+
+/**
+ * Properties declaration interface of the component
+ */
 interface Props {
+    /**
+     * Current constraint
+     */
     constraint: Constraint
 }
 const props = withDefaults(defineProps<Props>(), {})
 
+/**
+ * Language used by the app
+ */
 const lang = inject('lang') as string
 
-
+/**
+ * Current documentation loaded
+ */
 const doc: Ref<MarkdownDocumentation | null> = ref(null)
+
+/**
+ * Does the component has succesfully query a doc 
+ */
 const isResolved = ref(false)
+/**
+ * Does the component is querying a doc
+ */
 const isQuerying = ref(false)
-queryDocu()
-watch(
-    () => props.constraint,
-    (nV, oV) => { if (nV != oV) queryDocu() }
-)
 
-
+/**
+ * Load the documentation from the API
+ */
 async function queryDocu() {
     isQuerying.value = true
     isResolved.value = false
@@ -60,6 +79,15 @@ async function queryDocu() {
         .finally(() => isQuerying.value = false)
 }
 
+/**
+ * Add an event listener to query the API when the constraint changes
+ */
+ watch(
+    () => props.constraint,
+    (nV, oV) => { if (nV != oV) queryDocu() }
+)
+
+queryDocu()
 </script>
 
 <style scoped>
