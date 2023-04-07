@@ -65,6 +65,23 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), {})
 
+/**
+ * Classes to add to the tables processed by vueshowdown
+ */
+const TABLE_CLASSES = "table table-bordered"
+
+/**
+ * Post processing extension for the vueshowdown component
+ */
+const POST_PROCESSING_EXTENSION = {
+    type: 'output', //Specify that it is a post processing(i.e. applied after the markdown is converted to html)
+    filter: function (text: string) {
+        return text
+            //Add the classes to tables
+            .replace(/<table>/g, `<table class="${TABLE_CLASSES}">`)
+    }
+};
+
 const courseTypeStore = useCourseTypeStore()
 const departmentStore = useDepartmentStore()
 const groupStore = useGroupStore()
@@ -73,6 +90,30 @@ const trainProgStore = useTrainProgStore()
 const tutorStore = useTutorStore()
 const weekStore = useWeekStore()
 const roomStore = useRoomStore()
+
+/**
+ * Map of the items in the stores, accessible by the parameter name
+ */
+ const storesItems = new Map<string, any>([
+    ["base.CourseType", courseTypeStore.items],
+    ["base.Department", departmentStore.items],
+    ["base.StructuralGroup", groupStore.items],
+    ["base.Module", moduleStore.items],
+    ["base.TrainingProgramme", trainProgStore.items],
+    ["people.Tutor", tutorStore.items],
+    ["base.Week", weekStore.items],
+    ["base.Room", roomStore.items]
+])
+
+/**
+ * List of the requested interpolation
+ */
+ const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
+
+/**
+ * Does the parameter displayer can be teleported ?
+ */
+const teleportable = ref(false)
 
 /**
  * initialize all constraint parameters stores with Promises
@@ -91,17 +132,6 @@ async function initializeStores() {
     await Promise.all(promises)
 }
 
-await initializeStores()
-const teleportable = ref(false)
-onMounted(() => {
-    teleportable.value = true //Allow the teleportation of parameters displayer
-})
-
-/**
- * List of the requested interpolation
- */
-const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
-
 /**
  * Return an integer array from 1 to the number of call of interpolation in the doc property.
  * If the parameter is not called, returns an empty array and warn in the console.
@@ -112,9 +142,9 @@ const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
 function getNumberOfCallAsArray(paramName: string) {
     const nbCall = props.doc.paramCallCount.get(paramName) as number
     if (nbCall) return Array.from({ length: nbCall }, (v, k) => k + 1) //Create the array from 1 to nbCall
-    else { 
+    else {
         console.warn(`${paramName} not found in the documentation map of interporlation`)
-        return [] 
+        return []
     }
 }
 
@@ -125,7 +155,7 @@ function getNumberOfCallAsArray(paramName: string) {
  * @param paramName the constraint parameter name
  * @returns true if the constraint has the called parameter, else false
  */
-function constraintHasParameter(paramName : string){
+function constraintHasParameter(paramName: string) {
     const res = props.constraint.parameters.has(paramName)
     if (!res)
         console.warn(`${paramName} not found in the constraint's parameters`)
@@ -133,37 +163,11 @@ function constraintHasParameter(paramName : string){
     return res;
 }
 
-/**
- * Map of the items in the stores, accessible by the parameter name
- */
-const storesItems = new Map<string, any>([
-    ["base.CourseType", courseTypeStore.items],
-    ["base.Department", departmentStore.items],
-    ["base.StructuralGroup", groupStore.items],
-    ["base.Module", moduleStore.items],
-    ["base.TrainingProgramme", trainProgStore.items],
-    ["people.Tutor", tutorStore.items],
-    ["base.Week", weekStore.items],
-    ["base.Room", roomStore.items]
-])
 
-/**
- * Classes to add to the tables processed by vueshowdown
- */
-const TABLE_CLASSES = "table table-bordered"
-
-/**
- * Post processing extension for the vueshowdown component
- */
-const POST_PROCESSING_EXTENSION = {
-    type: 'output', //Specify that it is a post processing(i.e. applied after the markdown is converted to html)
-    filter: function (text: string) {
-        return text
-            //Add the classes to tables
-            .replace(/<table>/g, `<table class="${TABLE_CLASSES}">`)
-    }
-};
-
+await initializeStores()
+onMounted(() => {
+    teleportable.value = true //Allow the teleportation of parameters displayer
+})
 </script>
 
 <style scoped></style>
