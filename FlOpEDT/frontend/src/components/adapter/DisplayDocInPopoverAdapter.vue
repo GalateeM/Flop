@@ -172,14 +172,14 @@ enlargePopover()
 
 
 <style scoped>
-*>>>.buttonContainer {
+* :deep() .buttonContainer {
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: larger;
 }
 
-*>>>.plusButton {
+* :deep() .plusButton {
     width: 100%;
     height: 30px;
     border-radius: 20px;
@@ -187,11 +187,11 @@ enlargePopover()
     background-color: green;
 }
 
-*>>>.plusButton:hover {
+* :deep() .plusButton:hover {
     background-color: darkgreen;
 }
 
-*>>>.minusButton {
+* :deep() .minusButton {
     width: 100%;
     height: 30px;
     border-radius: 20px;
@@ -199,30 +199,30 @@ enlargePopover()
     background-color: firebrick;
 }
 
-*>>>.minusButton:hover {
+* :deep() .minusButton:hover {
     background-color: darkred;
 }
 
-*>>>.scrollbar {
+* :deep() .scrollbar {
     max-height: 70vh;
     overflow-y: scroll;
 }
 
-*>>>.scrollbar-primary::-webkit-scrollbar {
+* :deep() .scrollbar-primary::-webkit-scrollbar {
     width: 12px;
 }
 
-*>>>.scrollbar-primary::-webkit-scrollbar-thumb {
+* :deep() .scrollbar-primary::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: dodgerblue;
 }
 
-*>>>.scrollbar-primary::-webkit-scrollbar-thumb:hover {
+* :deep() .scrollbar-primary::-webkit-scrollbar-thumb:hover {
     border-radius: 4px;
     background-color: royalblue;
 }
 
-*>>>.scrollbar-primary {
+* :deep() .scrollbar-primary {
     scrollbar-color: #aaaaaa #f5f5f5;
 }
 </style>
