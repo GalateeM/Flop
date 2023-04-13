@@ -19,7 +19,7 @@ export class Constraint {
     private _is_active!: boolean
     private _comment!: string
     private _modified_at!: string
-    private _parameters!: Map<string, ConstrParameter>
+    private _parameters!: Map<string, ConstrParameter|null>
 
     constructor(
         inClassId: number,
@@ -29,7 +29,7 @@ export class Constraint {
         is_active: boolean,
         comment: string,
         modified_at: string,
-        parameters: Map<string, ConstrParameter>
+        parameters: Map<string, ConstrParameter|null>
     ) {
         this.inClassId = inClassId
         this.title = title
