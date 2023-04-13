@@ -7,7 +7,7 @@ const URL_GET_ALL = "/fr/api/fetch/idtutor"
  * @returns a map of Tutor where key are id
  */
 export async function getAllTutor(){
-    return useFetch(URL_GET_ALL,Tutor)
+    return useFetch(URL_GET_ALL,{})
     .then(items => {
         const res: Array<Tutor> = []
         items.forEach((i:any) => {

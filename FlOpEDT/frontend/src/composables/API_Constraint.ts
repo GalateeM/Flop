@@ -8,7 +8,7 @@ import { ConstraintClass } from "@/models/ConstraintClass"
  * @returns a map of ConstraintClass where key are class name
  */
 export async function loadConstraintClass(){
-    return await useFetch('/fr/api/ttapp/constraint_types', ConstraintClass).then(function (response) {
+    return await useFetch('/fr/api/ttapp/constraint_types', {}).then(function (response) {
         const res = new Map<string, ConstraintClass>()
         response.forEach((element: any) => {
             const classe = ConstraintClass.unserialize(element)
@@ -24,8 +24,8 @@ const URL_GET_ALL = "/fr/api/ttapp/constraint"
  * 
  * @returns a map of Constraint where key are constraint id
  */
-export async function getAllConstraint(){
-    return useFetch(URL_GET_ALL,Constraint)
+export async function getAllConstraint(department:string){
+    return useFetch(URL_GET_ALL,{dept:department})
     .then(items => {
         const res: Array<Constraint> = []
         items.forEach((i:any) => {

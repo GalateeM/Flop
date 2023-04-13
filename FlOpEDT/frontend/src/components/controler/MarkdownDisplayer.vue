@@ -1,5 +1,6 @@
 <template>
     <div>
+        <p>{{ constraint }}</p>
         <VueShowdown :markdown="doc.textContent" :options="{ tables: true }" :extensions="[POST_PROCESSING_EXTENSION]" />
     </div>
     <template v-if="teleportable">
@@ -22,7 +23,7 @@
                                 </template>
                             </template>
                             <template v-else>
-                                <i>{{ paramReqName }} </i>
+                                <i>{{ paramReqName }} </i> 
                             </template>
                         </Teleport>
                     </template>

@@ -7,7 +7,7 @@ const URL_GET_ALL = "/fr/api/fetch/idmodule"
  * @returns a map of modules where key are id
  */
 export async function getAllModule(){
-    return useFetch(URL_GET_ALL,Module)
+    return useFetch(URL_GET_ALL,{})
     .then(items => {
         const res: Array<Module> = []
         items.forEach((i:any) => {
