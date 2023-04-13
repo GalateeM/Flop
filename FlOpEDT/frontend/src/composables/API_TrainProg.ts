@@ -7,7 +7,7 @@ const URL_GET_ALL = "/fr/api/fetch/idtrainprog"
  * @returns a map of TrainProg where key are id
  */
 export async function getAllTrainProg(){
-    return useFetch(URL_GET_ALL,TrainProg)
+    return useFetch(URL_GET_ALL,{})
     .then(items => {
         const res: Array<TrainProg> = []
         items.forEach((i:any) => {

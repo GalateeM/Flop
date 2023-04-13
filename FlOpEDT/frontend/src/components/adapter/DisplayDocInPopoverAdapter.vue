@@ -102,6 +102,8 @@ function swap() {
     emit('updateShowDoc', props.showDoc)
 }
 
+
+
 /**
  * Return the currently selected constraint 
  * 

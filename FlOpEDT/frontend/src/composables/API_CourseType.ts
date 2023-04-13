@@ -8,7 +8,7 @@ const URL_GET_ALL = "/fr/api/fetch/idcoursetype"
  * @returns a map of CourseType where key are id
  */
 export async function getAllCourseType(){
-    return useFetch(URL_GET_ALL,CourseType)
+    return useFetch(URL_GET_ALL,{})
     .then(items => {
         const res: Array<CourseType> = []
         items.forEach((i:any) => {

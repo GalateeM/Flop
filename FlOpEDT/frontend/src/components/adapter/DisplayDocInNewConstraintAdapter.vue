@@ -118,7 +118,9 @@ function modifyDisplay() {
 function setConstraint() {
     const cstClass = Array.from(cstClasses.values()).find((e) => constraintEditTypeField.value == e.local_name)
     if (cstClass) {
-        constraint.value = new Constraint(0, '', cstClass.className, 0, true, '', '', new Map())
+        const paramMap = new Map<string, null>()
+        cstClass.parameters.forEach(p => paramMap.set(p.name, null))
+        constraint.value = new Constraint(0, '', cstClass.className, 0, true, '', '', paramMap)
     } else {
         constraint.value = null
     }
