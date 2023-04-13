@@ -179,7 +179,7 @@ function isParamInstanciate(paramReqName:string){
 
 /**
  * Call for a translation of the label.
- * May not be the final version because it use gettext which depend from old scripts
+ * May not be the final version because it use gettext which depend from pre-included scripts
  * 
  * @param label to translate
  * 
