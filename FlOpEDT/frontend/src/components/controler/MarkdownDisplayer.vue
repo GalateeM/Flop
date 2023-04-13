@@ -1,6 +1,5 @@
 <template>
     <div>
-        <p>{{ constraint }}</p>
         <VueShowdown :markdown="doc.textContent" :options="{ tables: true }" :extensions="[POST_PROCESSING_EXTENSION]" />
     </div>
     <template v-if="teleportable">

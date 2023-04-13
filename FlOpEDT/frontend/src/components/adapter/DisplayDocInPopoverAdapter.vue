@@ -121,7 +121,6 @@ function getCurrentConstraint() {
         const match = cstId.match(CST_ID_REGEX)
         //Return the associated constraint from the store if there is a match
         if (match && constraintStore.items.has(match[0])) {
-            console.log(constraintStore.items)
             return constraintStore.items.get(match[0])
         } else
             console.warn(`constraint ${match} not found in the store`)
