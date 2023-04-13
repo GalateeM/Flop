@@ -82,13 +82,11 @@ function enlargePopover() {
     const groupesOfButton = document.getElementsByClassName(CLASS_BTN_GROUP)
     for (let i = 0; i < groupesOfButton.length; i++) {
         const group = groupesOfButton.item(i) as HTMLElement
-        if (group !== null) {
-            console.log("true")
+        if (group != null) {
             group.style.alignItems = 'center';
             group.style.justifyContent = 'center';
             group.style.display = 'flex'
-        } else
-            console.log("false")
+        }
     }
 }
 
