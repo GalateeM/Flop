@@ -79,11 +79,16 @@ function enlargePopover() {
         window.scroll(popover.getBoundingClientRect().right, 0)
     }
     //Center the buttons
-    const groupeOfButton = document.getElementsByClassName(CLASS_BTN_GROUP).item(0) as HTMLElement
-    if (groupeOfButton !== null) {
-        groupeOfButton.style.alignItems = 'center';
-        groupeOfButton.style.justifyContent = 'center';
-        groupeOfButton.style.display = 'flex'
+    const groupesOfButton = document.getElementsByClassName(CLASS_BTN_GROUP)
+    for (let i = 0; i < groupesOfButton.length; i++) {
+        const group = groupesOfButton.item(i) as HTMLElement
+        if (group !== null) {
+            console.log("true")
+            group.style.alignItems = 'center';
+            group.style.justifyContent = 'center';
+            group.style.display = 'flex'
+        } else
+            console.log("false")
     }
 }
 
