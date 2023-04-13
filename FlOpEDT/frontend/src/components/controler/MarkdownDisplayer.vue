@@ -22,7 +22,7 @@
                                 </template>
                             </template>
                             <template v-else>
-                                <i>{{ paramReqName }} </i> 
+                                <i>{{ translate(paramReqName) }} </i> 
                             </template>
                         </Teleport>
                     </template>
@@ -177,6 +177,17 @@ function isParamInstanciate(paramReqName:string){
     return props.constraint.parameters.get(paramReqName) != null
 }
 
+/**
+ * Call for a translation of the label.
+ * May not be the final version because it use gettext which depend from pre-included scripts
+ * 
+ * @param label to translate
+ * 
+ * @return translated label
+ */
+function translate(label:string){
+    return window.eval(`gettext("${label}")`)
+}
 
 await initializeStores()
 onMounted(() => {
