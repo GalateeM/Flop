@@ -8,16 +8,21 @@
                 <template v-if="constraintHasParameter(paramReqName)">
                     <template v-for="callCount in getNumberOfCallAsArray(paramReqName)" :key="callCount">
                         <Teleport :to="'#' + paramReqName + 'Displayer' + callCount">
-                            <template
-                                v-if="ConstrParameter.primitiveTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
-                                <SimpleConstraintParameterDisplayer
-                                    :values="(constraint.parameters.get(paramReqName)?.id_list as unknown[])" />
+                            <template v-if="isParamInstanciate(paramReqName)">
+                                <template
+                                    v-if="ConstrParameter.primitiveTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
+                                    <SimpleConstraintParameterDisplayer
+                                        :values="(constraint.parameters.get(paramReqName)?.id_list as unknown[])" />
+                                </template>
+                                <template
+                                    v-if="ConstrParameter.objectTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
+                                    <ConstraintParameterDisplayer
+                                        :idList="(constraint.parameters.get(paramReqName)?.id_list as unknown[])"
+                                        :values="storesItems.get(constraint.parameters.get(paramReqName)?.type as string)" />
+                                </template>
                             </template>
-                            <template
-                                v-if="ConstrParameter.objectTypes().includes(constraint.parameters.get(paramReqName)?.type as string)">
-                                <ConstraintParameterDisplayer
-                                    :idList="(constraint.parameters.get(paramReqName)?.id_list as unknown[])"
-                                    :values="storesItems.get(constraint.parameters.get(paramReqName)?.type as string)" />
+                            <template v-else>
+                                <i>{{ paramReqName }} </i> 
                             </template>
                         </Teleport>
                     </template>
@@ -94,7 +99,7 @@ const roomStore = useRoomStore()
 /**
  * Map of the items in the stores, accessible by the parameter name
  */
- const storesItems = new Map<string, any>([
+const storesItems = new Map<string, any>([
     ["base.CourseType", courseTypeStore.items],
     ["base.Department", departmentStore.items],
     ["base.StructuralGroup", groupStore.items],
@@ -108,7 +113,7 @@ const roomStore = useRoomStore()
 /**
  * List of the requested interpolation
  */
- const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
+const paramRequestedName = Array.from(props.doc.paramCallCount.keys())
 
 /**
  * Does the parameter displayer can be teleported ?
@@ -161,6 +166,15 @@ function constraintHasParameter(paramName: string) {
         console.warn(`${paramName} not found in the constraint's parameters`)
 
     return res;
+}
+
+/**
+ * Checks if the parameter is instanciated in the constraint.
+ * 
+ * @param paramReqName 
+ */
+function isParamInstanciate(paramReqName:string){
+    return props.constraint.parameters.get(paramReqName) != null
 }
 
 

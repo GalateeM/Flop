@@ -7,7 +7,7 @@ const URL_GET_ALL =  "/fr/api/fetch/idgroup"
  * @returns a map of group where key are id
  */
 export async function getAllGroup(){
-    return useFetch(URL_GET_ALL,Group)
+    return useFetch(URL_GET_ALL, {})
     .then(items => {
         const res: Array<Group> = []
         items.forEach((i:any) => {

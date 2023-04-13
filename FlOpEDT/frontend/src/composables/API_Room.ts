@@ -7,7 +7,7 @@ const URL_GET_ALL = "/fr/api/rooms/room"
  * @returns a map of room where key are id
  */
 export async function getAllRoom(){
-    return useFetch(URL_GET_ALL,Room)
+    return useFetch(URL_GET_ALL,{})
     .then(items => {
         const res: Array<Room> = []
         items.forEach((i:any) => {
