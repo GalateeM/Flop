@@ -20,10 +20,18 @@ class ConstraintStore extends SimpleStoreMap<string, Constraint> {
     gatherData() {
         return getAllConstraint(this.dep);
     }
+
+    replace(item:Constraint){
+        if(this.items.value.has(item.id)){
+            this.items.value.delete(item.id)
+            this.insertNew(item)
+        }else
+            console.warn(item + "Does not exist in the map")
+    }
 }
 
 export const useConstraintStore = defineStore('contraint', () => {
-    const store: SimpleStoreMap<string, Constraint> = new ConstraintStore()
+    const store = new ConstraintStore()
 
     const items = store.items
 
@@ -31,9 +39,12 @@ export const useConstraintStore = defineStore('contraint', () => {
         store.insertNew(item)
     }
 
+    function replace(item: Constraint){
+        store.replace(item)
+    }
     function initialize() {
         return store.initialize()
     }
 
-    return { items, insertNew, initialize }
+    return { items, insertNew, initialize ,replace}
 })

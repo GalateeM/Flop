@@ -9,6 +9,7 @@
 
 <script setup lang="ts">
 import DocDisplayerControler from '@/components/controler/DocDisplayerControler.vue';
+import { useConstraintStore } from '@/stores/constraint';
 import { loadConstraintClass } from '@/composables/API_Constraint';
 import { Constraint } from '@/models/Constraint';
 import type { ConstraintClass } from '@/models/ConstraintClass';
@@ -42,6 +43,14 @@ const emit = defineEmits<{
 const MODAL_CLASSES = `modal-dialog modal-dialog-centered modal-dialog-scrollable`
 const MODAL_XL_CLASSES = `${MODAL_CLASSES} modal-xl`
 
+enum ModalStates {
+    Nothing,
+    CreateNewConstraint,
+    EditConstraint
+}
+
+let modalState: ModalStates = ModalStates.Nothing
+
 /**
  * Dummy constraint needed to use the markdown displayer
  */
@@ -62,6 +71,8 @@ const constraintEditTypeField = document.getElementById('constraint-edit-type') 
  * The modal containing the form to create a constraint
  */
 const modalElement = document.getElementById('constraint-edit-popup') as HTMLElement
+
+const constraintStore = useConstraintStore()
 
 /**
  * Swap showDoc value
@@ -127,6 +138,29 @@ function setConstraint() {
 }
 
 /**
+ * Save the constraint in the store by copying the pre existing code
+ */
+function saveConstraint() {
+    
+    let inOldConst: any
+    let modifiedConstraint
+    switch (modalState) {
+        case ModalStates.CreateNewConstraint:
+            inOldConst = window.eval(`newConstraint`)
+            modifiedConstraint = Constraint.unserialize(window.eval(`constraints["${inOldConst.name + inOldConst.id}"]`))
+            constraintStore.insertNew(modifiedConstraint)
+            break
+        case ModalStates.EditConstraint:
+            inOldConst = window.eval(`editConstraint`)
+            modifiedConstraint = Constraint.unserialize(window.eval(`constraints["${inOldConst.name + inOldConst.id}"]`))
+            constraintStore.replace(modifiedConstraint)
+            break
+        default:
+            console.error("The modal is in an unsupported state")
+    }
+}
+
+/**
  * Reload the constraint when the user select a constraint
  */
 constraintEditTypeField?.addEventListener('change', () => {
@@ -146,21 +180,36 @@ watch(
     () => { setModalSize(props.showDoc) }
 )
 
+constraintStore.initialize()
+
 /**
- * Observer on the modal that reset the constraint when the modal is hidden
- * and change the constraint when it is opened
+ * Observer on the modal to set the constraint when the modal is open
+ * and change the modal state based on the pre existing code.
  */
 new MutationObserver((mutationList: any[], observer: any) =>
     mutationList.forEach((mutation: { type: string; attributeName: string; }) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            if (!modalElement.classList.contains('show'))
-                constraint.value = null
-            else
+            if (modalElement.classList.contains('show')) {
                 setConstraint()
+                switch (window.eval(`currentState`)) {
+                    case window.eval(`State.CreateNewConstraint`):
+                        modalState = ModalStates.CreateNewConstraint
+                        break
+                    case window.eval(`State.EditConstraint`):
+                        modalState = ModalStates.EditConstraint
+                        break
+                    default:
+                        console.error("The modal is in an unsupported state")
+                }
+            } else {
+                constraint.value = null
+            }
         }
     })).observe(modalElement, {
         attributes: true
     })
+
+document.getElementById("confirm-edit-constraint")?.addEventListener('click' ,() => saveConstraint())
 </script>
 
 

@@ -48,15 +48,16 @@ export abstract class SimpleStoreMap<ID_TYPE, ITEM_TYPE extends I_Identifiable<I
     initialize(): Promise<null> {
         return new Promise((resolve, reject) => {
             if (!this.isInitialized) {
-                const items = this.gatherData()
+                this.isInitialized = true
+                this.gatherData()
                     .then((items) => {
                         items.forEach((item) => {
                             this.insertNew(item)
                         })
-                        this.isInitialized = true
                         resolve(null)
                     })
-                    .catch(() => {
+                    .catch((err) => {
+                        console.error("Store initialize() failed : " + err)
                         this.isInitialized = false
                         reject(null)
                     })
