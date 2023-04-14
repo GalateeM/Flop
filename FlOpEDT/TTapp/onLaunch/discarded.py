@@ -4,7 +4,7 @@ import re
 import os
 from pathlib import Path
 from MyFlOp.colors import Tcolors
-from FlOpEDT.TTapp.onLaunch.settings import settings
+from TTapp.onLaunch.settings import settings
 LANG_LIST = settings()["langs"]
 
 

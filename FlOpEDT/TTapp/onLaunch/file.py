@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from MyFlOp.colors import Tcolors
-from FlOpEDT.TTapp.onLaunch.settings import settings
+from TTapp.onLaunch.settings import settings
 import shutil
 
 TEMP_DIR = os.path.join(os.getcwd(),'temp')
