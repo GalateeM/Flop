@@ -59,9 +59,9 @@ import { BooleanRoomAttributeValue, CalendarDragEvent, CalendarProps,
     HourCalendarProps, NumericRoomAttributeValue, ReservationPeriodicity,
     ReservationPeriodicityType, ReservationPeriodicityTypeName, Room,
     RoomAttribute, RoomAttributeValue, RoomCalendarProps, RoomReservation,
-    ScheduledCourse, TimeSettings, User, WeekDay } from '@/ts/types'
-import { Time } from '@/ts/types'
-import { ComputedRef, inject, Ref } from 'vue'
+    ScheduledCourse, TimeSettings, User, WeekDay } from '@/ts/type'
+import { Time } from '@/ts/type'
+import { inject } from 'vue'
 import { computed, markRaw, onMounted, ref, shallowRef, watchEffect, watch} from 'vue'
 import { useDepartmentStore } from '@/stores/department'
 import { useRoomStore } from '@/stores/room'
