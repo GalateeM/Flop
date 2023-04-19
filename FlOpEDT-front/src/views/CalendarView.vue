@@ -60,7 +60,7 @@
   
             <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
               <template
-                v-for="event in getEvents(timestamp.date)"
+                v-for="event in getScheduled(timestamp.date)"
                 :key="event.id"
               >
                 <div
@@ -96,9 +96,12 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarDay.sass'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import NavigationBar from '@/components/utils/NavigationBar.vue'
-// The function below is used to set up our demo data
+import { useScheduledCourseStore } from '@/stores/scheduledCourse'
+
+//Test on scheduledCourses data
+const scheduledCourseStore = useScheduledCourseStore()
 const selectedDate = ref(today())
 const calendar = ref<QCalendarDay>(null)
 const CURRENT_DAY = new Date()
@@ -187,11 +190,48 @@ const events = ref([
         days: 5
     }
 ])
+
+function scheduledCoursesToCalendarSlot(scheduledCourse: any): any {
+    let slot = scheduledCourse
+    slot.title = scheduledCourse.course.module.abbrev
+    slot.details = scheduledCourse.tutor + " is teaching " + scheduledCourse.course.module.name
+    slot.date = parseDate(scheduledCourse.start_time).date
+    slot.time = scheduledCourse.start_time.toLocaleTimeString()
+    console.log("XXTime", slot.date)
+    slot.bgcolor = 'purple'
+    slot.icon ='fas fa-plane'
+    return slot
+}
+
+const scheduledMap = computed(() => {
+    const map = {}
+    scheduledCourseStore.scheduledCourses.forEach(scheduledCourse => {
+        let slot = scheduledCoursesToCalendarSlot(scheduledCourse)
+        if(!map[slot.date]) {
+            map[slot.date] = []
+        }
+        map[slot.date].push(slot)
+        if(slot.days) {
+            let timestamp = parseTimestamp(slot.date)
+            let days = slot.days
+            do {
+                timestamp = addToDate(timestamp, { day: 1 })
+                if (!map[ timestamp.date ]) {
+                    map[ timestamp.date ] = []
+                }
+                map[ timestamp.date ].push(slot)
+            } while (--days > 0)
+        }
+    })
+    return map
+})
+
 // convert the events into a map of lists keyed by date
 const eventsMap= computed(() => {
     const map = {}
     // this.events.forEach(event => (map[ event.date ] = map[ event.date ] || []).push(event))
     events.value.forEach(event => {
+        console.log("XXTime2", event.date)
         if (!map[ event.date ]) {
             map[ event.date ] = []
         }
@@ -238,6 +278,35 @@ function badgeStyles (event: any, type: any, timeStartPos : any = undefined, tim
     s[ 'align-items' ] = 'flex-start'
     return s
 }
+
+function getScheduled (dt : any) {
+    // get all events for the specified date
+    const events: any = scheduledMap.value[ dt ] || []
+    console.log("GET", dt)
+    console.log("GET?", events)
+    if (events.length === 1) {
+        events[ 0 ].side = 'full'
+    }
+    else if (events.length === 2) {
+        // this example does no more than 2 events per day
+        // check if the two events overlap and if so, select
+        // left or right side alignment to prevent overlap
+        const startTime = addToDate(parsed(events[ 0 ].date), { minute: parseTime(events[ 0 ].time) })
+        const endTime = addToDate(startTime, { minute: events[ 0 ].duration })
+        const startTime2 = addToDate(parsed(events[ 1 ].date), { minute: parseTime(events[ 1 ].time) })
+        const endTime2 = addToDate(startTime2, { minute: events[ 1 ].duration })
+        if (isBetweenDates(startTime2, startTime, endTime, true) || isBetweenDates(endTime2, startTime, endTime, true)) {
+            events[ 0 ].side = 'left'
+            events[ 1 ].side = 'right'
+        }
+        else {
+            events[ 0 ].side = 'full'
+            events[ 1 ].side = 'full'
+        }
+    }
+    return events
+}
+
 function getEvents (dt: any) {
     // get all events for the specified date
     const events: any = eventsMap.value[ dt ] || []
@@ -263,6 +332,7 @@ function getEvents (dt: any) {
     }
     return events
 }
+
 function scrollToEvent (event: any) {
     calendar.value.scrollToTime(event.time, 350)
 }
@@ -296,6 +366,12 @@ function onClickHeadIntervals (data : any) {
 function onClickHeadDay (data : any) {
     console.log('onClickHeadDay', data)
 }
+
+onMounted(() => {
+    scheduledCourseStore.fetchScheduledCourses({week : 50, year: 2022}).then(() => {
+        console.log(scheduledMap.value)
+    })
+})
 </script>
 
 <style lang="sass" scoped>
