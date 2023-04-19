@@ -13,7 +13,8 @@
         "generate": "Générer",
         "flop-editor": "flop!Editor",
         "import": "Importer",
-        "admin": "Admin" 
+        "admin": "Admin",
+        "calendar": "Calendrier"
     },
     "home": {
         "welcome" : "Bienvenue sur FlOpEDT !",

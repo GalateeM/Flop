@@ -7,6 +7,12 @@
                     dept: deptStore.getCurrentDepartment.abbrev,
                     locale: locale
                 }}">{{ $t("navbar.home") }}</router-link></li> 
+            <li><router-link :to="{
+                name: routeNames.calendar,
+                params: {
+                    dept: deptStore.getCurrentDepartment.abbrev,
+                    locale: locale
+                }}">{{ $t("navbar.calendar") }}</router-link></li> 
             <li v-if="deptStore.isCurrentDepartmentSelected">
                 <a :href="`/${locale}/edt/${deptStore.getCurrentDepartment.abbrev}/`">{{ $t("navbar.schedule") }}</a>
             </li>

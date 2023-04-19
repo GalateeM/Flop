@@ -8,6 +8,7 @@ export const routeNames = {
     roomReservation: Symbol('room-reservation'),
     departmentSelection: Symbol('department-selection'),
     contact: Symbol('contact'),
+    calendar: Symbol('calendar'),
     notFound: Symbol('notFound'),
     login: Symbol('login')
 }
@@ -37,6 +38,15 @@ const routes = [
         component: () => import('@/views/HomeView.vue'),
         meta: {
             title: 'Ca floppe !',
+            needsAuth: false,
+        },
+    },
+    {
+        path: '/calendar/:locale?/:dept?',
+        name: routeNames.calendar,
+        component: () => import('@/views/CalendarView.vue'),
+        meta: {
+            title: 'Ca floppe grave !',
             needsAuth: false,
         },
     },
