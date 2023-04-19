@@ -16,6 +16,8 @@ export const useScheduledCourseStore = defineStore('scheduledCourse', () => {
                 scheduledCourses.value.forEach(sc => {
                     sc.start_time = new Date(sc.start_time)
                     sc.end_time = new Date(sc.end_time)
+                    let diffInMilliSec : number = sc.end_time - sc.start_time 
+                    sc.duration = Math.floor(diffInMilliSec / 1000/60)
                 })
                 isAllScheduledFetched.value = true
             })

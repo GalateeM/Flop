@@ -304,15 +304,17 @@ export class ScheduledCourse {
     course: Course
     tutor: string
     id_visio: number
+    duration : number
 
     constructor(
-        id = 0,
-        room = {id: 0, name:'', is_basic: true},
-        start_time = '',
-        end_time = '',
-        course = new Course(),
-        tutor = '',
-        id_visio = 0) {
+            id = 0,
+            room = {id: 0, name:'', is_basic: true},
+            start_time = '',
+            end_time = '',
+            course = new Course(),
+            tutor = '',
+            id_visio = 0,
+            duration = 0) {
         this.id = id
         this.room = room
         this.start_time = new Date(start_time)
@@ -320,6 +322,7 @@ export class ScheduledCourse {
         this.course = course
         this.tutor = tutor
         this.id_visio = id_visio
+        this.duration = duration
     }
 }
 
