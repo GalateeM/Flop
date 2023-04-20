@@ -7,7 +7,7 @@
       />
   
       <div class="row justify-center">
-        <div style="display: flex; max-width: 800px; width: 100%; height: 400px;">
+        <div style="display: flex; max-width: 100%; width: 100%; height: 100%;">
           <q-calendar-day
             ref="calendar"
             v-model="selectedDate"
@@ -20,17 +20,31 @@
             :interval-start="6"
             :interval-count="18"
             :interval-height="28"
+            :weekdays="[1,2,3,4,5]"
             @change="onChange"
             @moved="onMoved"
             @click-date="onClickDate"
             @click-time="onClickTime"
             @click-interval="onClickInterval"
             @click-head-intervals="onClickHeadIntervals"
-            @click-head-day="onClickHeadDay"
-          >
+            @click-head-day="onClickHeadDay">
             <template #head-day-event="{ scope: { timestamp } }">
-              <div style="display: flex; justify-content: center; flex-wrap: wrap; padding: 2px;">
+              <div style="display: flex; justify-content: center; flex-wrap: wrap; padding-bottom: 2px; padding-top: 2px;">
                 <template
+                  v-for="group in getGroupsByTrainProgId[84]"
+                  :key="group.id">
+                  <q-badge
+                    :class="badgeClasses(group, 'header')"
+                    :style="badgeGroupStyles(group, 'header')"
+                    style="cursor: pointer; height: 12px; font-size: 10px; margin-bottom: 1px; margin-top: 1px;"
+                  >
+                    <span class="title q-calendar__ellipsis">
+                      {{ group.name }}
+                      <q-tooltip>{{ group.name }}</q-tooltip>
+                    </span>
+                  </q-badge>
+                </template>
+                <!-- <template
                   v-for="event in eventsMap[timestamp.date]"
                   :key="event.id"
                 >
@@ -54,23 +68,21 @@
                   >
                     <q-tooltip>{{ event.time + ' - ' + event.details }}</q-tooltip>
                   </q-badge>
-                </template>
+                </template> -->
               </div>
             </template>
   
             <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
               <template
                 v-for="event in getScheduled(timestamp.date)"
-                :key="event.id"
-              >
+                :key="event.id">
                 <div
                   v-if="event.time !== undefined"
                   class="my-event"
                   :class="badgeClasses(event, 'body')"
-                  :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)"
-                >
+                  :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)">
                   <span class="title q-calendar__ellipsis">
-                    {{ event.title }}
+                    {{ event.course.groups[0].name }}
                     <q-tooltip>{{ event.details }}</q-tooltip>
                   </span>
                 </div>
@@ -96,15 +108,20 @@ import {
 import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
 import '@quasar/quasar-ui-qcalendar/src/QCalendarDay.sass'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import NavigationBar from '@/components/utils/NavigationBar.vue'
 import { useScheduledCourseStore } from '@/stores/scheduledCourse'
+import { api } from '@/composables/api'
+import { useDepartmentStore } from '@/stores/department'
+import type { Group } from '@/ts/types'
 
 //Test on scheduledCourses data
 const scheduledCourseStore = useScheduledCourseStore()
+const departmentStore = useDepartmentStore()
 const selectedDate = ref(today())
 const calendar = ref<QCalendarDay>(null)
 const CURRENT_DAY = new Date()
+const groups = ref([])
 const events = ref([
     {
         id: 1,
@@ -200,13 +217,26 @@ function scheduledCoursesToCalendarSlot(scheduledCourse: any): any {
     console.log("XXTime", slot.date)
     slot.bgcolor = 'purple'
     slot.icon ='fas fa-plane'
+    slot.side = "right"
     return slot
 }
 
 const scheduledMap = computed(() => {
     const map = {}
     scheduledCourseStore.scheduledCourses.forEach(scheduledCourse => {
+      let hasBasicGroup = false
+      let group : Group
+      scheduledCourse.course.groups.forEach(gp => {
+        
+        if(gp.id in getGroupsById.value) {
+          hasBasicGroup = true
+          group = gp
+        }
+      })
+      if(hasBasicGroup) {
         let slot = scheduledCoursesToCalendarSlot(scheduledCourse)
+        slot.group = group
+        slot.index = getIndexById.value[group.id]
         if(!map[slot.date]) {
             map[slot.date] = []
         }
@@ -222,8 +252,33 @@ const scheduledMap = computed(() => {
                 map[ timestamp.date ].push(slot)
             } while (--days > 0)
         }
+      }
     })
     return map
+})
+
+const getGroupsById = computed(() => {
+  return Object.fromEntries(groups.value.map((group: any) => [group.id, group]))
+})
+
+const getIndexById = computed(() => {
+  let map = {}
+  let i = 0
+  map = groups.value.map((group: Group) => {[i++, group]})
+  console.log("MAP", map)
+  return map
+})
+
+const getGroupsByTrainProgId = computed(() => {
+  let map = {}
+  groups.value.forEach((group: any) => {
+    if(!map[group.train_prog]) {
+      map[group.train_prog] = []
+    }
+    map[group.train_prog].push(group)
+  })
+  console.log("GROUPS", map)
+  return map
 })
 
 // convert the events into a map of lists keyed by date
@@ -251,6 +306,10 @@ const eventsMap= computed(() => {
     return map
 })
 
+const widthPercentGroup = computed(() => {
+  return 100/getGroupsByTrainProgId.value[84].length
+})
+
 function getCurrentDay (day: any) {
     console.log("XX", CURRENT_DAY)
     const newDay = new Date(CURRENT_DAY)
@@ -270,7 +329,7 @@ function badgeClasses (event: any, type: any) {
     }
 }
 function badgeStyles (event: any, type: any, timeStartPos : any = undefined, timeDurationHeight: any = undefined) {
-    const s = { top: "", height: ""}
+    const s = { top: "", height: "", width: widthPercentGroup.value + "%" }
     if (timeStartPos && timeDurationHeight) {
         s.top = timeStartPos(event.time) + 'px'
         s.height = timeDurationHeight(event.duration) + 'px'
@@ -278,32 +337,39 @@ function badgeStyles (event: any, type: any, timeStartPos : any = undefined, tim
     s[ 'align-items' ] = 'flex-start'
     return s
 }
+function badgeGroupStyles (event: any, type: any, timeStartPos : any = undefined, timeDurationHeight: any = undefined) {
+    const s = { top: "", height: "", width: widthPercentGroup.value + "%" }
+    if (timeStartPos && timeDurationHeight) {
+        s.top = timeStartPos(event.time) + 'px'
+        s.height = timeDurationHeight(event.duration) + 'px'
+    }
+    s[ 'align-items' ] = 'flex-start'
+    return s
+  }
 
 function getScheduled (dt : any) {
     // get all events for the specified date
     const events: any = scheduledMap.value[ dt ] || []
-    console.log("GET", dt)
-    console.log("GET?", events)
-    if (events.length === 1) {
-        events[ 0 ].side = 'full'
-    }
-    else if (events.length === 2) {
-        // this example does no more than 2 events per day
-        // check if the two events overlap and if so, select
-        // left or right side alignment to prevent overlap
-        const startTime = addToDate(parsed(events[ 0 ].date), { minute: parseTime(events[ 0 ].time) })
-        const endTime = addToDate(startTime, { minute: events[ 0 ].duration })
-        const startTime2 = addToDate(parsed(events[ 1 ].date), { minute: parseTime(events[ 1 ].time) })
-        const endTime2 = addToDate(startTime2, { minute: events[ 1 ].duration })
-        if (isBetweenDates(startTime2, startTime, endTime, true) || isBetweenDates(endTime2, startTime, endTime, true)) {
-            events[ 0 ].side = 'left'
-            events[ 1 ].side = 'right'
-        }
-        else {
-            events[ 0 ].side = 'full'
-            events[ 1 ].side = 'full'
-        }
-    }
+    // if (events.length === 1) {
+    //     events[ 0 ].side = 'full'
+    // }
+    // else if (events.length === 2) {
+    //     // this example does no more than 2 events per day
+    //     // check if the two events overlap and if so, select
+    //     // left or right side alignment to prevent overlap
+    //     const startTime = addToDate(parsed(events[ 0 ].date), { minute: parseTime(events[ 0 ].time) })
+    //     const endTime = addToDate(startTime, { minute: events[ 0 ].duration })
+    //     const startTime2 = addToDate(parsed(events[ 1 ].date), { minute: parseTime(events[ 1 ].time) })
+    //     const endTime2 = addToDate(startTime2, { minute: events[ 1 ].duration })
+    //     if (isBetweenDates(startTime2, startTime, endTime, true) || isBetweenDates(endTime2, startTime, endTime, true)) {
+    //         events[ 0 ].side = 'left'
+    //         events[ 1 ].side = 'right'
+    //     }
+    //     else {
+    //         events[ 0 ].side = 'full'
+    //         events[ 1 ].side = 'full'
+    //     }
+    // }
     return events
 }
 
@@ -368,9 +434,14 @@ function onClickHeadDay (data : any) {
 }
 
 onMounted(() => {
-    scheduledCourseStore.fetchScheduledCourses({week : 50, year: 2022}).then(() => {
+    scheduledCourseStore.fetchScheduledCourses({week : 16, year: 2023}).then(() => {
         console.log(scheduledMap.value)
     })
+    api.getGroups(departmentStore.getCurrentDepartment).then(
+      (groupsFetched : any) => {
+        groups.value = groupsFetched.filter((group: Group) => group.basic === true)
+      }
+    )
 })
 </script>
 
@@ -405,15 +476,15 @@ onMounted(() => {
   background: grey
 .bg-purple
   background: purple
-.full-width
-  left: 0
-  width: calc(100% - 2px)
-.left-side
-  left: 0
-  width: calc(50% - 3px)
-.right-side
-  left: 50%
-  width: calc(50% - 3px)
-.rounded-border
+  .full-width
+   left: 0
+   width: calc(100% - 2px)
+  .left-side
+   left: 0
+   width: calc(50% - 3px)
+  .right-side
+   left: 50%
+   width: calc(50% - 3px)
+  .rounded-border
   border-radius: 2px
 </style>

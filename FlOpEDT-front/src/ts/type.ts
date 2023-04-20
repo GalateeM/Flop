@@ -192,6 +192,16 @@ export interface FormInterface {
     dismissAlerts: () => void
 }
 
+export interface Group {
+    id : number
+    name: number
+    size: number
+    basic: boolean
+    train_prog: number
+    type: number
+    parent_groups: number[]
+}
+
 export interface HourCalendarProps extends CalendarProps {
     slots: {
         // The slot date formatted as yyyy-MM-dd
@@ -199,6 +209,20 @@ export interface HourCalendarProps extends CalendarProps {
     }
     startTime: number
     endTime: number
+}
+
+export interface Module {
+    name: string
+    abbrev: string
+    head: number
+    train_prog: number
+    period: number
+    url: string
+    ppn: string
+    display: {
+        color_bg: string
+        color_txt: string
+    }
 }
 
 export interface NumericRoomAttributeValue extends RoomAttributeValue {

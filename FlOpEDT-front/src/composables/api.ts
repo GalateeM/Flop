@@ -1,4 +1,4 @@
-import { ReservationPeriodicity, ReservationPeriodicityByMonth, ReservationPeriodicityByMonthXChoice, ReservationPeriodicityByWeek, ReservationPeriodicityEachMonthSameDate, ReservationPeriodicityType, Room, Department, WeekDay, User, BooleanRoomAttributeValue, Course, CourseType, NumericRoomAttributeValue, RoomAttribute, RoomReservation, RoomReservationType, ScheduledCourse, TimeSettings } from '@/ts/type'
+import { ReservationPeriodicity, ReservationPeriodicityByMonth, ReservationPeriodicityByMonthXChoice, ReservationPeriodicityByWeek, ReservationPeriodicityEachMonthSameDate, ReservationPeriodicityType, Room, Department, WeekDay, User, BooleanRoomAttributeValue, Course, CourseType, NumericRoomAttributeValue, RoomAttribute, RoomReservation, RoomReservationType, ScheduledCourse, TimeSettings, Group, Module } from '@/ts/type'
 
 const API_ENDPOINT = '/fr/api/'
 
@@ -25,7 +25,9 @@ const urls = {
     numericroomattributes: 'rooms/numericattributes',
     booleanroomattributevalues: 'rooms/booleanattributevalues',
     numericroomattributevalues: 'rooms/numericattributevalues',
-    weeks: 'base/weeks'
+    weeks: 'base/weeks',
+    getGroups: 'groups/structural',
+    getModules: 'courses/module'
 }
 
 function getCookie(name: string) {
@@ -119,6 +121,8 @@ function buildUrl(base: string, uri: string) {
     return `${base}/${uri}`
 }
 export interface FlopAPI {
+    getGroups(department?: Department) : Promise<Group[]>
+    getModules(department?: Department) : Promise<Module[]>
     getCurrentUser() : Promise<User>
     getAllDepartments() : Promise<Array<Department>>
     getTutors(department?: Department) : Promise<Array<User>>
@@ -188,6 +192,56 @@ export interface FlopAPI {
 }
 
 const api: FlopAPI = {
+    async getGroups(department? : Department) : Promise<Array<Group>> {
+        let groups : Array<Group> = []
+        let finalUrl : string = API_ENDPOINT+urls.getGroups
+        if (department)
+            finalUrl += "/?dept="+department.abbrev
+        await fetch(finalUrl, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(
+            async (response) => {
+                if(!response.ok) {
+                    throw Error('Error : ' + response.status)
+                }
+                await response.json()
+                        .then(data => {
+                            groups = data
+                        })
+                        .catch( error => console.log('Error : ' + error.message))
+            }
+        ).catch( error => {
+            console.log(error.message)
+        }) 
+        return groups
+    },
+    async getModules(department? : Department) : Promise<Array<Module>> {
+        let modules : Array<Module> = []
+        let finalUrl : string = API_ENDPOINT+urls.getModules
+        if (department)
+            finalUrl += "/?dept="+department.abbrev
+        await fetch(finalUrl, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(
+            async (response) => {
+                if(!response.ok) {
+                    throw Error('Error : ' + response.status)
+                }
+                await response.json()
+                        .then(data => {
+                            modules = data
+                        })
+                        .catch( error => console.log('Error : ' + error.message))
+            }
+        ).catch( error => {
+            console.log(error.message)
+        }) 
+        return modules
+    },
     async getTutors(department? : Department) : Promise<Array<User>> {
         let tutors : Array<User> = []
         let finalUrl : string = API_ENDPOINT+urls.getTutors
