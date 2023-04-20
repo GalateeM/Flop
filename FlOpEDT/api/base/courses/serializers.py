@@ -22,6 +22,7 @@
 # without disclosing the source code of your own applications.
 
 import base.models as bm
+import people.models as pm
 import displayweb.models as dwm
 from api.base.serializers import TrainingProgramsSerializer
 
@@ -148,6 +149,12 @@ class Module_C_Serializer(serializers.Serializer):
         model = bm.Module
         fields = ['abbrev']
 
+class Tutor_QuickDirty_Serializer(serializers.Serializer):
+    username = serializers.CharField()
+
+    class Meta:
+        model = pm.Tutor
+        fields = ['username']
 
 class CoursesSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -157,7 +164,7 @@ class CoursesSerializer(serializers.Serializer):
     year = serializers.SerializerMethodField()
     groups = Group_SC_Serializer(many=True)
     tutor = serializers.CharField()
-    supp_tutor = serializers.CharField()
+    supp_tutor = Tutor_QuickDirty_Serializer(many=True)
     module = Module_SC_Serializer()
     modulesupp = Module_C_Serializer()
     pay_module = Module_C_Serializer()

@@ -758,6 +758,9 @@ function translate_cours_pl_from_json(d, result) {
     d.tutors=[];
   }
 
+  // quick fix
+  d.course.type = d.course.type.name
+
   // pre-process colors
   d.color_bg = 'white' ;
   d.color_txt = 'black' ;
