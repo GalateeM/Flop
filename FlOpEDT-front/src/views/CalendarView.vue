@@ -5,7 +5,7 @@
         @prev="onPrev"
         @next="onNext"
       />
-  
+
       <div class="row justify-center">
         <div style="display: flex; max-width: 100%; width: 100%; height: 100%;">
           <q-calendar-day
@@ -29,7 +29,7 @@
             @click-head-intervals="onClickHeadIntervals"
             @click-head-day="onClickHeadDay">
             <template #head-day-event="{ scope: { timestamp } }">
-              <div style="display: flex; justify-content: center; flex-wrap: wrap; padding-bottom: 2px; padding-top: 2px;">
+              <!-- <div style="display: flex; justify-content: center; flex-wrap: wrap; padding-bottom: 2px; padding-top: 2px;">
                 <template
                   v-for="group in getGroupsByTrainProgId[84]"
                   :key="group.id">
@@ -44,7 +44,7 @@
                     </span>
                   </q-badge>
                 </template>
-                <!-- <template
+                 <!- <template
                   v-for="event in eventsMap[timestamp.date]"
                   :key="event.id"
                 >
@@ -68,10 +68,10 @@
                   >
                     <q-tooltip>{{ event.time + ' - ' + event.details }}</q-tooltip>
                   </q-badge>
-                </template> -->
-              </div>
+                </template> ->
+              </div> -->
             </template>
-  
+
             <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
               <template
                 v-for="event in getScheduled(timestamp.date)"
@@ -93,7 +93,7 @@
       </div>
     </div>
   </template>
-  
+
 <script setup lang="ts">
 import {
     QCalendarDay,
@@ -224,35 +224,40 @@ function scheduledCoursesToCalendarSlot(scheduledCourse: any): any {
 const scheduledMap = computed(() => {
     const map = {}
     scheduledCourseStore.scheduledCourses.forEach(scheduledCourse => {
-      let hasBasicGroup = false
-      let group : Group
-      scheduledCourse.course.groups.forEach(gp => {
-        
-        if(gp.id in getGroupsById.value) {
-          hasBasicGroup = true
-          group = gp
-        }
-      })
-      if(hasBasicGroup) {
-        let slot = scheduledCoursesToCalendarSlot(scheduledCourse)
-        slot.group = group
-        slot.index = getIndexById.value[group.id]
-        if(!map[slot.date]) {
-            map[slot.date] = []
-        }
-        map[slot.date].push(slot)
-        if(slot.days) {
-            let timestamp = parseTimestamp(slot.date)
-            let days = slot.days
-            do {
-                timestamp = addToDate(timestamp, { day: 1 })
-                if (!map[ timestamp.date ]) {
-                    map[ timestamp.date ] = []
-                }
-                map[ timestamp.date ].push(slot)
-            } while (--days > 0)
-        }
+      let slot = scheduledCoursesToCalendarSlot(scheduledCourse)
+      if(!map[slot.date]) {
+        map[slot.date] = []
       }
+      map[slot.date].push(slot)
+      // let hasBasicGroup = false
+      // let group : Group
+      // scheduledCourse.course.groups.forEach(gp => {
+
+      //   if(gp.id in getGroupsById.value) {
+      //     hasBasicGroup = true
+      //     group = gp
+      //   }
+      // })
+      // if(hasBasicGroup) {
+      //   let slot = scheduledCoursesToCalendarSlot(scheduledCourse)
+      //   slot.group = group
+      //   slot.index = getIndexById.value[group.id]
+      //   if(!map[slot.date]) {
+      //       map[slot.date] = []
+      //   }
+      //   map[slot.date].push(slot)
+      //   if(slot.days) {
+      //       let timestamp = parseTimestamp(slot.date)
+      //       let days = slot.days
+      //       do {
+      //           timestamp = addToDate(timestamp, { day: 1 })
+      //           if (!map[ timestamp.date ]) {
+      //               map[ timestamp.date ] = []
+      //           }
+      //           map[ timestamp.date ].push(slot)
+      //       } while (--days > 0)
+      //   }
+      // }
     })
     return map
 })
@@ -307,7 +312,8 @@ const eventsMap= computed(() => {
 })
 
 const widthPercentGroup = computed(() => {
-  return 100/getGroupsByTrainProgId.value[84].length
+  return 20
+  //return 100/getGroupsByTrainProgId.value[84].length
 })
 
 function getCurrentDay (day: any) {
@@ -329,7 +335,7 @@ function badgeClasses (event: any, type: any) {
     }
 }
 function badgeStyles (event: any, type: any, timeStartPos : any = undefined, timeDurationHeight: any = undefined) {
-    const s = { top: "", height: "", width: widthPercentGroup.value + "%" }
+    const s = {left: "10%", width: widthPercentGroup.value + "%" }
     if (timeStartPos && timeDurationHeight) {
         s.top = timeStartPos(event.time) + 'px'
         s.height = timeDurationHeight(event.duration) + 'px'
