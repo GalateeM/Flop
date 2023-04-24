@@ -12,13 +12,15 @@ export const useScheduledCourseStore = defineStore('scheduledCourse', () => {
         await api.fetch
             .scheduledCourses({ week: week.week, year: week.year })
             .then((value: ScheduledCourse[]) => {
-                scheduledCourses.value = value
-                scheduledCourses.value.forEach(sc => {
+                console.log(week.week, week.year)
+                console.log(value)
+                value.forEach(sc => {
                     sc.start_time = new Date(sc.start_time)
                     sc.end_time = new Date(sc.end_time)
                     let diffInMilliSec : number = sc.end_time - sc.start_time 
                     sc.duration = Math.floor(diffInMilliSec / 1000/60)
                 })
+                scheduledCourses.value = value
                 isAllScheduledFetched.value = true
             })
     }
