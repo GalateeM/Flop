@@ -1,0 +1,33 @@
+#containerSelects{
+    text-align: center;
+    font-weight: bold;
+    transition: 0;
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    top: 40%; left: 50%; /* à 50%/50% du parent référent */
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+#annee{
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#groupe{
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#semestre{
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#my-button{
+    padding: 10px;
+}

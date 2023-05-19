@@ -12,4 +12,10 @@ urlpatterns = [
     url(r'^mk_and_dl_blank_planif/$', views.mk_and_dl_planif, {'with_courses': False}, name="mk_and_dl_blank_planif"),
     url(r'^mk_and_dl_fullfilled_planif/$', views.mk_and_dl_planif, {'with_courses': True}, name="mk_and_dl_fullfilled_planif"),
     url(r'^mk_and_dl_fullfilled_database_file/$', views.mk_and_dl_database_file, name="mk_and_dl_fullfilled_database_file"),
+    url(r'^export_to_excel/$', views.export_to_excel, name="export_to_excel"),
+    url(r'^createExportExcel/$', views.createExportExcel, name="createExportExcel"),
 ]
+
+
+#^ = commence
+# $ rien apres

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %} Export Excel - Flop!EDT {% endblock %}
+{% block content %}
+    {% load static %}
+    {% load i18n %}
+    <link rel="stylesheet" href="{% static 'configuration/style.css' %}"/>
+    <link rel="stylesheet" href="{% static 'configuration/styleExport.css' %}"/>
+    <h1>Exporteur de fichier Excel</h1>
+    <div id="containerSelects">
+        <select id="annee"></select>
+        <select id="groupe" style="display:none;"></select>
+        <select id="semestre" style="display:none;"></select>
+        <button id="my-button" style="display:none;">Télécharger le fichier Excel</button>
+        <div id="containerLinkToDL" style="display:none;"><a id="linkToDL">.</a></div>
+    </div>
+
+    <script>
+
+        function loadAllGroups(){
+            fetch('http://localhost/fr/api/groups/structural/tree/?dept=HES')
+            .then(t => t.json())
+            .then(result => {
+                const baliseSelectAnnee = document.querySelector("#annee");
+                const baliseOptionEmpty = document.createElement("option");
+                baliseOptionEmpty.setAttribute("id", "emptyOption");
+                baliseSelectAnnee.appendChild(baliseOptionEmpty);
+                for (let grp of result){
+                    let baliseOptionAnnee = document.createElement("option");
+                    baliseOptionAnnee.value = grp.name;
+                    baliseOptionAnnee.innerHTML = grp.name;
+                    baliseSelectAnnee.appendChild(baliseOptionAnnee);
+                }
+                baliseSelectAnnee.addEventListener("change", e => {
+                    findChild(e, result);
+                    document.getElementById('my-button').style.display = "none";
+                    document.getElementById('semestre').style.display = "none";
+                });
+            })
+        }
+        loadAllGroups();
+
+        function findChild(e, tree){
+            let valueSelected = e.target.value;
+            if ( valueSelected == ""){
+                return;
+            }
+            else{
+                const baliseSelectGroupe = document.querySelector("#groupe");
+                baliseSelectGroupe.innerHTML = "";
+                let indexGrp;
+                for (let i = 0 ; i < tree.length ; i++){
+                    if (tree[i].name == valueSelected){
+                        indexGrp = i;
+                    }
+                }
+
+                const baliseOptionEmpty = document.createElement("option");
+                baliseOptionEmpty.setAttribute("id", "emptyOption");
+                baliseSelectGroupe.appendChild(baliseOptionEmpty);
+
+
+                for (let sousGrp of tree[indexGrp].children){
+                    let baliseOptionGroupe = document.createElement("option");
+                    baliseOptionGroupe.value = sousGrp.name;
+                    baliseOptionGroupe.innerHTML = sousGrp.name;
+                    baliseSelectGroupe.appendChild(baliseOptionGroupe);
+                }
+                baliseSelectGroupe.style.display = "inline-block";
+                baliseSelectGroupe.addEventListener("change", () => {
+                    displaySemester(valueSelected);
+                    document.getElementById('my-button').style.display = "none";
+                });
+                
+            }
+        }
+
+        function displaySemester(annee){
+            const baliseSelectSemestre = document.querySelector("#semestre");
+            baliseSelectSemestre.innerHTML = "";
+            const listContent = [];
+            switch (annee) {
+            case '':
+                return;
+            case '3A':
+                listContent.push("5", "6");
+                break;
+            case '4A':
+                listContent.push("7", "8");
+                break;
+            case '5A':
+                listContent.push("9");
+                break;
+            default:
+                break;
+            }
+
+            const baliseOptionEmpty = document.createElement("option");
+            baliseOptionEmpty.setAttribute("id", "emptyOption");
+            baliseSelectSemestre.appendChild(baliseOptionEmpty);
+            for (let i = 0 ; i < listContent.length ; i++){
+                let baliseOptionSemestre = document.createElement("option");
+                baliseOptionSemestre.value = listContent[i];
+                baliseOptionSemestre.innerHTML = listContent[i];
+                baliseSelectSemestre.appendChild(baliseOptionSemestre);
+            }
+            baliseSelectSemestre.style.display = "inline-block";
+            baliseSelectSemestre.addEventListener('change', () => {
+                document.getElementById('my-button').style.display = "block";
+            })
+        }
+
+        //partie appel route django pour créer et récup le excel
+        document.getElementById('my-button').addEventListener('click', function() {
+            const valueGroupe = document.querySelector("#groupe").value;
+            const valueAnnee = document.querySelector("#annee").value;
+            const valueSemestre = document.querySelector("#semestre").value;
+            fetch('/configuration/createExportExcel?groupe=' + valueGroupe+'&annee=' + valueAnnee + '&semestre=' + valueSemestre)
+            .then(t => t.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const baliseDL = document.querySelector("#linkToDL");
+                baliseDL.style.display = "block";
+                baliseDL.setAttribute("download", "EDTByFlop.xlsx");
+                baliseDL.setAttribute("href", url);
+                baliseDL.setAttribute("data", url);
+                baliseDL.addEventListener("click", () =>{
+                    baliseDL.style.display = "none";
+                })
+                const baliseContainer = document.querySelector("#containerLinkToDL");
+                baliseContainer.style.display = "block";
+                baliseDL.click();
+            })
+        });
+    </script>
+    
+{% endblock %}
