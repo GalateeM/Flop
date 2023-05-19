@@ -1,16 +1,24 @@
+
 <template>
+        <!--LE COMPOSANT APP EST LE PRINCIPALE C'EST LUI QUI APPELE LES AUTRES-->
   <div id="app">
+    
+    <!--Boutton pour accéder à l'ajout des cours-->
     <div id="add-course-button">
       <SimpleButton @click.native="popupVisible=true" value="Ajouter" color="#2A27D8" size="15px" />
     </div>
 
     <div id="Choice">
+
+      <!--FILTER are not implemented for the moment-->
       <div id="ChooseFilter">    
         <p>Filtre</p> 
         <button>Groupe</button>
         <button>Professeur</button>
         <button>Module</button>
       </div>
+
+      <!--Allow to choose the way to display (by teacher or by group)-->
       <div id="ChooseDisplay">
         <button :class="ShowGroupe ? 'active' : 'inactive'" @click="ShowGroupe = true; ShowProf = false;">Groupe</button>
         <button :class="ShowProf ? 'active' : 'inactive'" @click="ShowGroupe = false; ShowProf = true;">Professeur</button>
@@ -19,10 +27,14 @@
   
     </div>
 
+    <!--Buttons to change the weeks to dipslay-->
     <div class="button-container">
+           <!--If you want to change the gap when we click on one of the button : Change -2 and 2 in getlistWeek()--> 
       <button class="custom-button" @click="listeWeek = getlistWeek(-2)">&lt;</button>
       <button class="custom-button" @click="listeWeek = getlistWeek(2)">></button>
     </div>
+
+    <!--Creation of all the composants week to display-->
     <div class="weeks">
       <Week class="main" v-for="i in listeWeek" :key="i" :nbweek="i" :ShowGroupe="ShowGroupe" :ShowProf="ShowProf"></Week>
     </div>
@@ -48,14 +60,17 @@ export default {
 
   data() {
     return {
+      //ShowGroupe, ShowProf, popupVisible are booleans that permits to choose what is currently displaying
       ShowGroupe: false,
       ShowProf: false,
       popupVisible: false,
+      //listWeek is a list of number corresponding to all the week number to display. Ex: [19,20,21,22,23,24]
       listeWeek : []
     };
   },
 
   created(){
+    //Init of listeWeek
     setTimeout(() => {
       this.listeWeek = this.getlistWeek(0);
         }, 1000);
@@ -64,6 +79,7 @@ export default {
 
   methods :{
 
+    //Methods that allows to return the listWeek
     getlistWeek(delay){
       let currentWeek = 0;
 
@@ -78,6 +94,7 @@ export default {
 
 
       const weekList = [];
+      //If you want to display more week : change the stop limit condition
       for (let i = currentWeek - 4; i <= currentWeek + 1; i++) {
          weekList.push(i);
       }

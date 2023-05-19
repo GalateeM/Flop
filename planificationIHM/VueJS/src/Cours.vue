@@ -2,6 +2,8 @@
     <div class="Cours">
         
         <div class="affich" :style="cssVars" @click="showPopup = !showPopup"></div>
+
+        <!--Class Popup is only displaying when we click on a cours to have more information about this one-->
         <div class="popup" v-if="showPopup">
             <div class="info" >
                 <h2 class="Titre"> Module : {{ module }}</h2>
@@ -12,8 +14,10 @@
                 <p class="Date">Date : {{ date }}</p>
                 <button class="close-button" @click="showPopup = !showPopup">&times;</button>
             </div>
+            <!--This class is only use to add the blanck behing when we click on a Cours componant-->
             <div class="overlay"></div>
         </div>
+
     </div>
 </template>
 
@@ -36,6 +40,8 @@ export default{
         salle : String,
     },
     computed: {
+
+        //If you want to change the way to show a Cours (bigger, smaler ....)
         cssVars () {
             return{
                 /* variables you want to pass to css */

@@ -1,10 +1,15 @@
 <template>
+      <!--Componant Week that created Componant Groupe and Prof-->
+
     <div class="week" :id="nbweek">
         <p class="numberoftheweek">SEMAINE {{nbweek}}</p>
         <div class="theweek">
+            <!--if ShowGroupe = True : diplay, else not display
+            Even if ShowGroupe = False, the componants are created (they are just not diplaied)-->
             <div v-for="groupe in listeGroupe" class="ByGroup" v-if="ShowGroupe">
                 <Groupe :GroupeName="groupe" :nbweek="nbweek"></Groupe>
             </div>
+            <!--if ShowProf = True : diplay, else not display-->
             <div v-for="prof in listeProf"  class="ByProf" v-if="ShowProf" >
                 <Prof :ProfName="prof" :nbweek="nbweek"></Prof>
             </div>
@@ -33,6 +38,7 @@ export default{
 
     data(){
         return {
+            //Each list contains all the names of all the groups and prof
             listeGroupe: [""],
             listeProf: [""],
         }
@@ -45,7 +51,9 @@ export default{
     },
 
     methods:{
+        //This function : get the data and after organise it.
       async fetchData() {
+        //WARNING : The arguments Year and Dept are here. You have to change it ! 
         const courseData = await getCourse(this.nbweek,"2023","HES3");
         this.listeProf= getListeProf(courseData,this.nbweek);
         this.listeGroupe = getListeGroupe(courseData,this.nbweek);

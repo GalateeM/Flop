@@ -1,6 +1,8 @@
 <template>
+    <!--Componant Prof-->
     <div class="Prof" >
         <p class="ProfName" @mouseover="showFullGroupName"  @mouseout="hideFullGroupName">{{ProfName}}</p>
+        <!--Creation of all the Cours that corresponds to this Prof-->
         <div v-for="(cours, index) in listeCours" :key="index">
             <Cours :salle="cours.salle" :date="cours.day" :module="cours.titre" :prof="cours.prof" :groupe="cours.groupe" :heure="cours.heure" :duree="cours.duree" :color="cours.color" :nbCoursOnThisTime="cours.nbCoursOnThisTime"/>
         </div>
@@ -34,6 +36,7 @@ export default{
     },
     methods :{
     
+        //Function to Show the name of the prof. It useful when there is a lot of Prof/Groups
         showFullGroupName(event) {
             // Récupère le texte complet du groupe
             const fullGroupName = this.ProfName;

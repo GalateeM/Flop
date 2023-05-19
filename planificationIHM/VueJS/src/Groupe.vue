@@ -1,4 +1,5 @@
 <template>
+    <!--The comments are the same as Prof.vue-->
     <div class="Groupe">
         <p class="GroupeName" @mouseover="showFullGroupName" @mouseout="hideFullGroupName">{{GroupeName}}</p>
         <div v-for="(cours, index) in listeCours" :key="index">

@@ -134,12 +134,14 @@ export function getCoursByGroupe(GroupeName,NbWeek){
 }
 
 
-
+//Fonction qui renvoi le numero du jours dans la semaine a partir des initiales du jour
 function getDayNumber(day) {
   const daysOfWeek = ["su", "m", "tu", "w", "th", "f", "sa"];
   return daysOfWeek.indexOf(day);
 }
 
+
+//Fonction pour obtenir une date de type : "Vendredi 19 Mai 2023", a partir du jour de la semaine, l'année et le numéro de semaine)
 function getDateFromWeekdayYearWeek(dayOf, year, week) {
   const weekday = getDayNumber(dayOf);
   const date = new Date(year, 0, 1 + (week - 1) * 7);
@@ -150,7 +152,7 @@ function getDateFromWeekdayYearWeek(dayOf, year, week) {
   return date.toLocaleDateString("fr-FR", options);
 }
 
-
+//Modif du prototype Date de JS pour lui ajouter la fonction getWeek qui retourner le numero de semaine d'une date
 Date.prototype.getWeek = function() {
   const date = new Date(this.getTime());
   date.setHours(0, 0, 0, 0);
