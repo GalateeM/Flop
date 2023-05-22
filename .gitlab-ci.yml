@@ -193,33 +193,32 @@ install_pip_artifact:
 
   dependencies:
     - build_pip_artifact
-
-release:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  rules:
-    - if: $CI_COMMIT_TAG # Run this job when a tag is created
-  script:
-    - echo 'running release_job'
-    - echo 'Previous Job IDs are printed below'
-    - echo 'Focal: $FOCAL_BUILD_JOB_ID'
-    - echo 'Jammy: $JAMMY_BUILD_JOB_ID'
-    - echo 'Bullseye: $BULLSEYE_BUILD_JOB_ID'
-  needs:
-    - job: build_deb_package:focal
-      artifacts: true
-    - job: build_deb_package:jammy
-      artifacts: true
-    - job: build_deb_package:bullseye
-      artifacts: true
-  release:
-    name: "Release Executables $CI_COMMIT_TAG"
-    description: "Created using the release-cli"
-    # tag_name is a mendatory field and can not be an empty string
-    tag_name: "$CI_COMMIT_TAG"
-    assets:
-      links:
-        - name: "Focal debian package"
-          url: "https://framagit.org/flopedt/FlOpEDT/-/jobs/${FOCAL_BUILD_JOB_ID}/artifacts/raw/flopedt_${CI_COMMIT_TAG}_amd64.deb"
-  # only:
-  #   - main
+# release:
+#   stage: release
+#   image: registry.gitlab.com/gitlab-org/release-cli:latest
+#   rules:
+#     - if: $CI_COMMIT_TAG # Run this job when a tag is created
+#   script:
+#     - echo 'running release_job'
+#     - echo 'Previous Job IDs are printed below'
+#     - echo 'Focal: $FOCAL_BUILD_JOB_ID'
+#     - echo 'Jammy: $JAMMY_BUILD_JOB_ID'
+#     - echo 'Bullseye: $BULLSEYE_BUILD_JOB_ID'
+#   needs:
+#     - job: build_deb_package:focal
+#       artifacts: true
+#     - job: build_deb_package:jammy
+#       artifacts: true
+#     - job: build_deb_package:bullseye
+#       artifacts: true
+#   release:
+#     name: "Release Executables $CI_COMMIT_TAG"
+#     description: "Created using the release-cli"
+#     # tag_name is a mendatory field and can not be an empty string
+#     tag_name: "$CI_COMMIT_TAG"
+#     assets:
+#       links:
+#         - name: "Focal debian package"
+#           url: "https://framagit.org/flopedt/FlOpEDT/-/jobs/${FOCAL_BUILD_JOB_ID}/artifacts/raw/flopedt_${CI_COMMIT_TAG}_amd64.deb"
+# only:
+#   - main
