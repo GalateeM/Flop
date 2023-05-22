@@ -2,8 +2,7 @@
 <template>
         <!--LE COMPOSANT APP EST LE PRINCIPALE C'EST LUI QUI APPELE LES AUTRES-->
   <div id="app">
-    
-    <!--Boutton pour accéder à l'ajout des cours-->
+    <!-- Bouton pour créer un cours -->
     <div id="add-course-button">
       <SimpleButton @click.native="popupVisible=true" value="Ajouter" color="#2A27D8" size="15px" />
     </div>
@@ -33,12 +32,13 @@
       <button class="custom-button" @click="listeWeek = getlistWeek(-2)">&lt;</button>
       <button class="custom-button" @click="listeWeek = getlistWeek(2)">></button>
     </div>
-
+    
     <!--Creation of all the composants week to display-->
     <div class="weeks">
       <Week class="main" v-for="i in listeWeek" :key="i" :nbweek="i" :ShowGroupe="ShowGroupe" :ShowProf="ShowProf"></Week>
     </div>
 
+    <!-- Afficher le popup d'ajout de cours si la varibale popupVisible est vraie -->
     <PopupAddCourses v-if="popupVisible" />
   </div>
 </template>

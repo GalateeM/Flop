@@ -19,6 +19,8 @@ export default {
     },
     data() {
         return {
+            // si  edit est différent de -1 alors on sélectionne la semaine si c'est le cas et on mets le bon nombre de cours 
+
             selected: this.$parent.edit == -1 ? false : Object.keys(this.$parent.savedCourses[this.$parent.edit].weeks).includes(this.number.toString()),
             courses: this.$parent.edit == -1 || !this.$parent.savedCourses[this.$parent.edit].weeks[this.number] ? 0 : this.$parent.savedCourses[this.$parent.edit].weeks[this.number]        }
     },

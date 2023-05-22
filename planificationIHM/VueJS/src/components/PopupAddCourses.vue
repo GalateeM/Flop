@@ -7,6 +7,7 @@
             <div class="container">
                 <div v-if="homeScreen">
                     <li v-for="(course, key) in savedCourses" :key="key" class="vertical-list">
+                        <!-- Affiche chaque cours enegistré -->
                         <HorizontalBanner :value="resumeCourse(savedCourses[key])" color="#2A27D8"
                             @delete="savedCourses.splice(key, 1)" @edit="editCourse(key)" />
                     </li>
@@ -18,11 +19,13 @@
                 <div v-else>
                     <div id="week-numbers">
                         <li v-for="week in weeks" :key="week" class="horizontal-list">
+                            <!-- Enregistre la semaine ou la supprime si le nomnbre de cours est égale à 0 -->
                             <WeekNumber :number=week
                                 @value="v => v > 0 ? $set(course.weeks, week, v) : $delete(course.weeks, week)" />
                         </li>
                     </div>
                     <div id="forms">
+                        <!-- SimpleInput pour les choix uniques et MultipleInput pour les choix multiples -->
                         <SimpleInput class="form-element" label="Module" :options="modules" edit="module"
                             @value="v => $set(course, 'module', v)" />
                         <MultipleInput class="form-element" label="Groupe(s)" :options="groups" edit="groups"
@@ -69,6 +72,7 @@ export default {
     },
     data() {
         return {
+            //Liste des routes d'api pour récupérer les informations nécessaires
             routes: {
                 "modules": "courses/module/",
                 "teachers": "fetch/idtutor",
@@ -90,6 +94,7 @@ export default {
             this.homeScreen = show;
         },
         saveCourse() {
+            //Ajoute le cours actuel dans la liste des cours enregistrés
             if (this.edit === -1) this.savedCourses.push(this.course);
             else this.savedCourses[this.edit] = this.course
             this.setHomeScreen(true);
@@ -99,15 +104,18 @@ export default {
             this.edit = -1;
         },
         editCourse(key) {
+            //Passe en mode modification en indiquant key comme la position du cours dans la liste
             this.course = this.savedCourses[key];
             this.edit = key;
             this.setHomeScreen(false);
         },
         optionsToString(ids, options) {
+            //Convertit une liste d'id en string avec les name
             return ids.map(id => options.find(o => o.id == id).name).join(", ");
         },
         resumeCourse(course) {
-            //TODO: change 90 by real data
+            //Créé un résumé du cours à partir des informations de ce dernier
+            //TODO: Changer la valeur 90 par la durée réelle du cours à partir du type de cours en utilisant l'API
             let minutes = Object.values(course.weeks).reduce((a, b) => a + b, 0) * 90;
             let time = Math.floor(minutes / 60) + "h" + ((minutes % 60) >= 10 ? (minutes % 60) : "0" + (minutes % 60));
             let weeks = Object.keys(course.weeks).join(", ");
@@ -124,6 +132,7 @@ export default {
             return data;
         },
         fetchAllData(dept, apiUrl, routes) {
+            //Récupère toutes les informations à partir de la liste de route
             let data = [];
             Object.keys(routes).forEach(async key => {
                 data.push(this.fetchJson(apiUrl + routes[key] + "?dept=" + dept));
@@ -140,12 +149,7 @@ export default {
             this.groups = res[Object.keys(this.routes).indexOf("groups")].map(e => { return { "id": e.id, "name": e.name } });
             this.courseTypes = res[Object.keys(this.routes).indexOf("courseTypes")];
             this.roomTypes = res[Object.keys(this.routes).indexOf("roomTypes")];
-        })/*
-        this.modules = data.modules.map(e => { return { "id": e.abbrev, "name": e.name } });
-        this.teachers = data.teachers;
-        this.groups = data.groups.map(e => { return { "id": e.id, "name": e.name } });
-        this.courseTypes = data.courseTypes;
-        this.roomTypes = data.roomTypes;*/
+        })
     }
 }
 </script>

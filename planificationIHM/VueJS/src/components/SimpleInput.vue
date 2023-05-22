@@ -2,7 +2,10 @@
     <div>
         <label for="select">{{ label }}</label>
         <select name="select" @change="$emit('value', $event.target.value)">
+            <!-- si edit est différent de -1 alors on sélectionne les éléments qui correspondent au cours modifié -->
             <option :selected="$parent.edit == -1"></option>
+
+            <!-- options doit être au format [{id: id, name: name }, ...] -->
             <option v-for="option in options" :key="option.id" :value="option.id"
                 :selected="$parent.edit != -1 && option.id == $parent.savedCourses[$parent.edit][edit]">{{ option.name }}</option>
         </select>

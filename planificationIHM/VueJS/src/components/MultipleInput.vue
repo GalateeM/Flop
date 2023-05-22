@@ -1,12 +1,18 @@
 <template>
     <div>
         <label for="select">{{ label }}</label>
+        
+        <!-- Le premier select correspond au menu "fermeé" -->
         <select v-show="small" @click="$event => small = false">
             <option selected disabled>{{ optionsToString() }}</option>
         </select>
+
+        <!-- Le deuxième select correspond au menu "ouvert" qui s'affiche au clic et se ferme en cliquant en dehors -->
         <select class="unwrapped" name="select" multiple size="6" v-if="!small" v-click-outside="$event => small = true"
             v-model="selectedOptions" @change="$emit('value', selectedOptions)">
             <option disabled class="help">ctrl/cmd + clic</option>
+
+            <!-- options doit être au format [{id: id, name: name }, ...] -->
             <option v-for="option in options" :key="option.id" :value="option.id" :selected="option.id == 'a'">{{
                 option.name
             }}</option>
