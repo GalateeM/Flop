@@ -202,16 +202,16 @@ release:
   script:
     - echo 'running release_job'
     - echo 'Previous Job IDs are printed below'
-    - echo "Focal: $FOCAL_BUILD_JOB_ID"
-    - echo "Jammy: $JAMMY_BUILD_JOB_ID"
-    - echo "Bullseye: $BULLSEYE_BUILD_JOB_ID"
-  # needs:
-  #   - job: build_deb_package:focal
-  #     artifacts: true
-  #   - job: build_deb_package:jammy
-  #     artifacts: true
-  #   - job: build_deb_package:bullseye
-  #     artifacts: true
+    - 'echo "Focal: $FOCAL_BUILD_JOB_ID"'
+    - 'echo "Jammy: $JAMMY_BUILD_JOB_ID"'
+    - 'echo "Bullseye: $BULLSEYE_BUILD_JOB_ID"'
+  needs:
+    - job: build_deb_package:focal
+      artifacts: true
+    - job: build_deb_package:jammy
+      artifacts: true
+    - job: build_deb_package:bullseye
+      artifacts: true
 #   release:
 #     name: "Release Executables $CI_COMMIT_TAG"
 #     description: "Created using the release-cli"
