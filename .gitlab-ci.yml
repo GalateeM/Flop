@@ -21,10 +21,10 @@ build_pip_artifact:
   stage: build
 
   before_script:
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
-  - apt update && apt install python3-pip -y
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - apt update && apt install python3-pip -y
 
   script:
     - pip3 install --upgrade build wheel
@@ -32,6 +32,7 @@ build_pip_artifact:
   artifacts:
     paths:
       - dist/*.tar.gz
+
 build_deb_package:focal:
   cache: []
   image: ubuntu:focal
@@ -175,13 +176,13 @@ install_pip_artifact:
     POSTGRES_PASSWORD: "flop"
     POSTGRES_HOST: "postgres"
     POSTGRES_PORT: 5432
-  
+
   before_script:
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
-  - apt update && apt install python3-pip -y
-  
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - apt update && apt install python3-pip -y
+
   script:
     - pip install dist/FlOpEDT*.tar.gz
     - mkdir -p /var/flopedt/{tmp,cache}
