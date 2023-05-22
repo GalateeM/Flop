@@ -15,6 +15,7 @@ cache:
 stages:
   - build
   - deploy
+  - release
 
 build_pip_artifact:
   stage: build
@@ -36,6 +37,7 @@ build_deb_package:focal:
   image: ubuntu:focal
   stage: build
   script:
+    - echo FOCAL_BUILD_JOB_ID=$CI_JOB_ID >> focal.env
     - apt update
     - DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
     - apt install debhelper build-essential virtualenv python3-venv python3-pip libpq-dev libpython3-dev wget -y
@@ -45,12 +47,15 @@ build_deb_package:focal:
   artifacts:
     paths:
       - ./*.deb
+    reports:
+      dotenv: focal.env
 
 build_deb_package:jammy:
   cache: []
   image: ubuntu:jammy
   stage: build
   script:
+    - echo JAMMY_BUILD_JOB_ID=$CI_JOB_ID >> jammy.env
     - apt update
     - DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
     - apt install debhelper build-essential virtualenv python3-venv python3-pip libpq-dev libpython3-dev wget -y
@@ -60,12 +65,15 @@ build_deb_package:jammy:
   artifacts:
     paths:
       - ./*.deb
+    reports:
+      dotenv: jammy.env
 
 build_deb_package:bullseye:
   cache: []
   image: debian:bullseye
   stage: build
   script:
+    - echo BULLSEYE_BUILD_JOB_ID=$CI_JOB_ID >> bullseye.env
     - apt update
     - DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
     - apt install debhelper build-essential virtualenv python3-venv python3-pip libpq-dev libpython3-dev wget -y
@@ -75,6 +83,8 @@ build_deb_package:bullseye:
   artifacts:
     paths:
       - ./*.deb
+    reports:
+      dotenv: bullseye.env
 
 install_deb_package:focal:
   cache: []
@@ -182,3 +192,33 @@ install_pip_artifact:
 
   dependencies:
     - build_pip_artifact
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG # Run this job when a tag is created
+  script:
+    - echo 'running release_job'
+    - echo 'Previous Job IDs are printed below'
+    - echo 'Focal: $FOCAL_BUILD_JOB_ID'
+    - echo 'Jammy: $JAMMY_BUILD_JOB_ID'
+    - echo 'Bullseye: $BULLSEYE_BUILD_JOB_ID'
+  needs:
+    - job: build_deb_package:focal
+      artifacts: true
+    - job: build_deb_package:jammy
+      artifacts: true
+    - job: build_deb_package:bullseye
+      artifacts: true
+  release:
+    name: "Release Executables $CI_COMMIT_TAG"
+    description: "Created using the release-cli"
+    # tag_name is a mendatory field and can not be an empty string
+    tag_name: "$CI_COMMIT_TAG"
+    assets:
+      links:
+        - name: "Focal debian package"
+          url: "https://framagit.org/flopedt/FlOpEDT/-/jobs/${FOCAL_BUILD_JOB_ID}/artifacts/raw/flopedt_${CI_COMMIT_TAG}_amd64.deb"
+  # only:
+  #   - main
