@@ -202,9 +202,9 @@ release:
   script:
     - echo 'running release_job'
     - echo 'Previous Job IDs are printed below'
-    - echo 'Focal: $FOCAL_BUILD_JOB_ID'
-    - echo 'Jammy: $JAMMY_BUILD_JOB_ID'
-    - echo 'Bullseye: $BULLSEYE_BUILD_JOB_ID'
+    - echo "Focal: $FOCAL_BUILD_JOB_ID"
+    - echo "Jammy: $JAMMY_BUILD_JOB_ID"
+    - echo "Bullseye: $BULLSEYE_BUILD_JOB_ID"
   needs:
     - job: build_deb_package:focal
       artifacts: true
