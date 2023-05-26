@@ -21,7 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from . import views
 from django.views.generic import RedirectView
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -31,10 +31,10 @@ app_name="quote"
 urlpatterns = [
     # directly reachable by users
     # ----------------------------
-    url(r'^proposer$', views.submit, name="submission"),
+    re_path(r'^proposer$', views.submit, name="submission"),
     # url(r'^moderer$', views.moderate, name="moderation"),
     # fetch 
     # ----------------------------
-    url(r'^fetch_all$', views.fetch_all_quotes, name="fetch_all_quotes")
+    re_path(r'^fetch_all$', views.fetch_all_quotes, name="fetch_all_quotes")
     
 ]

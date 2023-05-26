@@ -1568,6 +1568,20 @@ def send_email_proposal(req, **kwargs):
 
 # </editor-fold desc="EMAILS">
 
+def send_email_test(req):
+    print('envoi du mail')
+    # subject = 'Sujet du mail de test'
+    # msg = "Bonjour, ceci est un mail de test"
+    # email = EmailMessage(
+    #     subject,
+    #     msg,
+    #     to='galatee.m@gmail.com',
+    #     reply_to='galatee.marcq@etu.univ-tlse2.fr'
+    # )
+    # logger.info(email)
+    # email.send()
+
+
 
 # <editor-fold desc="VISIO">
 # ---------

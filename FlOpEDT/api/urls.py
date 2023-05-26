@@ -21,7 +21,7 @@
 # you develop activities involving the FlOpEDT/FlOpScheduler software
 # without disclosing the source code of your own applications.
 
-from django.conf.urls import include, url
+from django.urls import include, re_path
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 from django.views.generic import TemplateView
@@ -86,18 +86,18 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    url(r'^$', views_base.LoginView.as_view(), name='api_root'),
-    url(r'^logout/$', views_base.LogoutView.as_view()),
-    url(r'^backoffice/$', login_required(TemplateView.as_view(template_name='logout.html'))),
+    re_path(r'^$', views_base.LoginView.as_view(), name='api_root'),
+    re_path(r'^logout/$', views_base.LogoutView.as_view()),
+    re_path(r'^backoffice/$', login_required(TemplateView.as_view(template_name='logout.html'))),
     path('base/', include((routerBase.urls, 'api'), namespace='base')),
     path('user/', include((routerPeople.urls, 'api'), namespace="people")),
     path('display/', include(routerDisplayweb.urls)),
     path('ttapp/', include((routerTTapp.urls, 'api'), namespace='ttapp')),
     path('fetch/',
          include((routerFetch.urls, 'api'), namespace='fetch')),
-    path('rest-auth/', include('rest_auth.urls')),
+   # path('rest-auth/', include('rest_auth.urls')),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-    url('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('doc/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('preferences/', include(routerPreferences.urls)),
     path('rooms/',
          include((routerRooms.urls, 'api'), namespace='rooms')),

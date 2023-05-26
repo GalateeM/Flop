@@ -37,7 +37,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.conf import settings
 from django.urls import path, re_path
 from django.contrib import admin
@@ -59,7 +59,7 @@ urlpatterns = [
 
     # favicon
     # ----------------------------
-    url(views.fav_regexp,
+    path(views.fav_regexp,
         views.favicon,
         name="favicon"),
     re_path(r'^$', views.index, name='index')
@@ -88,7 +88,7 @@ urlpatterns += i18n_patterns(
     re_path(r'^cstmanager/', include('cstmanager.urls')),
     path('api/', include('api.urls')),
     re_path(r'^roomreservation/(?P<department>[a-zA-Z]\w{0,6})/', include('roomreservation.urls')),
-    url(r'^.well-known/acme-challenge/', include('acme_challenge.urls')),
+    re_path(r'^.well-known/acme-challenge/', include('acme_challenge.urls')),
 )
 
 if settings.DEBUG:
