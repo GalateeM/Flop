@@ -18,6 +18,7 @@ class RoomReservation(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     periodicity = models.ForeignKey("ReservationPeriodicity", null=True, blank=True, on_delete=models.SET_NULL)
+    isValidated = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.room}-{self.date}  {self.start_time}/{self.end_time}"
@@ -102,14 +103,3 @@ class ReservationPeriodicityByMonth(ReservationPeriodicity):
     def save(self, **kwargs):
         self.periodicity_type = 'BM'
         super(ReservationPeriodicity, self).save(**kwargs)
-
-
-class RoomReservationValidationEmail(models.Model):
-    room = models.OneToOneField('base.Room', on_delete=models.CASCADE)
-    validators = models.ManyToManyField('people.User', null=True, on_delete=models.CASCADE, blank=True)
-
-# Contains a room reservation request
-class RoomReservationRequest(models.Model) :
-    room = models.ForeignKey('base.Room', on_delete=models.CASCADE)
-    asker = models.ForeignKey('people.User', on_delete=models.CASCADE, null=True, blank=True)
-    date = models.DateField()
