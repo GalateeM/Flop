@@ -1336,7 +1336,7 @@ onMounted(() => {
             currentUserId = data.user_id
         }
         if ('accept' in data && data.accept==true) {
-
+            console.log("ici");
         }
     }
     departmentStore.remote.fetch().then((value) => {
