@@ -8,3 +8,9 @@ def RoomReservationsView(request, **kwargs):
     db_data = {'dept': request.department.abbrev, 'api': reverse('api:api_root'),
                'user_id': request.user.id}
     return render(request, 'roomreservation/index.html', {'json_data': db_data})
+
+def RoomReservationAccept(request, **kwargs):
+    db_data = {'dept': request.department.abbrev, 'api': reverse('api:api_root'),
+               'user_id': request.user.id, 'accept':True}
+    return render(request, 'roomreservation/index.html', {'json_data': db_data})
+
