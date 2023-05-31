@@ -105,10 +105,11 @@ class ReservationPeriodicityByMonth(ReservationPeriodicity):
 
 
 class RoomReservationValidationEmail(models.Model):
-    room = models.OneToOneField('base.Room', models.CASCADE)
-    validators = models.ManyToManyField('people.User')
+    room = models.OneToOneField('base.Room', on_delete=models.CASCADE)
+    validators = models.ManyToManyField('people.User', null=True, on_delete=models.CASCADE, blank=True)
 
 # Contains a room reservation request
 class RoomReservationRequest(models.Model) :
-    room = models.ForeignKey('base.Room', models.CASCADE)
+    room = models.ForeignKey('base.Room', on_delete=models.CASCADE)
+    asker = models.ForeignKey('people.User', on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField()
