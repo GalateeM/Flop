@@ -363,30 +363,37 @@ CACHES = {
 }
 
 # EMAIL SETTINGS
-EMAIL_SUBJECT_PREFIX = '[flop!EDT] '
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'test.mailflop@gmail.com'
+EMAIL_HOST_PASSWORD = 'kjbifhwqfwshkatt' #past the key or password app here
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'default from email'
+# EMAIL_SUBJECT_PREFIX = '[flop!EDT] '
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-try:
-    EMAIL_HOST = flop_config['email']['email_host']
-except KeyError:
-    print("WARNING - email_host is not configured. Mail sending won't work")
-try:
-    EMAIL_PORT = flop_config['email']['email_port']
-except KeyError:
-    print("WARNING - email_port is not configured. Mail sending won't work")
-try:
-    EMAIL_USE_SSL=bool(flop_config['email']['email_use_ssl'])
-except KeyError:
-    print("WARNING - email_use_ssl is not configured. SSL Email sending disabled")
-    EMAIL_USE_SSL = False
-try:
-    EMAIL_HOST_USER = flop_config['email']['email_user']
-except KeyError:
-    print("WARNING - email_user is not configured. Mail sending won't working if your email server requires authentication.")
-try:
-    EMAIL_HOST_PASSWORD = flop_config['email']['email_password']
-except KeyError:
-    print("WARNING - email_password is not configured. Mail sending won't working if your email server requires authentication.")
+# try:
+#     EMAIL_HOST = flop_config['email']['email_host']
+# except KeyError:
+#     print("WARNING - email_host is not configured. Mail sending won't work")
+# try:
+#     EMAIL_PORT = flop_config['email']['email_port']
+# except KeyError:
+#     print("WARNING - email_port is not configured. Mail sending won't work")
+# try:
+#     EMAIL_USE_SSL=bool(flop_config['email']['email_use_ssl'])
+# except KeyError:
+#     print("WARNING - email_use_ssl is not configured. SSL Email sending disabled")
+#     EMAIL_USE_SSL = False
+# try:
+#     EMAIL_HOST_USER = flop_config['email']['email_user']
+# except KeyError:
+#     print("WARNING - email_user is not configured. Mail sending won't working if your email server requires authentication.")
+# try:
+#     EMAIL_HOST_PASSWORD = flop_config['email']['email_password']
+# except KeyError:
+#     print("WARNING - email_password is not configured. Mail sending won't working if your email server requires authentication.")
 
 # Logging settings
 try:

@@ -55,7 +55,7 @@ urlpatterns = [
     re_path(r'^modules$', views.all_modules_with_desc, name="modules"),
     #Send Email to teacher when student want modify schedule
     re_path(r'^email-modif$', views.send_email_proposal, name='email-proposal'),
-    path('email_test', views.send_email_test, name='send_email_test'),
+    re_path(r'^email_room_reservation$', views.send_email_room_reservation, name='send_email_room_reservation'),
 
     # exchanges with the db via django
     # ---------------------------------

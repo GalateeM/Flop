@@ -1496,10 +1496,9 @@ def contact(req, tutor=None, **kwargs):
 def send_email_proposal(req, **kwargs):
     bad_response = {'status': 'KO', 'more': ''}
     good_response = {'status': 'OK', 'more': ''}
-
-    if not req.is_ajax():
-        bad_response['more'] = "Non ajax"
-        return JsonResponse(bad_response)
+    # if not req.is_ajax():
+    #     bad_response['more'] = "Non ajax"
+    #     return JsonResponse(bad_response)
 
     if req.method != "POST":
         bad_response['more'] = "Non POST"
@@ -1559,27 +1558,52 @@ def send_email_proposal(req, **kwargs):
                 reply_to=reply_to_list
             )
             logger.info(email)
-            # email.send()
+            #email.send()
         except Exception:
             bad_response['more'] = 'Envoi du mail impossible !'
             return JsonResponse(bad_response)
 
     return JsonResponse(good_response)
 
-# </editor-fold desc="EMAILS">
 
-def send_email_test(req):
-    print('envoi du mail')
-    # subject = 'Sujet du mail de test'
-    # msg = "Bonjour, ceci est un mail de test"
-    # email = EmailMessage(
-    #     subject,
-    #     msg,
-    #     to='galatee.m@gmail.com',
-    #     reply_to='galatee.marcq@etu.univ-tlse2.fr'
-    # )
-    # logger.info(email)
-    # email.send()
+def send_email_room_reservation(req, **kwargs):
+    bad_response = {'status': 'KO', 'more': ''}
+    good_response = {'status': 'OK', 'more': ''}
+    initiator = User.objects.get(username=req.user.username)
+    salle = json.loads(req.POST.get('salle'))
+    date = json.loads(req.POST.get('date'))
+    iswholeday = json.loads(req.POST.get('wholeday'))
+    title = json.loads(req.POST.get('title'))
+    description = json.loads(req.POST.get('description'))
+
+    msg = f'<p>Bonjour,<br> {initiator.first_name} {initiator.last_name} a fait une demande de réservation de salle : <br>'
+    msg += 'Salle : '+ salle + "<br>"
+    msg += 'Horaire : '+ date
+
+    if(iswholeday=='True'):
+        msg += ' - Journée entière<br>'
+    else:
+        start_time = json.loads(req.POST.get('starttime'))
+        end_time = json.loads(req.POST.get('endtime'))
+        msg += ' de ' + start_time + " à " + end_time + "<br>"
+    
+    msg += title + "<br>"
+    msg += description + "<br></p>"
+
+    msg += "<a href='http://localhost:8000/fr/roomreservation/INFO/accept'>Accepter</a> \t\t"
+    msg += "<a href='http://localhost:8000'>Refuser</a>"
+
+    email = EmailMessage(
+        '[flop!EDT] Demande de réservation de salle',
+        msg,
+        to=('galatee.m@gmail.com',),
+        reply_to=('galatee.marcq@etu.univ-tlse2.fr',)
+    )
+    logger.info(email)
+    print(email.to)
+    email.content_subtype = "html"
+    email.send()
+    return JsonResponse(good_response)
 
 
 
