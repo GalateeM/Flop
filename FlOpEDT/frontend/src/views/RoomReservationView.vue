@@ -1335,6 +1335,9 @@ onMounted(() => {
         if ('user_id' in data) {
             currentUserId = data.user_id
         }
+        if ('accept' in data && data.accept==true) {
+
+        }
     }
     departmentStore.remote.fetch().then((value) => {
         // Select the current department by default
