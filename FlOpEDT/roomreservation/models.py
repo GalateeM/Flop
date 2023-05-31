@@ -18,7 +18,6 @@ class RoomReservation(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     periodicity = models.ForeignKey("ReservationPeriodicity", null=True, blank=True, on_delete=models.SET_NULL)
-    isValidated = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.room}-{self.date}  {self.start_time}/{self.end_time}"
