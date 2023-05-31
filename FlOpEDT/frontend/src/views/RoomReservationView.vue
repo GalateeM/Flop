@@ -881,7 +881,7 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         dayEnd: dayFinishTime.value,
         title: reservation.title,
         id: `roomreservation-${reservation.id}`,
-        displayStyle: { background: backgroundColor },
+        displayStyle: { background: 'rgba(255,255,0,0.27)', borderColor: 'rgba(255,255,0,0.27)' },
         onPeriodicityDelete: () => {
             if (!reservation.periodicity) {
                 return Promise.resolve()
