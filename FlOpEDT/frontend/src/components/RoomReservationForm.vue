@@ -345,6 +345,8 @@
 
 <script setup lang="ts">
 import { convertDecimalTimeToHuman, parseReason } from '@/helpers'
+    
+import $ from 'jquery'
 import { apiKey, requireInjection } from '@/assets/js/keys'
 import type {
     FormInterface,
@@ -367,7 +369,7 @@ import { computed, ComputedRef, defineProps, Ref, ref, watch, watchEffect } from
 import PeriodicitySelect from '@/components/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import type { Room } from '@/stores/room'
-import $ from 'jquery'
+
 
 interface Emits {
     (e: 'saved', reservation: RoomReservation): void
@@ -713,6 +715,7 @@ function extractPeriodicity(): ReservationPeriodicityData | null {
     return periodicityToUpdate
 }
 
+
 function saveReservation(createRepetitions = false) {
     const newPeriodicityData = extractPeriodicity()
     const newPeriodicity = newPeriodicityData
@@ -735,14 +738,14 @@ function saveReservation(createRepetitions = false) {
         create_repetitions: createRepetitions,
     }
 
-    let url_request = "{% url "RoomReservation:roomreservationrequest" department %}"
 
-    $.ajax({
+
+   $.ajax({
         method : "POST",
-        url : url_request,
+        url : "request/",
         dataType : "JSON",
         data : obj
-    })
+    }) 
 
     /*const method = props.isNew ? api.post : api.put
     method
