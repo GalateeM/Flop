@@ -1353,8 +1353,16 @@ onMounted(() => {
         if ('user_id' in data) {
             currentUserId = data.user_id
         }
-        if ('accept' in data && data.accept == true) {
+        if ('accept' in data) {
             isDialogOpen.value = true
+            if(data.accept == true) {
+                console.log("oui")
+                //message si premiere validatin
+                //message autre si deuxieme
+            } else {
+                //message reservation refusee
+                console.log("non")
+            }
         }
     }
     departmentStore.remote.fetch().then((value) => {
