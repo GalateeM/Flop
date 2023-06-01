@@ -18,7 +18,7 @@ from api.shared.params import week_param, year_param
                       ])
                   )
 class RoomReservationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrReadOnly]
+    #permission_classes = [IsAdminOrReadOnly]
     serializer_class = serializers.RoomReservationSerializer
 
     def get_queryset(self):

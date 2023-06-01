@@ -65,7 +65,6 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     ScheduledCourseAdditional, GroupPreferredLinks, Week, Theme, CourseAdditional
 import base.queries as queries
 from base.weeks import *
-import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -1567,45 +1566,6 @@ def send_email_proposal(req, **kwargs):
     return JsonResponse(good_response)
 
 
-def send_email_room_reservation(req, **kwargs):
-    bad_response = {'status': 'KO', 'more': ''}
-    good_response = {'status': 'OK', 'more': ''}
-    initiator = User.objects.get(username=req.user.username)
-    salle = json.loads(req.POST.get('salle'))
-    date = json.loads(req.POST.get('date'))
-    iswholeday = json.loads(req.POST.get('wholeday'))
-    title = json.loads(req.POST.get('title'))
-    description = json.loads(req.POST.get('description'))
-    generated_uuid = uuid.uuid4()
-
-    msg = f'<p>Bonjour,<br> {initiator.first_name} {initiator.last_name} a fait une demande de réservation de salle : <br>'
-    msg += 'Salle : '+ salle + "<br>"
-    msg += 'Horaire : '+ date
-
-    if(iswholeday=='True'):
-        msg += ' - Journée entière<br>'
-    else:
-        start_time = json.loads(req.POST.get('starttime'))
-        end_time = json.loads(req.POST.get('endtime'))
-        msg += ' de ' + start_time + " à " + end_time + "<br>"
-    
-    msg += title + "<br>"
-    msg += description + "<br></p>"
-
-    msg += "<a href='http://localhost:8000/fr/roomreservation/INFO/accept/"+str(generated_uuid)+"'>Accepter</a> \t\t"
-    msg += "<a href='http://localhost:8000'>Refuser</a>"
-
-    email = EmailMessage(
-        '[flop!EDT] Demande de réservation de salle',
-        msg,
-        to=('galatee.m@gmail.com',),
-        reply_to=('galatee.marcq@etu.univ-tlse2.fr',)
-    )
-    logger.info(email)
-    print(email.to)
-    email.content_subtype = "html"
-    email.send()
-    return JsonResponse(good_response)
 
 
 

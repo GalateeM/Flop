@@ -88,7 +88,6 @@
     var url_fetch_shared_rooms = "{% url 'base:fetch_shared_rooms' department 0 0 %}" ;
     url_fetch_shared_rooms = url_fetch_shared_rooms.slice(0, -3) ;
     var url_mail_auto = "{% url "base:email-proposal" department %}";
-    var url_mail_room_reservation = "{% url "base:send_email_room_reservation" department %}";
     var url_game = "{% url 'easter_egg:start_game' %}" ;
   var url_colors = "{% url 'displayweb:fetch_colors' department %}" ;
   var url_group_lunch = "{% url 'TTapp:fetch_group_lunch' department %}" ;
@@ -141,38 +140,5 @@
 <script type='text/javascript' src="{% static 'base/update.js' %}?2"></script>
 
 {% block script_file %}{% endblock %}
-
-<button onclick="myFunction()">Click me</button>
-<script>
-  function myFunction() {
-    var sent_data = {};
-  sent_data['salle'] = JSON.stringify('Amphi1');
-  sent_data['date'] = JSON.stringify('29-05-2023');
-  sent_data['wholeday'] = JSON.stringify('False');
-  sent_data['title'] = JSON.stringify('Cours de Maths');
-  sent_data['description'] = JSON.stringify('algorithmique comme cours');
-  sent_data['starttime'] = JSON.stringify('08:00');
-  sent_data['endtime'] = JSON.stringify('09:00');
-  
-
-  $.ajax({
-    url: url_mail_room_reservation,
-    type: 'POST',
-    data: sent_data,
-    dataType: 'json',
-    success: function (msg) {
-      console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
-      console.log(msg);
-      mail_ack(msg);
-    },
-    error: function (msg) {
-      console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
-      console.log(msg);
-      mail_ack(msg);
-    }
-  });
-  }
-  
-</script>
 
 {% endblock %}

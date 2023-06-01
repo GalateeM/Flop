@@ -751,37 +751,10 @@ function saveReservation(createRepetitions = false) {
         title: title.value,
         reservation_type: selectedType.value,
         create_repetitions: createRepetitions,
+        url_context:window.location.href,
     }
-
     
-    const csrfToken = getCookie('csrftoken');
-
-    console.log(JSON.stringify(obj))
-
-
-   $.ajax({
-        method : "POST",
-        url : "request/",
-        dataType : "JSON",
-        data : obj,
-        headers: {
-            'X-CSRFToken': csrfToken,
-        },
-        success: function (msg) {
-            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
-            console.log(msg);
-            isFormOpen.value = false
-        },
-        error: function (msg) {
-            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
-            console.log(msg);
-
-        }
-    });
-    
-    
-
-    /*const method = props.isNew ? api.post : api.put
+    const method = props.isNew ? api.post : api.put
     method
         .roomReservation(obj)
         .then(
@@ -829,7 +802,9 @@ function saveReservation(createRepetitions = false) {
                 }
             }
         )
-        .catch((reason) => handleReason(reason))*/
+        .catch((reason) => handleReason(reason))
+
+    
 }
 
 function removePeriodicity() {

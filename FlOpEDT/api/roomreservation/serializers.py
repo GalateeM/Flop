@@ -9,7 +9,13 @@ import roomreservation.models as rm
 from roomreservation.check_periodicity import check_periodicity, check_reservation
 
 from django.core.mail import EmailMessage
+
+import uuid
+from datetime import datetime
+
 import base.models as bm
+from base.models import Room
+from people.models import User
 
 
 class PeriodicityField(serializers.Field):
@@ -144,8 +150,11 @@ def check_reservation_possible(reservation):
 class RoomReservationSerializer(serializers.ModelSerializer):
     periodicity = ReservationPeriodicitySerializer(allow_null=True)
     create_repetitions = serializers.BooleanField(write_only=True, default=False)
+    url_context = serializers.URLField(write_only=True)
 
     def create(self, validated_data):
+        
+        print(validated_data)
         check_reservation_possible(validated_data)
         periodicity = validated_data.pop('periodicity')
         # Check if we should create repeated reservations
@@ -163,6 +172,50 @@ class RoomReservationSerializer(serializers.ModelSerializer):
             # Store the instance to the reservation
             validated_data['periodicity'] = periodicity_instance
         room = validated_data['room']
+
+        if room.owner == None or room.owner == validated_data['responsible']:
+            validated_data['is_validated']=True
+        else:
+            validated_data['is_validated'] = False
+            generated_uuid = uuid.uuid4()
+            validated_data['id_mail_validation'] = generated_uuid
+
+
+            #send mail for validation of the owner of the room
+            responsible = validated_data['responsible']
+            start_time = validated_data['start_time']
+            end_time = validated_data['end_time']
+            title = validated_data['title']
+            validated_data['title'] = "[non validé]"+validated_data['title']
+            description = validated_data['description']
+            url_site = validated_data['url_context']
+            date = validated_data['date']
+            email_owner = room.owner.email
+
+            msg = f'<p>Bonjour,<br> {responsible.first_name} {responsible.last_name} a fait une demande de réservation de salle : <br>'
+            msg += 'Salle : '+ room.name + "<br>"
+            msg += 'Horaire : '+ date.strftime("%m/%d/%Y")
+            msg += ' de ' + start_time.strftime("%H:%M") + " à " + end_time.strftime("%H:%M") + "<br>"
+            
+            msg += "Titre : "+title + "<br>"
+            msg += "Description : "+ description + "<br></p>"
+
+            msg += "<a href='"+url_site+"accept/"+str(generated_uuid)+"'>Accepter</a> \t\t"
+            msg += "<a href='"+url_site+"refuse/"+str(generated_uuid)+"'>Refuser</a> \t\t"
+            msg += "<a href='"+url_site+"'>Voir les réservations</a>"
+
+            email = EmailMessage(
+                '[flop!EDT] Demande de réservation de salle',
+                msg,
+                to=(email_owner,)
+            )
+            email.content_subtype = "html"
+            try:
+                email.send()
+            except:
+                print("non envoyé")
+
+        validated_data.pop('url_context')
         reservation = rm.RoomReservation.objects.create(**validated_data)
         if rm.RoomReservationValidationEmail.objects.filter(room=room).exists():
             validators = rm.RoomReservationValidationEmail.objects.get(room=room).validators.all()
@@ -207,6 +260,8 @@ class RoomReservationSerializer(serializers.ModelSerializer):
                 )
                 email.send()
         return reservation
+    
+
 
     def update(self, instance, validated_data):
         """
