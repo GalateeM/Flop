@@ -715,6 +715,21 @@ function extractPeriodicity(): ReservationPeriodicityData | null {
     return periodicityToUpdate
 }
 
+function getCookie(name) {
+    if (!document.cookie) {
+        return null;
+    }
+
+    const xsrfCookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
+
+    if (xsrfCookies.length === 0) {
+        return null;
+    }
+    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+}
+
 
 function saveReservation(createRepetitions = false) {
     const newPeriodicityData = extractPeriodicity()
@@ -723,7 +738,7 @@ function saveReservation(createRepetitions = false) {
               periodicity: newPeriodicityData,
           }
         : props.reservation.periodicity
-    const obj: RoomReservation = {
+    const obj : RoomReservation = {
         date: date.value,
         description: description.value,
         email: email.value,
@@ -738,14 +753,33 @@ function saveReservation(createRepetitions = false) {
         create_repetitions: createRepetitions,
     }
 
+    
+    const csrfToken = getCookie('csrftoken');
+
+    console.log(JSON.stringify(obj))
 
 
    $.ajax({
         method : "POST",
         url : "request/",
         dataType : "JSON",
-        data : obj
-    }) 
+        data : obj,
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        success: function (msg) {
+            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
+            console.log(msg);
+            isFormOpen.value = false
+        },
+        error: function (msg) {
+            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
+            console.log(msg);
+
+        }
+    });
+    
+    
 
     /*const method = props.isNew ? api.post : api.put
     method
