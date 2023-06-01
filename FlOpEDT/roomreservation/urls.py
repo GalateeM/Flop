@@ -29,5 +29,6 @@ app_name="roomreservation"
 
 urlpatterns = [
     path('', views.RoomReservationsView, name="roomreservation"),
-    path('accept/', views.RoomReservationAccept, name="roomreservationaccept")
+    path('accept/', views.RoomReservationAccept, name="roomreservationaccept"),
+    path('request/', views.RoomReservationRequest, name="roomreservationrequest")
 ]
