@@ -367,6 +367,7 @@ import { computed, ComputedRef, defineProps, Ref, ref, watch, watchEffect } from
 import PeriodicitySelect from '@/components/PeriodicitySelect.vue'
 import ModalDialog from '@/components/ModalDialog.vue'
 import type { Room } from '@/stores/room'
+import $ from 'jquery'
 
 interface Emits {
     (e: 'saved', reservation: RoomReservation): void
@@ -733,7 +734,17 @@ function saveReservation(createRepetitions = false) {
         reservation_type: selectedType.value,
         create_repetitions: createRepetitions,
     }
-    const method = props.isNew ? api.post : api.put
+
+    let url_request = "{% url "RoomReservation:roomreservationrequest" department %}"
+
+    $.ajax({
+        method : "POST",
+        url : url_request,
+        dataType : "JSON",
+        data : obj
+    })
+
+    /*const method = props.isNew ? api.post : api.put
     method
         .roomReservation(obj)
         .then(
@@ -781,7 +792,7 @@ function saveReservation(createRepetitions = false) {
                 }
             }
         )
-        .catch((reason) => handleReason(reason))
+        .catch((reason) => handleReason(reason))*/
 }
 
 function removePeriodicity() {
