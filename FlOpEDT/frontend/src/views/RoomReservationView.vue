@@ -116,6 +116,17 @@
                         :values="roomCalendarValues"
                         @row-header-click="handleRoomNameClick"
                     ></RoomCalendar>
+                    <ModalDialog :is-open="isDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
+                        <template #title>Réservation validée</template>
+                        <template #body>
+                            <span> Vous avez bien validé la réservation !</span>
+                        </template>
+                        <template #buttons>
+                        <button>
+
+                        </button>
+                        </template>
+                    </ModalDialog>
                 </div>
             </div>
         </div>
@@ -169,12 +180,19 @@ import DeletePeriodicReservationDialog from '@/components/DeletePeriodicReservat
 import type { Department } from '@/stores/department'
 import { useDepartmentStore } from '@/stores/department'
 import { type Room, useRoomStore } from '@/stores/room'
+import ModalDialog from '@/components/ModalDialog.vue'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
 let currentDepartment = ''
 let currentUserId = -1
 let loadingCounter = 0
+
+const isDialogOpen = ref(false)
+
+function closeModal() {
+    isDialogOpen.value = false
+}
 
 interface RoomAttributeEntry {
     component: any
@@ -1335,8 +1353,8 @@ onMounted(() => {
         if ('user_id' in data) {
             currentUserId = data.user_id
         }
-        if ('accept' in data && data.accept==true) {
-            console.log("ici");
+        if ('accept' in data && data.accept == true) {
+            isDialogOpen.value = true
         }
     }
     departmentStore.remote.fetch().then((value) => {

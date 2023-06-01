@@ -23,3 +23,5 @@ def RoomReservationAccept(request, uuid, **kwargs):
         reservation_request.save()
     return render(request, 'roomreservation/index.html', {'json_data': db_data})
 
+def RoomReservationRequest(request, **kwargs) :
+    pass
