@@ -371,8 +371,6 @@ class RoomType(models.Model):
 class RoomAttribute(models.Model):
     name = models.CharField(max_length=20)
     description = models.TextField(null=True)
-    
-    owner = models.ForeignKey('people.User', on_delete=models.CASCADE, null=True, blank=True)
 
     def is_boolean(self):
         return hasattr(self, "booleanroomattribute")
@@ -418,7 +416,8 @@ class Room(models.Model):
                                         symmetrical=False,
                                         blank=True,
                                         related_name="subrooms")
-    departments = models.ManyToManyField(Department)
+    departments = models.ManyToManyField(Department)    
+    owner = models.ForeignKey('people.User', on_delete=models.CASCADE, null=True, blank=True)
 
     @property
     def is_basic(self):
