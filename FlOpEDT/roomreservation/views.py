@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from FlOpEDT.base.models import RoomAttribute
+from base.models import RoomAttribute
 from .models import RoomReservation
 
 
@@ -28,6 +28,7 @@ def RoomReservationAccept(request, uuid, **kwargs):
 
 def RoomReservationRequest(request, **kwargs) :        
     responsible = json.loads(request.POST.get('responsible'))
+    print("ICI")
     room_attributes = RoomAttribute.objects.get(responsible)
 
     # Creation of the RoomReservation object
