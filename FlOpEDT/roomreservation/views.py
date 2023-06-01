@@ -34,15 +34,17 @@ def RoomReservationRequest(request, **kwargs) :
     responsible = json.loads(request.POST.get('responsible'))
     room = json.loads(request.POST.get('room'))
     reservation_type = json.loads(request.POST.get('reservation_type'))
-
-    # Creation of the periodicity object
     periodicity = json.loads(request.POST.get('periodicity'))
+    
     new_periodicity = ReservationPeriodicity()
-    new_periodicity.start = periodicity['start']
-    new_periodicity.end = periodicity['end']
-    new_periodicity.periodicity_type = periodicity['periodicity_type']
-    # save of the periodicity object
-    new_periodicity.save()
+
+    # Creation of the periodicity object if exists
+    if periodicity != None :
+        new_periodicity.start = periodicity['start']
+        new_periodicity.end = periodicity['end']
+        new_periodicity.periodicity_type = periodicity['periodicity_type']
+        # save of the periodicity object
+        new_periodicity.save()
 
     # Creation of the roomreservation object
     room_reservation = RoomReservation()
@@ -59,7 +61,7 @@ def RoomReservationRequest(request, **kwargs) :
     room_reservation.is_validated = False
 
     # If the owner is the asker of the reservation is the same person
-    if room['owner'] == responsible['id'] :
+    if room['owner'] == responsible['id'] or room['owner'] == None :
         room_reservation.is_validated = True
     
     # save of the roomreservation object
