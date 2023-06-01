@@ -65,6 +65,7 @@ from base.models import Course, UserPreference, ScheduledCourse, EdtVersion, \
     ScheduledCourseAdditional, GroupPreferredLinks, Week, Theme, CourseAdditional
 import base.queries as queries
 from base.weeks import *
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -1575,6 +1576,7 @@ def send_email_room_reservation(req, **kwargs):
     iswholeday = json.loads(req.POST.get('wholeday'))
     title = json.loads(req.POST.get('title'))
     description = json.loads(req.POST.get('description'))
+    generated_uuid = uuid.uuid4()
 
     msg = f'<p>Bonjour,<br> {initiator.first_name} {initiator.last_name} a fait une demande de réservation de salle : <br>'
     msg += 'Salle : '+ salle + "<br>"
@@ -1590,7 +1592,7 @@ def send_email_room_reservation(req, **kwargs):
     msg += title + "<br>"
     msg += description + "<br></p>"
 
-    msg += "<a href='http://localhost:8000/fr/roomreservation/INFO/accept'>Accepter</a> \t\t"
+    msg += "<a href='http://localhost:8000/fr/roomreservation/INFO/accept/"+str(generated_uuid)+"'>Accepter</a> \t\t"
     msg += "<a href='http://localhost:8000'>Refuser</a>"
 
     email = EmailMessage(
