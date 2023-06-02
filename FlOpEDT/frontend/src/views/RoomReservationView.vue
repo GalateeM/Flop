@@ -116,15 +116,29 @@
                         :values="roomCalendarValues"
                         @row-header-click="handleRoomNameClick"
                     ></RoomCalendar>
-                    <ModalDialog :is-open="isDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
+                    <ModalDialog :is-open="isAcceptDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
                         <template #title>Réservation validée</template>
                         <template #body>
                             <span> Vous avez bien validé la réservation !</span>
                         </template>
                         <template #buttons>
-                        <button>
-
-                        </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
+                                Ok
+                            </button>
+                        </template>
+                    </ModalDialog>
+                    <ModalDialog :is-open="isRefuseDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
+                        <template #title>Réservation refusée</template>
+                        <template #body>
+                            <span> Etes-vous sûr de refuser cette modification ?</span>
+                        </template>
+                        <template #buttons>
+                            <button type="button" class="btn btn-secondary" @click.stop="closeModal">
+                                Accepter la modification
+                            </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
+                                Refuser
+                            </button>
                         </template>
                     </ModalDialog>
                 </div>
@@ -188,10 +202,12 @@ let currentDepartment = ''
 let currentUserId = -1
 let loadingCounter = 0
 
-const isDialogOpen = ref(false)
+const isAcceptDialogOpen = ref(false)
+const isRefuseDialogOpen = ref(false)
 
 function closeModal() {
-    isDialogOpen.value = false
+    isAcceptDialogOpen.value = false
+    isRefuseDialogOpen.value = false
 }
 
 interface RoomAttributeEntry {
@@ -1354,10 +1370,10 @@ onMounted(() => {
             currentUserId = data.user_id
         }
         if ('accept' in data) {
-            isDialogOpen.value = true
+
             if(data.accept == true) {
                 console.log("oui")
-                //message si premiere validatin
+                isAcceptDialogOpen.value = true
                 //message autre si deuxieme
             } else {
                 //message reservation refusee
