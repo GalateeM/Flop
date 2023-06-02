@@ -22,7 +22,11 @@ def RoomReservationsView(request, **kwargs):
 def RoomReservationAccept(request, uuid, **kwargs):
     db_data = {'dept': request.department.abbrev, 'api': reverse('api:api_root'),
                'user_id': request.user.id, 'accept':True}
-    reservation_request = RoomReservation.objects.all().get(id_mail_validation=uuid)
+    try:
+        reservation_request = RoomReservation.objects.all().get(id_mail_validation=uuid)
+    except:
+        db_data['error'] = True
+
     print(reservation_request.is_validated)
     if(reservation_request.is_validated==True):
         db_data['first_click']=False
