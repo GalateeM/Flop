@@ -24,19 +24,19 @@ def RoomReservationAccept(request, uuid, **kwargs):
                'user_id': request.user.id, 'accept':True}
     try:
         reservation_request = RoomReservation.objects.all().get(id_mail_validation=uuid)
+        print(reservation_request.is_validated)
+        if(reservation_request.is_validated==True):
+            db_data['first_click']=False
+        else:
+            db_data['first_click']=True
+            reservation_request.is_validated=True
+            if len(reservation_request.title.split("]")) > 1:
+                reservation_request.title = reservation_request.title.split("]")[1]
+            reservation_request.save()
+        return render(request, 'roomreservation/index.html', {'json_data': db_data})
     except:
         db_data['error'] = True
-
-    print(reservation_request.is_validated)
-    if(reservation_request.is_validated==True):
-        db_data['first_click']=False
-    else:
-        db_data['first_click']=True
-        reservation_request.is_validated=True
-        if len(reservation_request.title.split("]")) > 1:
-            reservation_request.title = reservation_request.title.split("]")[1]
-        reservation_request.save()
-    return render(request, 'roomreservation/index.html', {'json_data': db_data})
+        return render(request, 'roomreservation/index.html', {'json_data': db_data})
 
 
 def RoomReservationRefuse(request, uuid, **kwargs):
