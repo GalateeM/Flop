@@ -69,6 +69,7 @@ export interface RoomReservation {
     periodicity: ReservationPeriodicity | null
     create_repetitions?: boolean
     isValidated?: boolean
+    url_context: string
 }
 
 export interface RoomReservationType {
