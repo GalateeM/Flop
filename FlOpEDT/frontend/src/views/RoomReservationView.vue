@@ -132,11 +132,10 @@
                         </template>
                         <template #buttons>
                             <button type="button" class="btn btn-secondary" @click.stop="closeModal">
-                                Annuler
+                                Accepter la modification Annuler
                             </button>
-                            <button type="button" class="btn btn-primary" @click.stop="deleteReservation">
-                                Oui
-                            </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Refuser</button>
+                            <button type="button" class="btn btn-primary" @click.stop="deleteReservation">Oui</button>
                         </template>
                     </ModalDialog>
                 </div>
@@ -210,50 +209,47 @@ function closeModal() {
     isRefuseDialogOpen.value = false
 }
 
-
 function getCookie(name) {
     if (!document.cookie) {
-        return null;
+        return null
     }
 
-    const xsrfCookies = document.cookie.split(';')
-        .map(c => c.trim())
-        .filter(c => c.startsWith(name + '='));
+    const xsrfCookies = document.cookie
+        .split(';')
+        .map((c) => c.trim())
+        .filter((c) => c.startsWith(name + '='))
 
     if (xsrfCookies.length === 0) {
-        return null;
+        return null
     }
-    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+    return decodeURIComponent(xsrfCookies[0].split('=')[1])
 }
 
-
 function deleteReservation() {
-    
-    const csrfToken = getCookie('csrftoken');
-    
-    const actualUrl = window.location.href.split("/");
-    const id = actualUrl.slice(-1);
-    const url_refuse = "../refuseconfirmed/"+id
-    
-   $.ajax({
-        method : "POST",
-        url : url_refuse,
-        dataType : "JSON",
-        data : {},
+    const csrfToken = getCookie('csrftoken')
+
+    const actualUrl = window.location.href.split('/')
+    const id = actualUrl.slice(-1)
+
+    $.ajax({
+        method: 'POST',
+        url: '../../refuse/' + id,
+        dataType: 'JSON',
+        data: {},
         headers: {
             'X-CSRFToken': csrfToken,
         },
         success: function (msg) {
-            console.log("success")
+            console.log('SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS')
+            console.log(msg)
+            isAcceptDialogOpen.value = false
             isRefuseDialogOpen.value = false
-            window.location.href = ".."
         },
         error: function (msg) {
-            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
-            console.log(msg);
-
-        }
-    });
+            console.log('ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR')
+            console.log(msg)
+        },
+    })
 }
 
 interface RoomAttributeEntry {
@@ -1416,7 +1412,11 @@ onMounted(() => {
             currentUserId = data.user_id
         }
         if ('accept' in data) {
-            if (data.accept == true) {
+            if(data.error == true){
+                acceptDialogContent.value.title = 'Erreur'
+                acceptDialogContent.value.body = "La réservation n'existe pas"
+            }
+            else if (data.accept == true)
                 if ('first_click' in data) {
                     if (data['first_click'] == true) {
                         acceptDialogContent.value.title = 'Réservation validée'
@@ -1425,15 +1425,15 @@ onMounted(() => {
                         acceptDialogContent.value.title = 'Réservation validée'
                         acceptDialogContent.value.body = 'La réservation a déjà été validée'
                     }
-                    isAcceptDialogOpen.value = true
                 }
-                isAcceptDialogOpen.value = true
-                //message autre si deuxieme
-            } else {
-                isRefuseDialogOpen.value = true
-            }
+            isAcceptDialogOpen.value = true
+            //message autre si deuxieme
+        } else {
+            //message reservation refusee
+            console.log('non')
         }
     }
+
     departmentStore.remote.fetch().then((value) => {
         // Select the current department by default
         if (value) {
