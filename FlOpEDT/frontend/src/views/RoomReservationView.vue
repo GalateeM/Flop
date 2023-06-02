@@ -132,10 +132,8 @@
                         </template>
                         <template #buttons>
                             <button type="button" class="btn btn-secondary" @click.stop="closeModal">
-                                Accepter la modification
                                 Annuler
                             </button>
-                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Refuser</button>
                             <button type="button" class="btn btn-primary" @click.stop="deleteReservation">
                                 Oui
                             </button>
@@ -230,24 +228,25 @@ function getCookie(name) {
 
 
 function deleteReservation() {
+    
     const csrfToken = getCookie('csrftoken');
-
+    
     const actualUrl = window.location.href.split("/");
     const id = actualUrl.slice(-1);
-
-    $.ajax({
+    const url_refuse = "../refuseconfirmed/"+id
+    
+   $.ajax({
         method : "POST",
-        url : "../../refuse/"+id,
+        url : url_refuse,
         dataType : "JSON",
         data : {},
         headers: {
             'X-CSRFToken': csrfToken,
         },
         success: function (msg) {
-            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
-            console.log(msg);
-            isAcceptDialogOpen.value = false
+            console.log("success")
             isRefuseDialogOpen.value = false
+            window.location.href = ".."
         },
         error: function (msg) {
             console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
@@ -1431,8 +1430,7 @@ onMounted(() => {
                 isAcceptDialogOpen.value = true
                 //message autre si deuxieme
             } else {
-                //message reservation refusee
-                console.log('non')
+                isRefuseDialogOpen.value = true
             }
         }
     }
