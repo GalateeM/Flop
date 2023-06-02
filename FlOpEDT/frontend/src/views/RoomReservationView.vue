@@ -117,14 +117,12 @@
                         @row-header-click="handleRoomNameClick"
                     ></RoomCalendar>
                     <ModalDialog :is-open="isAcceptDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
-                        <template #title>Réservation validée</template>
+                        <template #title>{{ acceptDialogContent.title }}</template>
                         <template #body>
-                            <span> Vous avez bien validé la réservation !</span>
+                            <span>{{ acceptDialogContent.body }}</span>
                         </template>
                         <template #buttons>
-                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
-                                Ok
-                            </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Ok</button>
                         </template>
                     </ModalDialog>
                     <ModalDialog :is-open="isRefuseDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
@@ -134,11 +132,10 @@
                         </template>
                         <template #buttons>
                             <button type="button" class="btn btn-secondary" @click.stop="closeModal">
-                                Accepter la modification
+                                Accepter la modification Annuler
                             </button>
-                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
-                                Refuser
-                            </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Refuser</button>
+                            <button type="button" class="btn btn-primary" @click.stop="deleteReservation">Oui</button>
                         </template>
                     </ModalDialog>
                 </div>
@@ -195,6 +192,7 @@ import type { Department } from '@/stores/department'
 import { useDepartmentStore } from '@/stores/department'
 import { type Room, useRoomStore } from '@/stores/room'
 import ModalDialog from '@/components/ModalDialog.vue'
+import $ from 'jquery'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
@@ -204,10 +202,54 @@ let loadingCounter = 0
 
 const isAcceptDialogOpen = ref(false)
 const isRefuseDialogOpen = ref(false)
+const acceptDialogContent = ref({ body: '', title: '' })
 
 function closeModal() {
     isAcceptDialogOpen.value = false
     isRefuseDialogOpen.value = false
+}
+
+function getCookie(name) {
+    if (!document.cookie) {
+        return null
+    }
+
+    const xsrfCookies = document.cookie
+        .split(';')
+        .map((c) => c.trim())
+        .filter((c) => c.startsWith(name + '='))
+
+    if (xsrfCookies.length === 0) {
+        return null
+    }
+    return decodeURIComponent(xsrfCookies[0].split('=')[1])
+}
+
+function deleteReservation() {
+    const csrfToken = getCookie('csrftoken')
+
+    const actualUrl = window.location.href.split('/')
+    const id = actualUrl.slice(-1)
+
+    $.ajax({
+        method: 'POST',
+        url: '../../refuse/' + id,
+        dataType: 'JSON',
+        data: {},
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        success: function (msg) {
+            console.log('SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS')
+            console.log(msg)
+            isAcceptDialogOpen.value = false
+            isRefuseDialogOpen.value = false
+        },
+        error: function (msg) {
+            console.log('ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR')
+            console.log(msg)
+        },
+    })
 }
 
 interface RoomAttributeEntry {
@@ -1370,17 +1412,28 @@ onMounted(() => {
             currentUserId = data.user_id
         }
         if ('accept' in data) {
-
-            if(data.accept == true) {
-                console.log("oui")
-                isAcceptDialogOpen.value = true
-                //message autre si deuxieme
-            } else {
-                //message reservation refusee
-                console.log("non")
+            if(data.error == true){
+                acceptDialogContent.value.title = 'Erreur'
+                acceptDialogContent.value.body = "La réservation n'existe pas"
             }
+            else if (data.accept == true)
+                if ('first_click' in data) {
+                    if (data['first_click'] == true) {
+                        acceptDialogContent.value.title = 'Réservation validée'
+                        acceptDialogContent.value.body = 'Vous avez bien validé la réservation !'
+                    } else {
+                        acceptDialogContent.value.title = 'Réservation validée'
+                        acceptDialogContent.value.body = 'La réservation a déjà été validée'
+                    }
+                }
+            isAcceptDialogOpen.value = true
+            //message autre si deuxieme
+        } else {
+            //message reservation refusee
+            console.log('non')
         }
     }
+
     departmentStore.remote.fetch().then((value) => {
         // Select the current department by default
         if (value) {

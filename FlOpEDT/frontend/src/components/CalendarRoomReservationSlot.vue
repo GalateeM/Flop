@@ -39,6 +39,16 @@
                 ></CalendarSlotContextMenu>
             </slot>
         </template>
+        <ModalDialog :is-open="isAcceptDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
+            <template #title>Suppression de reservation</template>
+            <template #body>
+                <span>Etes-vous sûr de vouloir supprimer</span>
+            </template>
+            <template #buttons>
+                <button type="button" class="btn btn-secondary" @click.stop="closeModal">Annuler</button>
+                <button type="button" class="btn btn-primary" @click.stop="doDelete">Oui</button>
+            </template>
+        </ModalDialog>
     </PopperComponent>
 </template>
 
@@ -53,6 +63,7 @@ import type {
 import CalendarSlotContextMenu from '@/components/CalendarSlotContextMenu.vue'
 import RoomReservationForm from '@/components/RoomReservationForm.vue'
 import { onMounted, ref } from 'vue'
+import ModalDialog from "@/components/ModalDialog.vue";
 
 interface Props {
     data: CalendarRoomReservationSlotData
@@ -62,6 +73,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const isAcceptDialogOpen = ref(false)
+
+function closeModal() {
+    isAcceptDialogOpen.value = false
+}
 
 interface Emits {
     (e: 'interface', id: string, slotInterface: CalendarSlotInterface): void
@@ -110,6 +126,10 @@ function onSave(reservation: RoomReservation) {
 }
 
 function onDelete() {
+    isAcceptDialogOpen.value = true
+}
+
+function doDelete(){
     // Recuperation of current user
     const user = props.users[props.reservation.responsible]
     // If the user is a superuser
@@ -117,6 +137,7 @@ function onDelete() {
         // Delete the roomreservation
         props.actions.delete?.(props.data)
     }
+    closeModal()
 }
 
 function onDuplicate() {
