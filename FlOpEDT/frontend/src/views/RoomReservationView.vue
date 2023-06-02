@@ -117,14 +117,12 @@
                         @row-header-click="handleRoomNameClick"
                     ></RoomCalendar>
                     <ModalDialog :is-open="isAcceptDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
-                        <template #title>{{acceptDialogContent.title}}</template>
+                        <template #title>{{ acceptDialogContent.title }}</template>
                         <template #body>
-                            <span>{{acceptDialogContent.body}}</span>
+                            <span>{{ acceptDialogContent.body }}</span>
                         </template>
                         <template #buttons>
-                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
-                                Ok
-                            </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Ok</button>
                         </template>
                     </ModalDialog>
                     <ModalDialog :is-open="isRefuseDialogOpen" :cancel-disabled="true" :on-cancel="() => closeModal">
@@ -134,8 +132,10 @@
                         </template>
                         <template #buttons>
                             <button type="button" class="btn btn-secondary" @click.stop="closeModal">
+                                Accepter la modification
                                 Annuler
                             </button>
+                            <button type="button" class="btn btn-primary" @click.stop="closeModal">Refuser</button>
                             <button type="button" class="btn btn-primary" @click.stop="deleteReservation">
                                 Oui
                             </button>
@@ -205,7 +205,7 @@ let loadingCounter = 0
 
 const isAcceptDialogOpen = ref(false)
 const isRefuseDialogOpen = ref(false)
-const acceptDialogContent = ref({body:"",title:""})
+const acceptDialogContent = ref({ body: '', title: '' })
 
 function closeModal() {
     isAcceptDialogOpen.value = false
@@ -1417,16 +1417,14 @@ onMounted(() => {
             currentUserId = data.user_id
         }
         if ('accept' in data) {
-
-            if(data.accept == true) {
-                if('first_click' in data){
-                    if(data['first_click'] == true){
-                        acceptDialogContent.value.title = "Réservation validée"
-                        acceptDialogContent.value.body = "Vous avez bien validé la réservation !"
-                    }
-                    else {
-                        acceptDialogContent.value.title = "Réservation validée"
-                        acceptDialogContent.value.body = "La réservation a déjà été validée"
+            if (data.accept == true) {
+                if ('first_click' in data) {
+                    if (data['first_click'] == true) {
+                        acceptDialogContent.value.title = 'Réservation validée'
+                        acceptDialogContent.value.body = 'Vous avez bien validé la réservation !'
+                    } else {
+                        acceptDialogContent.value.title = 'Réservation validée'
+                        acceptDialogContent.value.body = 'La réservation a déjà été validée'
                     }
                     isAcceptDialogOpen.value = true
                 }
@@ -1434,7 +1432,7 @@ onMounted(() => {
                 //message autre si deuxieme
             } else {
                 //message reservation refusee
-                console.log("non")
+                console.log('non')
             }
         }
     }
