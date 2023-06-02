@@ -48,6 +48,7 @@ import type {
     CalendarSlotActions,
     CalendarSlotInterface,
     RoomReservation,
+    User,
 } from '@/assets/js/types'
 import CalendarSlotContextMenu from '@/components/CalendarSlotContextMenu.vue'
 import RoomReservationForm from '@/components/RoomReservationForm.vue'
@@ -56,6 +57,8 @@ import { onMounted, ref } from 'vue'
 interface Props {
     data: CalendarRoomReservationSlotData
     actions: CalendarSlotActions
+    users: { [userId: number]: User }
+    reservation: RoomReservation
 }
 
 const props = defineProps<Props>()
@@ -107,7 +110,13 @@ function onSave(reservation: RoomReservation) {
 }
 
 function onDelete() {
-    props.actions.delete?.(props.data)
+    // Recuperation of current user
+    const user = props.users[props.reservation.responsible]
+    // If the user is a superuser
+    if (user.is_superuser) {
+        // Delete the roomreservation
+        props.actions.delete?.(props.data)
+    }
 }
 
 function onDuplicate() {
