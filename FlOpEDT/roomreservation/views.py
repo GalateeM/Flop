@@ -28,7 +28,8 @@ def RoomReservationAccept(request, uuid, **kwargs):
     else:
         db_data['first_click']=True
         reservation_request.is_validated=True
-        reservation_request.title = reservation_request.title.split("]")[1]
+        if len(reservation_request.title.split("]")) > 1:
+            reservation_request.title = reservation_request.title.split("]")[1]
         reservation_request.save()
     return render(request, 'roomreservation/index.html', {'json_data': db_data})
 
