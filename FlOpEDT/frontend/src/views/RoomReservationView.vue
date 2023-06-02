@@ -134,10 +134,10 @@
                         </template>
                         <template #buttons>
                             <button type="button" class="btn btn-secondary" @click.stop="closeModal">
-                                Accepter la modification
+                                Annuler
                             </button>
-                            <button type="button" class="btn btn-primary" @click.stop="closeModal">
-                                Refuser
+                            <button type="button" class="btn btn-primary" @click.stop="deleteReservation">
+                                Oui
                             </button>
                         </template>
                     </ModalDialog>
@@ -195,6 +195,7 @@ import type { Department } from '@/stores/department'
 import { useDepartmentStore } from '@/stores/department'
 import { type Room, useRoomStore } from '@/stores/room'
 import ModalDialog from '@/components/ModalDialog.vue'
+import $ from 'jquery'
 
 const api = ref<FlopAPI>(requireInjection(apiKey))
 const currentWeek = ref(requireInjection(currentWeekKey))
@@ -208,6 +209,51 @@ const isRefuseDialogOpen = ref(false)
 function closeModal() {
     isAcceptDialogOpen.value = false
     isRefuseDialogOpen.value = false
+}
+
+
+function getCookie(name) {
+    if (!document.cookie) {
+        return null;
+    }
+
+    const xsrfCookies = document.cookie.split(';')
+        .map(c => c.trim())
+        .filter(c => c.startsWith(name + '='));
+
+    if (xsrfCookies.length === 0) {
+        return null;
+    }
+    return decodeURIComponent(xsrfCookies[0].split('=')[1]);
+}
+
+
+function deleteReservation() {
+    const csrfToken = getCookie('csrftoken');
+
+    const actualUrl = window.location.href.split("/");
+    const id = actualUrl.slice(-1);
+
+    $.ajax({
+        method : "POST",
+        url : "../../refuse/"+id,
+        dataType : "JSON",
+        data : {},
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        success: function (msg) {
+            console.log("SUCCESSSSSSSSSSSSSSSSSSSSSSSSSS");
+            console.log(msg);
+            isAcceptDialogOpen.value = false
+            isRefuseDialogOpen.value = false
+        },
+        error: function (msg) {
+            console.log("ERROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOR");
+            console.log(msg);
+
+        }
+    });
 }
 
 interface RoomAttributeEntry {
@@ -915,7 +961,7 @@ function createRoomReservationSlot(reservation: RoomReservation): CalendarSlot {
         dayEnd: dayFinishTime.value,
         title: reservation.title,
         id: `roomreservation-${reservation.id}`,
-        displayStyle: { background: 'rgba(255,255,0,0.27)', borderColor: 'rgba(255,255,0,0.27)' },
+        displayStyle: { background: backgroundColor, borderColor: backgroundColor },
         onPeriodicityDelete: () => {
             if (!reservation.periodicity) {
                 return Promise.resolve()
