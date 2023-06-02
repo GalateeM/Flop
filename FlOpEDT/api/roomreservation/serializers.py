@@ -194,7 +194,7 @@ class RoomReservationSerializer(serializers.ModelSerializer):
 
             msg = f'<p>Bonjour,<br> {responsible.first_name} {responsible.last_name} a fait une demande de réservation de salle : <br>'
             msg += 'Salle : '+ room.name + "<br>"
-            msg += 'Horaire : '+ date.strftime("%d/%M/%Y")
+            msg += 'Horaire : '+ date.strftime("%d/%m/%Y")
             msg += ' de ' + start_time.strftime("%H:%M") + " à " + end_time.strftime("%H:%M") + "<br>"
             
             msg += "Titre : "+title + "<br>"

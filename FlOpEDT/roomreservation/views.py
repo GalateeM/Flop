@@ -62,10 +62,9 @@ def RoomReservationRefuseConfirmed(request, uuid, **kwargs):
         return JsonResponse(bad_response)
 
 def send_mail(isaccept, reservation):
-        print("la",reservation.responsible.email)
         msg = f'<p>Bonjour,<br> Votre réservation : <br>'
         msg += 'Salle : '+ reservation.room.name + "<br>"
-        msg += 'Horaire : '+ reservation.date.strftime("%d/%M/%Y")
+        msg += 'Horaire : '+ reservation.date.strftime("%d/%m/%Y")
         msg += ' de ' + reservation.start_time.strftime("%H:%M") + " à " + reservation.end_time.strftime("%H:%M") + "<br>"
         
         obj = "[flop!EDT]"
